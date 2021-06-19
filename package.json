@@ -9,6 +9,8 @@
   "keywords": [],
   "author": "Charles D'Angelo",
   "license": "ISC",
+  "workspaces": ["packages/*"],
+  "private": true,
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^4.27.0",
     "@typescript-eslint/parser": "^4.27.0",
