@@ -1,0 +1,15 @@
+{
+  "name": "@talent/tsconfig",
+  "version": "0.0.0",
+  "description": "> TODO: description",
+  "author": "Charles D'Angelo <c.g.dangelo@gmail.com>",
+  "homepage": "",
+  "license": "ISC",
+  "main": "tsconfig.json",
+  "files": [
+    "tsconfig.json"
+  ],
+  "scripts": {
+    "test": "echo \"Error: run tests from root\" && exit 1"
+  }
+}

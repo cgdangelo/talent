@@ -1,0 +1,22 @@
+{
+  "name": "@talent/core",
+  "version": "0.0.0",
+  "description": "> TODO: description",
+  "author": "Charles D'Angelo <c.g.dangelo@gmail.com>",
+  "homepage": "",
+  "license": "ISC",
+  "main": "lib/core.js",
+  "directories": {
+    "lib": "lib",
+    "test": "__tests__"
+  },
+  "files": [
+    "lib"
+  ],
+  "scripts": {
+    "test": "echo \"Error: run tests from root\" && exit 1"
+  },
+  "dependencies": {
+    "@talent/tsconfig": "^0.0.0"
+  }
+}
