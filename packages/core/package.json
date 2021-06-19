@@ -17,6 +17,7 @@
     "test": "echo \"Error: run tests from root\" && exit 1"
   },
   "dependencies": {
-    "@talent/tsconfig": "^0.0.0"
+    "@talent/tsconfig": "^0.0.0",
+    "@types/node": "^15.12.4"
   }
 }
