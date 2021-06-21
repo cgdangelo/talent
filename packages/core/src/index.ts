@@ -13,18 +13,18 @@ const DIRECTORY_ENTRY_LENGTH =
   12; // "frames, offset and length"
 
 type Header = {
-  gameDirectory: string;
-  magic: "HLDEMO";
-  mapChecksum: number;
-  mapName: string;
-  networkProtocol: number;
-  protocol: 5;
+  readonly gameDirectory: string;
+  readonly magic: "HLDEMO";
+  readonly mapChecksum: number;
+  readonly mapName: string;
+  readonly networkProtocol: number;
+  readonly protocol: 5;
 };
 
 type DirectoryEntry = {
-  index: number;
-  title: string;
-  time: number;
+  readonly index: number;
+  readonly title: string;
+  readonly time: number;
 };
 
 const readString = (buffer: Buffer, cursor = 0, length = 1): string =>
