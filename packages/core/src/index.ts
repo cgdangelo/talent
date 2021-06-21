@@ -1,5 +1,5 @@
-import { taskEither } from "fp-ts";
-import { constant, pipe } from "fp-ts/lib/function";
+import { either as E, taskEither as TE } from "fp-ts";
+import { pipe } from "fp-ts/lib/function";
 import { readFile } from "fs/promises";
 import { resolve } from "path";
 
@@ -24,23 +24,55 @@ const readDirectoryEntry = (buffer: Buffer, cursor = 0) => ({
   time: buffer.readFloatLE(cursor + 4 + 64 + 4 + 4),
 });
 
+const readFileContents = (path: string) =>
+  TE.tryCatch(() => readFile(path), E.toError);
+
+type Header = {
+  gameDirectory: string;
+  magic: "HLDEMO";
+  mapChecksum: number;
+  mapName: string;
+  networkProtocol: number;
+  protocol: 5;
+};
+
+const readMagic = (buffer: Buffer): E.Either<Error, "HLDEMO"> =>
+  pipe(
+    readString(buffer, 0, 8),
+    E.fromPredicate(
+      (a): a is "HLDEMO" => a === "HLDEMO",
+      (a) => new Error(`unsupported magic: ${a}`)
+    )
+  );
+
+const readProtocol = (buffer: Buffer): E.Either<Error, 5> =>
+  pipe(
+    buffer.readInt32LE(8),
+    E.fromPredicate(
+      (a): a is 5 => a === 5,
+      (a) => new Error(`unsupported protocol: ${a}`)
+    )
+  );
+
+const readHeader = (buffer: Buffer): E.Either<Error, Header> =>
+  pipe(
+    E.Do,
+    E.bind("magic", () => readMagic(buffer)),
+    E.bind("protocol", () => readProtocol(buffer)),
+    E.map((a) => ({
+      ...a,
+      networkProtocol: buffer.readInt32LE(12),
+      mapName: readString(buffer, 13, 260),
+      gameDirectory: readString(buffer, 274, 260),
+      mapChecksum: buffer.readUInt32LE(535),
+    }))
+  );
+
 pipe(
-  taskEither.tryCatch(
-    () => readFile(DEMO_PATH),
-    constant("could not read file")
-  ),
-
-  taskEither.map((buffer) => {
-    const magic = readString(buffer, 0, 8);
-
-    console.assert(magic === "HLDEMO", `File is not an HLDEMO: ${magic}`);
-
-    const protocol = buffer.readInt32LE(8);
-    const networkProtocol = buffer.readInt32LE(12);
-    const mapName = readString(buffer, 13, 260);
-    const gameDirectory = readString(buffer, 274, 260);
-    const mapChecksum = buffer.readUInt32LE(535);
-
+  readFileContents(DEMO_PATH),
+  TE.bindTo("buffer"),
+  TE.bind("header", ({ buffer }) => TE.fromEither(readHeader(buffer))),
+  TE.map(({ buffer, header }) => {
     // Validate directory entries offset
     const directoryEntriesOffset = buffer.readUInt32LE(540);
     const expectedDirectoryEntriesOffset = buffer.byteLength - 4 - 92 * 2;
@@ -61,12 +93,7 @@ pipe(
     const directoryEntriesStartIndex = directoryEntriesOffset + 4;
 
     console.log({
-      magic,
-      protocol,
-      networkProtocol,
-      mapName,
-      gameDirectory,
-      mapChecksum,
+      ...header,
       directoryEntries: [
         readDirectoryEntry(buffer, directoryEntriesStartIndex),
         readDirectoryEntry(
@@ -76,4 +103,4 @@ pipe(
       ],
     });
   })
-)();
+);
