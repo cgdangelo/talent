@@ -12,22 +12,6 @@ const DIRECTORY_ENTRY_LENGTH =
   8 + // "flags, cdtrack" ?
   12; // "frames, offset and length"
 
-const readString = (buffer: Buffer, cursor = 0, length = 1) =>
-  new Array(length)
-    .fill(null)
-    .map((_, i) => String.fromCharCode(buffer.readInt8(cursor + i)))
-    .filter((s) => s !== "\x00")
-    .join("");
-
-const readDirectoryEntry = (buffer: Buffer, cursor = 0) => ({
-  index: buffer.readInt32LE(cursor),
-  title: readString(buffer, cursor + 4, 64),
-  time: buffer.readFloatLE(cursor + 4 + 64 + 4 + 4),
-});
-
-const readFileContents = (path: string) =>
-  TE.tryCatch(() => readFile(path), E.toError);
-
 type Header = {
   gameDirectory: string;
   magic: "HLDEMO";
@@ -36,6 +20,28 @@ type Header = {
   networkProtocol: number;
   protocol: 5;
 };
+
+type DirectoryEntry = {
+  index: number;
+  title: string;
+  time: number;
+};
+
+const readString = (buffer: Buffer, cursor = 0, length = 1): string =>
+  new Array(length)
+    .fill(null)
+    .map((_, i) => String.fromCharCode(buffer.readInt8(cursor + i)))
+    .filter((s) => s !== "\x00")
+    .join("");
+
+const readDirectoryEntry = (buffer: Buffer, cursor = 0): DirectoryEntry => ({
+  index: buffer.readInt32LE(cursor),
+  title: readString(buffer, cursor + 4, 64),
+  time: buffer.readFloatLE(cursor + 4 + 64 + 4 + 4),
+});
+
+const readFileContents = (path: string): TE.TaskEither<Error, Buffer> =>
+  TE.tryCatch(() => readFile(path), E.toError);
 
 const readMagic = (buffer: Buffer): E.Either<Error, "HLDEMO"> =>
   pipe(
@@ -55,11 +61,30 @@ const readProtocol = (buffer: Buffer): E.Either<Error, 5> =>
     )
   );
 
+const readDirectoryEntries = (
+  buffer: Buffer
+): E.Either<Error, DirectoryEntry[]> =>
+  pipe(
+    buffer.readUInt32LE(540),
+    E.fromPredicate(
+      (a) => a === buffer.byteLength - 4 - 92 * 2,
+      (a) => new Error(`directory entries offset did not match expected: ${a}`)
+    ),
+    E.map((directoryEntriesOffset) => [
+      readDirectoryEntry(buffer, directoryEntriesOffset),
+      readDirectoryEntry(
+        buffer,
+        directoryEntriesOffset + DIRECTORY_ENTRY_LENGTH + 1
+      ),
+    ])
+  );
+
 const readHeader = (buffer: Buffer): E.Either<Error, Header> =>
   pipe(
     sequenceS(E.Applicative)({
       magic: readMagic(buffer),
       protocol: readProtocol(buffer),
+      directoryEntries: readDirectoryEntries(buffer),
     }),
     E.map((a) => ({
       ...a,
