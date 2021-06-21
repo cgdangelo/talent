@@ -1,4 +1,4 @@
-import { either as E, taskEither as TE } from "fp-ts";
+import { array as A, either as E, option as O, taskEither as TE } from "fp-ts";
 import { sequenceS } from "fp-ts/lib/Apply";
 import { pipe } from "fp-ts/lib/function";
 import { readFile } from "fs/promises";
@@ -28,11 +28,16 @@ type DirectoryEntry = {
 };
 
 const readString = (buffer: Buffer, cursor = 0, length = 1): string =>
-  new Array(length)
-    .fill(null)
-    .map((_, i) => String.fromCharCode(buffer.readInt8(cursor + i)))
-    .filter((s) => s !== "\x00")
-    .join("");
+  pipe(
+    A.range(1, length),
+    A.filterMapWithIndex((i) =>
+      pipe(
+        String.fromCharCode(buffer.readInt8(cursor + i)),
+        O.fromPredicate((a) => a !== "\x00")
+      )
+    ),
+    (a) => a.join("") // HACK I'm sure there's a better way to do this.
+  );
 
 const readDirectoryEntry = (buffer: Buffer, cursor = 0): DirectoryEntry => ({
   index: buffer.readInt32LE(cursor),
