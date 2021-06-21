@@ -1,4 +1,5 @@
 import { either as E, taskEither as TE } from "fp-ts";
+import { sequenceS } from "fp-ts/lib/Apply";
 import { pipe } from "fp-ts/lib/function";
 import { readFile } from "fs/promises";
 import { resolve } from "path";
@@ -56,9 +57,10 @@ const readProtocol = (buffer: Buffer): E.Either<Error, 5> =>
 
 const readHeader = (buffer: Buffer): E.Either<Error, Header> =>
   pipe(
-    E.Do,
-    E.bind("magic", () => readMagic(buffer)),
-    E.bind("protocol", () => readProtocol(buffer)),
+    sequenceS(E.Applicative)({
+      magic: readMagic(buffer),
+      protocol: readProtocol(buffer),
+    }),
     E.map((a) => ({
       ...a,
       networkProtocol: buffer.readInt32LE(12),
@@ -69,10 +71,10 @@ const readHeader = (buffer: Buffer): E.Either<Error, Header> =>
   );
 
 pipe(
-  readFileContents(DEMO_PATH),
-  TE.bindTo("buffer"),
+  TE.Do,
+  TE.bind("buffer", () => readFileContents(DEMO_PATH)),
   TE.bind("header", ({ buffer }) => TE.fromEither(readHeader(buffer))),
-  TE.map(({ buffer, header }) => {
+  TE.bimap(console.error, ({ buffer, header }) => {
     // Validate directory entries offset
     const directoryEntriesOffset = buffer.readUInt32LE(540);
     const expectedDirectoryEntriesOffset = buffer.byteLength - 4 - 92 * 2;
@@ -103,4 +105,4 @@ pipe(
       ],
     });
   })
-);
+)();
