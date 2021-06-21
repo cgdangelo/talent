@@ -39,12 +39,6 @@ const readString = (buffer: Buffer, cursor = 0, length = 1): string =>
     (a) => a.join("") // HACK I'm sure there's a better way to do this.
   );
 
-const readDirectoryEntry = (buffer: Buffer, cursor = 0): DirectoryEntry => ({
-  index: buffer.readInt32LE(cursor),
-  title: readString(buffer, cursor + 4, 64),
-  time: buffer.readFloatLE(cursor + 4 + 64 + 4 + 4),
-});
-
 const readFileContents = (path: string): TE.TaskEither<Error, Buffer> =>
   TE.tryCatch(() => readFile(path), E.toError);
 
@@ -66,15 +60,38 @@ const readProtocol = (buffer: Buffer): E.Either<Error, 5> =>
     )
   );
 
-const readDirectoryEntries = (
-  buffer: Buffer
-): E.Either<Error, DirectoryEntry[]> =>
+const readDirectoryEntriesOffset = (buffer: Buffer): E.Either<Error, number> =>
   pipe(
     buffer.readUInt32LE(540),
     E.fromPredicate(
       (a) => a === buffer.byteLength - 4 - 92 * 2,
       (a) => new Error(`directory entries offset did not match expected: ${a}`)
-    ),
+    )
+  );
+
+const readTotalDirectoryEntries =
+  (buffer: Buffer) =>
+  (directoryEntriesOffset: number): E.Either<Error, number> =>
+    pipe(
+      buffer.readInt32LE(directoryEntriesOffset),
+      E.fromPredicate(
+        (a) => a === 2,
+        (a) => new Error(`unexpected number of directory entries: ${a}`)
+      )
+    );
+
+const readDirectoryEntry = (buffer: Buffer, cursor = 0): DirectoryEntry => ({
+  index: buffer.readInt32LE(cursor),
+  title: readString(buffer, cursor + 4, 64),
+  time: buffer.readFloatLE(cursor + 4 + 64 + 4 + 4),
+});
+
+const readDirectoryEntries = (
+  buffer: Buffer
+): E.Either<Error, readonly DirectoryEntry[]> =>
+  pipe(
+    readDirectoryEntriesOffset(buffer),
+    E.chainFirst(readTotalDirectoryEntries(buffer)),
     E.map((directoryEntriesOffset) => [
       readDirectoryEntry(buffer, directoryEntriesOffset),
       readDirectoryEntry(
@@ -101,38 +118,7 @@ const readHeader = (buffer: Buffer): E.Either<Error, Header> =>
   );
 
 pipe(
-  TE.Do,
-  TE.bind("buffer", () => readFileContents(DEMO_PATH)),
-  TE.bind("header", ({ buffer }) => TE.fromEither(readHeader(buffer))),
-  TE.bimap(console.error, ({ buffer, header }) => {
-    // Validate directory entries offset
-    const directoryEntriesOffset = buffer.readUInt32LE(540);
-    const expectedDirectoryEntriesOffset = buffer.byteLength - 4 - 92 * 2;
-
-    console.assert(
-      directoryEntriesOffset === expectedDirectoryEntriesOffset,
-      `Directory entries offset did not match expected: ${directoryEntriesOffset} !== ${expectedDirectoryEntriesOffset}`
-    );
-
-    // Validate total directory entries
-    const totalDirectoryEntries = buffer.readInt32LE(directoryEntriesOffset);
-
-    console.assert(
-      totalDirectoryEntries === 2,
-      `Number of directory entries larger than expected: ${totalDirectoryEntries}`
-    );
-
-    const directoryEntriesStartIndex = directoryEntriesOffset + 4;
-
-    console.log({
-      ...header,
-      directoryEntries: [
-        readDirectoryEntry(buffer, directoryEntriesStartIndex),
-        readDirectoryEntry(
-          buffer,
-          directoryEntriesStartIndex + DIRECTORY_ENTRY_LENGTH + 1
-        ),
-      ],
-    });
-  })
+  readFileContents(DEMO_PATH),
+  TE.map(readHeader),
+  TE.bimap(console.error, console.log)
 )();
