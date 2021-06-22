@@ -84,13 +84,10 @@ const readDirectoryEntry = (buffer: Buffer, cursor = 0): DirectoryEntry => ({
 const readDirectoryEntries = (
   buffer: Buffer,
   directoryOffset: number
-): E.Either<Error, readonly DirectoryEntry[]> =>
-  pipe(
-    E.of([
-      readDirectoryEntry(buffer, directoryOffset),
-      readDirectoryEntry(buffer, directoryOffset + DIRECTORY_ENTRY_LENGTH + 8),
-    ])
-  );
+): readonly DirectoryEntry[] => [
+  readDirectoryEntry(buffer, directoryOffset),
+  readDirectoryEntry(buffer, directoryOffset + DIRECTORY_ENTRY_LENGTH + 8),
+];
 
 const readTotalDirectoryEntries =
   (buffer: Buffer) =>
@@ -116,7 +113,7 @@ const readDirectory = (buffer: Buffer): E.Either<Error, Directory> =>
   pipe(
     readDirectoryOffset(buffer),
     E.chainFirst(readTotalDirectoryEntries(buffer)),
-    E.chain((directoryOffset) => readDirectoryEntries(buffer, directoryOffset)),
+    E.map((directoryOffset) => readDirectoryEntries(buffer, directoryOffset)),
     E.map((entries) => ({ entries }))
   );
 
