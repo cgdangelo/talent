@@ -13,6 +13,7 @@ const DIRECTORY_ENTRY_LENGTH =
   12; // "frames, offset and length"
 
 type Header = {
+  readonly directory: Directory;
   readonly gameDirectory: string;
   readonly magic: "HLDEMO";
   readonly mapChecksum: number;
@@ -21,10 +22,19 @@ type Header = {
   readonly protocol: 5;
 };
 
+type Directory = {
+  readonly entries: readonly DirectoryEntry[];
+};
+
 type DirectoryEntry = {
-  readonly index: number;
-  readonly title: string;
-  readonly time: number;
+  readonly cdTrack: number;
+  readonly description: string;
+  readonly fileLength: number;
+  readonly flags: number;
+  readonly frameCount: number;
+  readonly offset: number;
+  readonly trackTime: number;
+  readonly type: number;
 };
 
 const readString = (buffer: Buffer, cursor = 0, length = 1): string =>
@@ -60,7 +70,40 @@ const readProtocol = (buffer: Buffer): E.Either<Error, 5> =>
     )
   );
 
-const readDirectoryEntriesOffset = (buffer: Buffer): E.Either<Error, number> =>
+const readDirectoryEntry = (buffer: Buffer, cursor = 0): DirectoryEntry => ({
+  type: buffer.readInt32LE(cursor),
+  description: readString(buffer, cursor + 4, 64),
+  flags: 0,
+  cdTrack: 0,
+  trackTime: 0,
+  frameCount: 0,
+  offset: 0,
+  fileLength: 0,
+});
+
+const readDirectoryEntries = (
+  buffer: Buffer,
+  directoryOffset: number
+): E.Either<Error, readonly DirectoryEntry[]> =>
+  pipe(
+    E.of([
+      readDirectoryEntry(buffer, directoryOffset),
+      readDirectoryEntry(buffer, directoryOffset + DIRECTORY_ENTRY_LENGTH + 8),
+    ])
+  );
+
+const readTotalDirectoryEntries =
+  (buffer: Buffer) =>
+  (directoryOffset: number): E.Either<Error, number> =>
+    pipe(
+      buffer.readInt32LE(directoryOffset),
+      E.fromPredicate(
+        (a) => a === 2,
+        (a) => new Error(`unexpected number of directory entries: ${a}`)
+      )
+    );
+
+const readDirectoryOffset = (buffer: Buffer): E.Either<Error, number> =>
   pipe(
     buffer.readUInt32LE(540),
     E.fromPredicate(
@@ -69,36 +112,12 @@ const readDirectoryEntriesOffset = (buffer: Buffer): E.Either<Error, number> =>
     )
   );
 
-const readTotalDirectoryEntries =
-  (buffer: Buffer) =>
-  (directoryEntriesOffset: number): E.Either<Error, number> =>
-    pipe(
-      buffer.readInt32LE(directoryEntriesOffset),
-      E.fromPredicate(
-        (a) => a === 2,
-        (a) => new Error(`unexpected number of directory entries: ${a}`)
-      )
-    );
-
-const readDirectoryEntry = (buffer: Buffer, cursor = 0): DirectoryEntry => ({
-  index: buffer.readInt32LE(cursor),
-  title: readString(buffer, cursor + 4, 64),
-  time: buffer.readFloatLE(cursor + 4 + 64 + 4 + 4),
-});
-
-const readDirectoryEntries = (
-  buffer: Buffer
-): E.Either<Error, readonly DirectoryEntry[]> =>
+const readDirectory = (buffer: Buffer): E.Either<Error, Directory> =>
   pipe(
-    readDirectoryEntriesOffset(buffer),
+    readDirectoryOffset(buffer),
     E.chainFirst(readTotalDirectoryEntries(buffer)),
-    E.map((directoryEntriesOffset) => [
-      readDirectoryEntry(buffer, directoryEntriesOffset),
-      readDirectoryEntry(
-        buffer,
-        directoryEntriesOffset + DIRECTORY_ENTRY_LENGTH + 1
-      ),
-    ])
+    E.chain((directoryOffset) => readDirectoryEntries(buffer, directoryOffset)),
+    E.map((entries) => ({ entries }))
   );
 
 const readHeader = (buffer: Buffer): E.Either<Error, Header> =>
@@ -106,7 +125,7 @@ const readHeader = (buffer: Buffer): E.Either<Error, Header> =>
     sequenceS(E.Applicative)({
       magic: readMagic(buffer),
       protocol: readProtocol(buffer),
-      directoryEntries: readDirectoryEntries(buffer),
+      directory: readDirectory(buffer),
     }),
     E.map((a) => ({
       ...a,
@@ -120,5 +139,5 @@ const readHeader = (buffer: Buffer): E.Either<Error, Header> =>
 pipe(
   readFileContents(DEMO_PATH),
   TE.map(readHeader),
-  TE.bimap(console.error, console.log)
+  TE.bimap(console.error, (a) => console.dir(a, { depth: Infinity }))
 )();
