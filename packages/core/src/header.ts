@@ -15,6 +15,22 @@ export type Header = {
   readonly protocol: 5;
 };
 
+export const readHeader = (buffer: Buffer): E.Either<Error, Header> =>
+  pipe(
+    sequenceS(E.Applicative)({
+      magic: readMagic(buffer),
+      protocol: readProtocol(buffer),
+      directory: readDirectory(buffer),
+    }),
+    E.map((a) => ({
+      ...a,
+      networkProtocol: buffer.readInt32LE(12),
+      mapName: readString(buffer, 13, 260),
+      gameDirectory: readString(buffer, 274, 260),
+      mapChecksum: buffer.readUInt32LE(535),
+    }))
+  );
+
 export const readMagic = (buffer: Buffer): E.Either<Error, "HLDEMO"> =>
   pipe(
     readString(buffer, 0, 8),
@@ -31,20 +47,4 @@ export const readProtocol = (buffer: Buffer): E.Either<Error, 5> =>
       (a): a is 5 => a === 5,
       (a) => new Error(`unsupported protocol: ${a}`)
     )
-  );
-
-export const readHeader = (buffer: Buffer): E.Either<Error, Header> =>
-  pipe(
-    sequenceS(E.Applicative)({
-      magic: readMagic(buffer),
-      protocol: readProtocol(buffer),
-      directory: readDirectory(buffer),
-    }),
-    E.map((a) => ({
-      ...a,
-      networkProtocol: buffer.readInt32LE(12),
-      mapName: readString(buffer, 13, 260),
-      gameDirectory: readString(buffer, 274, 260),
-      mapChecksum: buffer.readUInt32LE(535),
-    }))
   );
