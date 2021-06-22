@@ -2,7 +2,7 @@ import { array as A, either as E, option as O, taskEither as TE } from "fp-ts";
 import { pipe } from "fp-ts/lib/function";
 import { readFile } from "fs/promises";
 import { resolve } from "path";
-import { readHeader } from "./header";
+import { readDemo } from "./demo";
 
 const DEMO_PATH = resolve(__dirname, "../../../demo.dem");
 
@@ -23,6 +23,6 @@ const readFileContents = (path: string): TE.TaskEither<Error, Buffer> =>
 
 pipe(
   readFileContents(DEMO_PATH),
-  TE.map(readHeader),
+  TE.chainEitherK(readDemo),
   TE.bimap(console.error, (a) => console.dir(a, { depth: Infinity }))
 )();

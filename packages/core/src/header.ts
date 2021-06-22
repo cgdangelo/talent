@@ -2,11 +2,8 @@ import { either as E } from "fp-ts";
 import { sequenceS } from "fp-ts/lib/Apply";
 import { pipe } from "fp-ts/lib/function";
 import { readString } from ".";
-import type { Directory } from "./directory";
-import { readDirectory } from "./directory";
 
 export type Header = {
-  readonly directory: Directory;
   readonly gameDirectory: string;
   readonly magic: "HLDEMO";
   readonly mapChecksum: number;
@@ -20,7 +17,6 @@ export const readHeader = (buffer: Buffer): E.Either<Error, Header> =>
     sequenceS(E.Applicative)({
       magic: readMagic(buffer),
       protocol: readProtocol(buffer),
-      directory: readDirectory(buffer),
     }),
     E.map((a) => ({
       ...a,
