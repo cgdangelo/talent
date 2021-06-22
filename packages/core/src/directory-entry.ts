@@ -17,10 +17,10 @@ export const readDirectoryEntry = (
 ): DirectoryEntry => ({
   type: buffer.readInt32LE(cursor),
   description: readString(buffer, cursor + 4, 64),
-  flags: 0,
-  cdTrack: 0,
-  trackTime: 0,
-  frameCount: 0,
-  offset: 0,
-  fileLength: 0,
+  flags: buffer.readInt32LE(cursor + 4 + 64),
+  cdTrack: buffer.readInt32LE(cursor + 4 + 64 + 4),
+  trackTime: buffer.readInt32LE(cursor + 4 + 64 + 4 + 4),
+  frameCount: buffer.readInt32LE(cursor + 4 + 64 + 4 + 4 + 4),
+  offset: buffer.readInt32LE(cursor + 4 + 64 + 4 + 4 + 4 + 4 + 4),
+  fileLength: buffer.readInt32LE(cursor + 4 + 64 + 4 + 4 + 4 + 4 + 4),
 });
