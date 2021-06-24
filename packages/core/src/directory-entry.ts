@@ -1,10 +1,12 @@
 import { readString } from ".";
+import type { Frame } from "./frame";
 
 export type DirectoryEntry = {
   readonly cdTrack: number;
   readonly description: string;
   readonly fileLength: number;
   readonly flags: number;
+  readonly frames: Frame[];
   readonly frameCount: number;
   readonly offset: number;
   readonly trackTime: number;
@@ -22,4 +24,5 @@ export const readDirectoryEntry =
     frameCount: buffer.readInt32LE(cursor + 4 + 64 + 4 + 4 + 4),
     offset: buffer.readInt32LE(cursor + 4 + 64 + 4 + 4 + 4 + 4 + 4),
     fileLength: buffer.readInt32LE(cursor + 4 + 64 + 4 + 4 + 4 + 4 + 4),
+    frames: [],
   });
