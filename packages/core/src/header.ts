@@ -21,15 +21,15 @@ export const readHeader = (buffer: Buffer): E.Either<Error, Header> =>
     E.map((a) => ({
       ...a,
       networkProtocol: buffer.readInt32LE(12),
-      mapName: readString(buffer, 13, 260),
-      gameDirectory: readString(buffer, 274, 260),
+      mapName: readString(buffer)(13)(260),
+      gameDirectory: readString(buffer)(274)(260),
       mapChecksum: buffer.readUInt32LE(535),
     }))
   );
 
 export const readMagic = (buffer: Buffer): E.Either<Error, "HLDEMO"> =>
   pipe(
-    readString(buffer, 0, 8),
+    readString(buffer)(0)(8),
     E.fromPredicate(
       (a): a is "HLDEMO" => a === "HLDEMO",
       (a) => new Error(`unsupported magic: ${a}`)

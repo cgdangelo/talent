@@ -7,11 +7,7 @@ export type Directory = {
   readonly entries: readonly DirectoryEntry[];
 };
 
-const DIRECTORY_ENTRY_LENGTH =
-  4 + // Unknown
-  64 + // Title
-  8 + // "flags, cdtrack" ?
-  12; // "frames, offset and length"
+const DIRECTORY_ENTRY_LENGTH = 4 + 64 + 8 + 12;
 
 export const readDirectory = (buffer: Buffer): E.Either<Error, Directory> =>
   pipe(
@@ -45,6 +41,6 @@ export const readDirectoryEntries =
   (buffer: Buffer) =>
   (directoryOffset: number): readonly DirectoryEntry[] =>
     [
-      readDirectoryEntry(buffer, directoryOffset),
-      readDirectoryEntry(buffer, directoryOffset + DIRECTORY_ENTRY_LENGTH + 8),
+      readDirectoryEntry(buffer)(directoryOffset),
+      readDirectoryEntry(buffer)(directoryOffset + DIRECTORY_ENTRY_LENGTH + 8),
     ];
