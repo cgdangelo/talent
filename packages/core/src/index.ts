@@ -15,7 +15,7 @@ export const readString =
           O.fromPredicate((a) => a !== "\x00")
         )
       ),
-      (a) => a.join("") // HACK I'm sure there's a better way to do this.
+      (a) => a.join("")
     );
 
 const readFileContents = (path: string): TE.TaskEither<Error, Buffer> =>
