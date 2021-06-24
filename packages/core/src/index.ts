@@ -1,10 +1,7 @@
 import { array as A, either as E, option as O, taskEither as TE } from "fp-ts";
 import { pipe } from "fp-ts/lib/function";
 import { readFile } from "fs/promises";
-import { resolve } from "path";
 import { readDemo } from "./demo";
-
-const DEMO_PATH = resolve(__dirname, "../../../demo.dem");
 
 export const readString = (buffer: Buffer, cursor = 0, length = 1): string =>
   pipe(
@@ -21,8 +18,24 @@ export const readString = (buffer: Buffer, cursor = 0, length = 1): string =>
 const readFileContents = (path: string): TE.TaskEither<Error, Buffer> =>
   TE.tryCatch(() => readFile(path), E.toError);
 
+const getDemoPath = (path?: string): E.Either<Error, string> =>
+  pipe(
+    path,
+    E.fromNullable(new Error("no demo path provided")),
+    E.map((s) => s.trim()),
+    E.chain(
+      E.fromPredicate(
+        (s) => s.length !== 0,
+        () => new Error("demo path is empty")
+      )
+    )
+  );
+
 pipe(
-  readFileContents(DEMO_PATH),
+  process.argv[2],
+  getDemoPath,
+  TE.fromEither,
+  TE.chain(readFileContents),
   TE.chainEitherK(readDemo),
   TE.bimap(console.error, (a) => console.dir(a, { depth: Infinity }))
 )();
