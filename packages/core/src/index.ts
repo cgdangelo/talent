@@ -21,7 +21,7 @@ export const readString =
 const readFileContents = (path: string): TE.TaskEither<Error, Buffer> =>
   TE.tryCatch(() => readFile(path), E.toError);
 
-const getDemoPath = (path?: string): E.Either<Error, string> =>
+const validateDemoPath = (path?: string): E.Either<Error, string> =>
   pipe(
     path,
     E.fromNullable(new Error("no demo path provided")),
@@ -35,8 +35,7 @@ const getDemoPath = (path?: string): E.Either<Error, string> =>
   );
 
 pipe(
-  process.argv[2],
-  getDemoPath,
+  validateDemoPath(process.argv[2]),
   TE.fromEither,
   TE.chain(readFileContents),
   TE.chainEitherK(readDemo),
