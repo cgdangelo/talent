@@ -12,11 +12,11 @@ export type Header = {
   readonly protocol: 5;
 };
 
-export const readHeader = (buffer: Buffer): E.Either<Error, Header> =>
+export const header = (buffer: Buffer): E.Either<Error, Header> =>
   pipe(
     sequenceS(E.Applicative)({
-      magic: readMagic(buffer),
-      protocol: readProtocol(buffer),
+      magic: magic(buffer),
+      protocol: protocol(buffer),
     }),
     E.map((a) => ({
       ...a,
@@ -27,7 +27,7 @@ export const readHeader = (buffer: Buffer): E.Either<Error, Header> =>
     }))
   );
 
-export const readMagic = (buffer: Buffer): E.Either<Error, "HLDEMO"> =>
+const magic = (buffer: Buffer): E.Either<Error, "HLDEMO"> =>
   pipe(
     readString(buffer)(0)(8),
     E.fromPredicate(
@@ -36,7 +36,7 @@ export const readMagic = (buffer: Buffer): E.Either<Error, "HLDEMO"> =>
     )
   );
 
-export const readProtocol = (buffer: Buffer): E.Either<Error, 5> =>
+const protocol = (buffer: Buffer): E.Either<Error, 5> =>
   pipe(
     buffer.readInt32LE(8),
     E.fromPredicate(

@@ -1,23 +1,22 @@
 import { either as E } from "fp-ts";
 import { pipe } from "fp-ts/lib/function";
 import type { DirectoryEntry } from "./directory-entry";
-import { readDirectoryEntry } from "./directory-entry";
+import { directoryEntry } from "./directory-entry";
+
+const DIRECTORY_ENTRY_LENGTH = 4 + 64 + 8 + 12;
 
 export type Directory = {
   readonly entries: readonly DirectoryEntry[];
 };
 
-const DIRECTORY_ENTRY_LENGTH = 4 + 64 + 8 + 12;
-
-export const readDirectory = (buffer: Buffer): E.Either<Error, Directory> =>
+export const directory = (buffer: Buffer): E.Either<Error, Directory> =>
   pipe(
-    readDirectoryOffset(buffer),
-    E.chainFirst(checkTotalDirectoryEntries(buffer)),
-    E.map(readDirectoryEntries(buffer)),
+    directoryOffset(buffer),
+    E.chain(directoryEntries(buffer)),
     E.map((entries) => ({ entries }))
   );
 
-export const readDirectoryOffset = (buffer: Buffer): E.Either<Error, number> =>
+const directoryOffset = (buffer: Buffer) =>
   pipe(
     buffer.readUInt32LE(540),
     E.fromPredicate(
@@ -26,9 +25,18 @@ export const readDirectoryOffset = (buffer: Buffer): E.Either<Error, number> =>
     )
   );
 
-export const checkTotalDirectoryEntries =
-  (buffer: Buffer) =>
-  (directoryOffset: number): E.Either<Error, number> =>
+const directoryEntries = (buffer: Buffer) => (directoryOffset: number) =>
+  pipe(
+    validateDirectoryEntries(buffer)(directoryOffset),
+
+    E.map(() => [
+      directoryEntry(buffer)(directoryOffset),
+      directoryEntry(buffer)(directoryOffset + DIRECTORY_ENTRY_LENGTH + 8),
+    ])
+  );
+
+const validateDirectoryEntries =
+  (buffer: Buffer) => (directoryOffset: number) =>
     pipe(
       buffer.readInt32LE(directoryOffset),
       E.fromPredicate(
@@ -36,11 +44,3 @@ export const checkTotalDirectoryEntries =
         (a) => new Error(`unexpected number of directory entries: ${a}`)
       )
     );
-
-export const readDirectoryEntries =
-  (buffer: Buffer) =>
-  (directoryOffset: number): readonly DirectoryEntry[] =>
-    [
-      readDirectoryEntry(buffer)(directoryOffset),
-      readDirectoryEntry(buffer)(directoryOffset + DIRECTORY_ENTRY_LENGTH + 8),
-    ];

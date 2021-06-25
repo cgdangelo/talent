@@ -13,7 +13,7 @@ export type DirectoryEntry = {
   readonly type: number;
 };
 
-export const readDirectoryEntry =
+export const directoryEntry =
   (buffer: Buffer) =>
   (cursor = 0): DirectoryEntry => ({
     type: buffer.readInt32LE(cursor),

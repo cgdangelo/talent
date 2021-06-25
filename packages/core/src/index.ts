@@ -9,7 +9,7 @@ import { error } from "fp-ts/lib/Console";
 import { pipe } from "fp-ts/lib/function";
 import { readFile } from "fs/promises";
 import type { InspectOptions } from "util";
-import { readDemo } from "./demo";
+import { demo } from "./demo";
 
 const dir =
   (options: InspectOptions) =>
@@ -53,6 +53,6 @@ pipe(
   validateDemoPath(process.argv[2]),
   TE.fromEither,
   TE.chain(readFileContents),
-  TE.chainEitherK(readDemo),
+  TE.chainEitherK(demo),
   TE.bimap(error, dumpObject)
 )();
