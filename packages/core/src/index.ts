@@ -1,7 +1,22 @@
-import { array as A, either as E, option as O, taskEither as TE } from "fp-ts";
+import {
+  array as A,
+  either as E,
+  io,
+  option as O,
+  taskEither as TE,
+} from "fp-ts";
+import { error } from "fp-ts/lib/Console";
 import { pipe } from "fp-ts/lib/function";
 import { readFile } from "fs/promises";
+import type { InspectOptions } from "util";
 import { readDemo } from "./demo";
+
+const dir =
+  (options: InspectOptions) =>
+  (obj: unknown): io.IO<void> =>
+    io.of(console.dir(obj, options));
+
+export const dumpObject = dir({ depth: Infinity });
 
 export const readString =
   (buffer: Buffer) =>
@@ -39,5 +54,5 @@ pipe(
   TE.fromEither,
   TE.chain(readFileContents),
   TE.chainEitherK(readDemo),
-  TE.bimap(console.error, (a) => console.dir(a, { depth: Infinity }))
+  TE.bimap(error, dumpObject)
 )();
