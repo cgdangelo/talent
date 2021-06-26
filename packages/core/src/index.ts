@@ -1,9 +1,9 @@
-import { either as E, taskEither as TE } from "fp-ts";
+import { either as E, string as S, taskEither as TE } from "fp-ts";
 import { error } from "fp-ts/lib/Console";
-import { pipe } from "fp-ts/lib/function";
+import { constant, flow, pipe } from "fp-ts/lib/function";
 import { readFile } from "fs/promises";
 import { demo } from "./demo";
-import { dumpObject } from "./utils";
+import { dumpObject, eq, invert } from "./utils";
 
 const readFileContents = (path: string): TE.TaskEither<Error, Buffer> =>
   TE.tryCatch(() => readFile(path), E.toError);
@@ -15,8 +15,8 @@ const validateDemoPath = (path?: string): E.Either<Error, string> =>
     E.map((s) => s.trim()),
     E.chain(
       E.fromPredicate(
-        (s) => s.length !== 0,
-        () => new Error("demo path is empty")
+        flow(S.size, eq(0), invert),
+        constant(new Error("demo path is empty"))
       )
     )
   );
