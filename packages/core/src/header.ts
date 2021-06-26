@@ -1,7 +1,7 @@
 import { either as E } from "fp-ts";
 import { sequenceS } from "fp-ts/lib/Apply";
 import { pipe } from "fp-ts/lib/function";
-import { readString } from ".";
+import { readString } from "./utils";
 
 export type Header = {
   readonly gameDirectory: string;

@@ -1,5 +1,5 @@
-import { readString } from ".";
 import type { Frame } from "./frame";
+import { readString } from "./utils";
 
 export type DirectoryEntry = {
   readonly cdTrack: number;
