@@ -1,7 +1,7 @@
 import { either as E } from "fp-ts";
 import { sequenceS } from "fp-ts/lib/Apply";
 import { pipe } from "fp-ts/lib/function";
-import { readString } from "./utils";
+import { str } from "./utils";
 
 export type Header = {
   readonly gameDirectory: string;
@@ -21,15 +21,15 @@ export const header = (buffer: Buffer): E.Either<Error, Header> =>
     E.map((a) => ({
       ...a,
       networkProtocol: buffer.readInt32LE(12),
-      mapName: readString(buffer)(13)(260),
-      gameDirectory: readString(buffer)(274)(260),
+      mapName: str(buffer)(13)(260),
+      gameDirectory: str(buffer)(274)(260),
       mapChecksum: buffer.readUInt32LE(535),
     }))
   );
 
 const magic = (buffer: Buffer): E.Either<Error, "HLDEMO"> =>
   pipe(
-    readString(buffer)(0)(8),
+    str(buffer)(0)(8),
     E.fromPredicate(
       (a): a is "HLDEMO" => a === "HLDEMO",
       (a) => new Error(`unsupported magic: ${a}`)

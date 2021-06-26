@@ -1,5 +1,5 @@
 import type { Frame } from "./frame";
-import { readString } from "./utils";
+import { str } from "./utils";
 
 export type DirectoryEntry = {
   readonly cdTrack: number;
@@ -17,7 +17,7 @@ export const directoryEntry =
   (buffer: Buffer) =>
   (cursor = 0): DirectoryEntry => ({
     type: buffer.readInt32LE(cursor),
-    description: readString(buffer)(cursor + 4)(64),
+    description: str(buffer)(cursor + 4)(64),
     flags: buffer.readInt32LE(cursor + 4 + 64),
     cdTrack: buffer.readInt32LE(cursor + 4 + 64 + 4),
     trackTime: buffer.readInt32LE(cursor + 4 + 64 + 4 + 4),

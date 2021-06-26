@@ -6,15 +6,17 @@ export const invert = (a: boolean): boolean => !a;
 
 export const eq =
   <A>(a: A) =>
-  <B extends A>(b: B) =>
+  <B extends A>(b: B): boolean =>
     a === b;
 
-export const dir = (options: InspectOptions) => (obj: unknown) =>
-  io.of(console.dir(obj, options));
+export const dir =
+  (options: InspectOptions) =>
+  (obj: unknown): io.IO<void> =>
+    io.of(console.dir(obj, options));
 
 export const dumpObject = dir({ depth: Infinity });
 
-export const readString =
+export const str =
   (buffer: Buffer) =>
   (cursor = 0) =>
   (length = 1): string =>
@@ -22,15 +24,15 @@ export const readString =
       A.range(1, length),
       A.filterMapWithIndex(
         flow(
-          (_, i) => cursor + i,
-          readChar(buffer),
+          (i) => cursor + i,
+          char(buffer),
           O.fromPredicate(flow(eq("\x00"), invert))
         )
       ),
       (a) => a.join("")
     );
 
-const readChar =
+const char =
   (buffer: Buffer) =>
   (cursor = 0) =>
     pipe(buffer.readInt8(cursor), String.fromCharCode);
