@@ -32,7 +32,23 @@ export const str =
       (a) => a.join("")
     );
 
-const char =
+export const char =
+  (buffer: Buffer) =>
+  (cursor = 0): string =>
+    pipe(buffer.readInt8(cursor), String.fromCharCode);
+
+const int32 =
+  (unsigned = false) =>
+  (endianness: "BE" | "LE" = "LE") =>
   (buffer: Buffer) =>
   (cursor = 0) =>
-    pipe(buffer.readInt8(cursor), String.fromCharCode);
+    buffer[`read${unsigned && "U"}Int32${endianness}`]?.(cursor);
+
+export const uint32_le = int32(true)("LE");
+
+export const int32_le = int32()("LE");
+
+export const toError =
+  <A>(message: string) =>
+  (a: A): Error =>
+    new Error(`${message}: ${a}`);
