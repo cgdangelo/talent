@@ -3,7 +3,7 @@ import { error } from "fp-ts/lib/Console";
 import { constant, flow, pipe } from "fp-ts/lib/function";
 import { readFile } from "fs/promises";
 import { demo } from "./demo";
-import { dumpObject, eq, invert } from "./utils";
+import { dumpObject, eq, not } from "./utils";
 
 const readFileContents = (path: string): TE.TaskEither<Error, Buffer> =>
   TE.tryCatch(() => readFile(path), E.toError);
@@ -15,7 +15,7 @@ const validateDemoPath = (path?: string): E.Either<Error, string> =>
     E.map((s) => s.trim()),
     E.chain(
       E.fromPredicate(
-        flow(S.size, eq(0), invert),
+        flow(S.size, eq(0), not),
         constant(new Error("demo path is empty"))
       )
     )

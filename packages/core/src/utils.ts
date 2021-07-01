@@ -2,7 +2,7 @@ import { array as A, io, option as O } from "fp-ts";
 import { flow, pipe } from "fp-ts/function";
 import type { InspectOptions } from "util";
 
-export const invert = (a: boolean): boolean => !a;
+export const not = (a: boolean): boolean => !a;
 
 export const eq =
   <A>(a: A) =>
@@ -26,7 +26,7 @@ export const str =
         flow(
           (i) => cursor + i,
           char(buffer),
-          O.fromPredicate(flow(eq("\x00"), invert))
+          O.fromPredicate(flow(eq("\x00"), not))
         )
       ),
       (a) => a.join("")
