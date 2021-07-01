@@ -2,6 +2,7 @@ import { either as E } from "fp-ts";
 import { pipe } from "fp-ts/lib/function";
 import type { DirectoryEntry } from "./directory-entry";
 import { directoryEntry } from "./directory-entry";
+import { int32_le, toError, uint32_le } from "./utils";
 
 const DIRECTORY_ENTRY_LENGTH = 4 + 64 + 8 + 12;
 
@@ -18,10 +19,10 @@ export const directory = (buffer: Buffer): E.Either<Error, Directory> =>
 
 const directoryOffset = (buffer: Buffer) =>
   pipe(
-    buffer.readUInt32LE(540),
+    uint32_le(buffer)(540),
     E.fromPredicate(
       (a) => a === buffer.byteLength - 4 - 92 * 2,
-      (a) => new Error(`directory entries offset did not match expected: ${a}`)
+      toError("directory entries offset did not match expected")
     )
   );
 
@@ -38,9 +39,9 @@ const directoryEntries = (buffer: Buffer) => (directoryOffset: number) =>
 const validateDirectoryEntries =
   (buffer: Buffer) => (directoryOffset: number) =>
     pipe(
-      buffer.readInt32LE(directoryOffset),
+      int32_le(buffer)(directoryOffset),
       E.fromPredicate(
         (a) => a === 2,
-        (a) => new Error(`unexpected number of directory entries: ${a}`)
+        toError("unexpected number of directory entries")
       )
     );

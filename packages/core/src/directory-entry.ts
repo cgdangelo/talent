@@ -1,5 +1,5 @@
 import type { Frame } from "./frame";
-import { str } from "./utils";
+import { int32_le, str } from "./utils";
 
 export type DirectoryEntry = {
   readonly cdTrack: number;
@@ -16,13 +16,13 @@ export type DirectoryEntry = {
 export const directoryEntry =
   (buffer: Buffer) =>
   (cursor = 0): DirectoryEntry => ({
-    type: buffer.readInt32LE(cursor),
+    type: int32_le(buffer)(cursor),
     description: str(buffer)(cursor + 4)(64),
-    flags: buffer.readInt32LE(cursor + 4 + 64),
-    cdTrack: buffer.readInt32LE(cursor + 4 + 64 + 4),
-    trackTime: buffer.readInt32LE(cursor + 4 + 64 + 4 + 4),
-    frameCount: buffer.readInt32LE(cursor + 4 + 64 + 4 + 4 + 4),
-    offset: buffer.readInt32LE(cursor + 4 + 64 + 4 + 4 + 4 + 4 + 4),
-    fileLength: buffer.readInt32LE(cursor + 4 + 64 + 4 + 4 + 4 + 4 + 4),
+    flags: int32_le(buffer)(cursor + 4 + 64),
+    cdTrack: int32_le(buffer)(cursor + 4 + 64 + 4),
+    trackTime: int32_le(buffer)(cursor + 4 + 64 + 4 + 4),
+    frameCount: int32_le(buffer)(cursor + 4 + 64 + 4 + 4 + 4),
+    offset: int32_le(buffer)(cursor + 4 + 64 + 4 + 4 + 4 + 4 + 4),
+    fileLength: int32_le(buffer)(cursor + 4 + 64 + 4 + 4 + 4 + 4 + 4),
     frames: [],
   });
