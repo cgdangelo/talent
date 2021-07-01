@@ -42,7 +42,8 @@ const int32 =
   (endianness: "BE" | "LE" = "LE") =>
   (buffer: Buffer) =>
   (cursor = 0) =>
-    buffer[`read${unsigned && "U"}Int32${endianness}`]?.(cursor);
+    // @ts-expect-error Index access error because Buffer extends UInt8Array?
+    buffer[`read${unsigned ? "U" : ""}Int32${endianness}`](cursor);
 
 export const uint32_le = int32(true)("LE");
 
