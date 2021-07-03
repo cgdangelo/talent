@@ -37,17 +37,15 @@ export const char =
   (cursor = 0): string =>
     pipe(buffer.readInt8(cursor), String.fromCharCode);
 
-const int32 =
-  (unsigned = false) =>
-  (endianness: "BE" | "LE" = "LE") =>
+export const uint32_le =
   (buffer: Buffer) =>
   (cursor = 0) =>
-    // @ts-expect-error Index access error because Buffer extends UInt8Array?
-    buffer[`read${unsigned ? "U" : ""}Int32${endianness}`](cursor);
+    buffer.readUInt32LE(cursor);
 
-export const uint32_le = int32(true)("LE");
-
-export const int32_le = int32()("LE");
+export const int32_le =
+  (buffer: Buffer) =>
+  (cursor = 0) =>
+    buffer.readInt32LE(cursor);
 
 export const toError =
   <A>(message: string) =>
