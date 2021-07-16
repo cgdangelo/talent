@@ -1,4 +1,4 @@
-import { array as A, io, option as O } from "fp-ts";
+import { array as A, either as E, io, option as O } from "fp-ts";
 import { flow, pipe } from "fp-ts/function";
 import type { InspectOptions } from "util";
 
@@ -26,7 +26,8 @@ export const str =
         flow(
           (i) => cursor + i,
           char(buffer),
-          O.fromPredicate(flow(eq("\x00"), not))
+          O.fromEither,
+          O.chain(O.fromPredicate(flow(eq("\x00"), not)))
         )
       ),
       (a) => a.join("")
@@ -34,18 +35,21 @@ export const str =
 
 export const char =
   (buffer: Buffer) =>
-  (cursor = 0): string =>
-    pipe(buffer.readInt8(cursor), String.fromCharCode);
+  (cursor = 0): E.Either<Error, string> =>
+    pipe(
+      E.tryCatch(() => buffer.readInt8(cursor), E.toError),
+      E.map(String.fromCharCode)
+    );
 
 export const uint32_le =
   (buffer: Buffer) =>
-  (cursor = 0) =>
-    buffer.readUInt32LE(cursor);
+  (cursor = 0): E.Either<Error, number> =>
+    E.tryCatch(() => buffer.readUInt32LE(cursor), E.toError);
 
 export const int32_le =
   (buffer: Buffer) =>
-  (cursor = 0) =>
-    buffer.readInt32LE(cursor);
+  (cursor = 0): E.Either<Error, number> =>
+    E.tryCatch(() => buffer.readInt32LE(cursor), E.toError);
 
 export const toError =
   <A>(message: string) =>

@@ -1,3 +1,4 @@
+import { either as E } from "fp-ts";
 import { char, dir, dumpObject, eq, not, str } from "../src/utils";
 
 describe("utils", () => {
@@ -43,8 +44,9 @@ describe("utils", () => {
   });
 
   test("char", () => {
-    expect(char(Buffer.from("foo"))()).toBe("f");
-    expect(char(Buffer.from("foo"))(1)).toBe("o");
-    expect(char(Buffer.from("foo"))(2)).toBe("o");
+    expect(char(Buffer.from("foo"))()).toEqual(E.right("f"));
+    expect(char(Buffer.from("foo"))(1)).toEqual(E.right("o"));
+    expect(char(Buffer.from("foo"))(2)).toEqual(E.right("o"));
+    expect(char(Buffer.from("foo"))(-1)).toEqual(E.left(expect.any(Error)));
   });
 });

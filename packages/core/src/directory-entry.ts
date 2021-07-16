@@ -1,3 +1,5 @@
+import { either as E } from "fp-ts";
+import { sequenceS } from "fp-ts/lib/Apply";
 import type { Frame } from "./frame";
 import { int32_le, str } from "./utils";
 
@@ -15,14 +17,15 @@ export type DirectoryEntry = {
 
 export const directoryEntry =
   (buffer: Buffer) =>
-  (cursor = 0): DirectoryEntry => ({
-    type: int32_le(buffer)(cursor),
-    description: str(buffer)(cursor + 4)(64),
-    flags: int32_le(buffer)(cursor + 4 + 64),
-    cdTrack: int32_le(buffer)(cursor + 4 + 64 + 4),
-    trackTime: int32_le(buffer)(cursor + 4 + 64 + 4 + 4),
-    frameCount: int32_le(buffer)(cursor + 4 + 64 + 4 + 4 + 4),
-    offset: int32_le(buffer)(cursor + 4 + 64 + 4 + 4 + 4 + 4 + 4),
-    fileLength: int32_le(buffer)(cursor + 4 + 64 + 4 + 4 + 4 + 4 + 4),
-    frames: [],
-  });
+  (cursor = 0): E.Either<Error, DirectoryEntry> =>
+    sequenceS(E.Applicative)({
+      type: int32_le(buffer)(cursor),
+      description: E.of(str(buffer)(cursor + 4)(64)),
+      flags: int32_le(buffer)(cursor + 4 + 64),
+      cdTrack: int32_le(buffer)(cursor + 4 + 64 + 4),
+      trackTime: int32_le(buffer)(cursor + 4 + 64 + 4 + 4),
+      frameCount: int32_le(buffer)(cursor + 4 + 64 + 4 + 4 + 4),
+      offset: int32_le(buffer)(cursor + 4 + 64 + 4 + 4 + 4 + 4 + 4),
+      fileLength: int32_le(buffer)(cursor + 4 + 64 + 4 + 4 + 4 + 4 + 4),
+      frames: E.of([]),
+    });
