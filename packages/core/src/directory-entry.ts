@@ -1,7 +1,7 @@
 import { either as E } from "fp-ts";
 import { sequenceS } from "fp-ts/lib/Apply";
 import type { Frame } from "./frame";
-import { int32_le, str } from "./utils";
+import { int32_le, str } from "./parser";
 
 export type DirectoryEntry = {
   readonly cdTrack: number;

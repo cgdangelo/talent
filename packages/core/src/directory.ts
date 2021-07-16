@@ -3,7 +3,8 @@ import { sequenceT } from "fp-ts/lib/Apply";
 import { pipe } from "fp-ts/lib/function";
 import type { DirectoryEntry } from "./directory-entry";
 import { directoryEntry } from "./directory-entry";
-import { int32_le, toError, uint32_le } from "./utils";
+import { int32_le, uint32_le } from "./parser";
+import { toError } from "./utils";
 
 const DIRECTORY_ENTRY_LENGTH = 4 + 64 + 8 + 12;
 

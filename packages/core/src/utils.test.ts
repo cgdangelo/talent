@@ -1,52 +1,36 @@
-import { either as E } from "fp-ts";
-import { char, dir, dumpObject, eq, not, str } from "../src/utils";
+import { dir, dumpObject, eq, not } from "../src/utils";
 
-describe("utils", () => {
-  test("not", () => {
-    expect(not(true)).toBe(false);
-    expect(not(false)).toBe(true);
+test("not", () => {
+  expect(not(true)).toBe(false);
+  expect(not(false)).toBe(true);
+});
+
+test("eq", () => {
+  expect(eq(1)(1)).toBe(true);
+  expect(eq(1)(0)).toBe(false);
+
+  expect(eq("foo")("foo")).toBe(true);
+  expect(eq("foo")("bar")).toBe(false);
+
+  expect(eq({})({})).toBe(false);
+});
+
+test("dir", () => {
+  const consoleDir = jest.spyOn(console, "dir").mockImplementation(() => {
+    /* noop */
   });
 
-  test("eq", () => {
-    expect(eq(1)(1)).toBe(true);
-    expect(eq(1)(0)).toBe(false);
+  dir({})("foo");
 
-    expect(eq("foo")("foo")).toBe(true);
-    expect(eq("foo")("bar")).toBe(false);
+  expect(consoleDir).toHaveBeenCalledWith("foo", {});
+});
 
-    expect(eq({})({})).toBe(false);
+test("dumpObject", () => {
+  const consoleDir = jest.spyOn(console, "dir").mockImplementation(() => {
+    /* noop */
   });
 
-  test("dir", () => {
-    const consoleDir = jest.spyOn(console, "dir").mockImplementation(() => {
-      /* noop */
-    });
+  dumpObject("foo");
 
-    dir({})("foo");
-
-    expect(consoleDir).toHaveBeenCalledWith("foo", {});
-  });
-
-  test("dumpObject", () => {
-    const consoleDir = jest.spyOn(console, "dir").mockImplementation(() => {
-      /* noop */
-    });
-
-    dumpObject("foo");
-
-    expect(consoleDir).toHaveBeenCalledWith("foo", { depth: Infinity });
-  });
-
-  test("str", () => {
-    expect(str(Buffer.from("foo"))()()).toBe("f");
-    expect(str(Buffer.from("foo"))()(3)).toBe("foo");
-    expect(str(Buffer.from("foo bar baz"))(4)(3)).toBe("bar");
-  });
-
-  test("char", () => {
-    expect(char(Buffer.from("foo"))()).toEqual(E.right("f"));
-    expect(char(Buffer.from("foo"))(1)).toEqual(E.right("o"));
-    expect(char(Buffer.from("foo"))(2)).toEqual(E.right("o"));
-    expect(char(Buffer.from("foo"))(-1)).toEqual(E.left(expect.any(Error)));
-  });
+  expect(consoleDir).toHaveBeenCalledWith("foo", { depth: Infinity });
 });
