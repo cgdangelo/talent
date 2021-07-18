@@ -36,8 +36,8 @@ const directoryEntries = (buffer: Buffer) => (directoryOffset: number) =>
 
     E.chain(() =>
       sequenceT(E.Applicative)(
-        directoryEntry(buffer)(directoryOffset),
-        directoryEntry(buffer)(directoryOffset + DIRECTORY_ENTRY_LENGTH + 8)
+        directoryEntry(buffer)(directoryOffset + 4),
+        directoryEntry(buffer)(directoryOffset + 8 + DIRECTORY_ENTRY_LENGTH)
       )
     )
   );

@@ -1,8 +1,7 @@
 import { either as E } from "fp-ts";
 import { sequenceS } from "fp-ts/lib/Apply";
 import { pipe } from "fp-ts/lib/function";
-import type { Frame } from "./frame";
-import { frames } from "./frame";
+import { Frame, frames } from "./frame";
 import { float32_le, int32_le, str } from "./parser";
 
 export type DirectoryEntry = {
@@ -28,7 +27,7 @@ export const directoryEntry =
         cdTrack: int32_le(buffer)(cursor + 4 + 64 + 4),
         trackTime: float32_le(buffer)(cursor + 4 + 64 + 4 + 4),
         frameCount: int32_le(buffer)(cursor + 4 + 64 + 4 + 4 + 4),
-        offset: int32_le(buffer)(cursor + 4 + 64 + 4 + 4 + 4 + 4 + 4),
+        offset: int32_le(buffer)(cursor + 4 + 64 + 4 + 4 + 4 + 4),
         fileLength: int32_le(buffer)(cursor + 4 + 64 + 4 + 4 + 4 + 4 + 4),
       }),
 

@@ -27,4 +27,6 @@ const main = pipe(
   TE.chainEitherK(demo)
 );
 
-main().then(console.log).catch(console.error);
+main()
+  .then((a) => console.dir(a, { depth: Infinity }))
+  .catch(console.error);

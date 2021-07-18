@@ -19,9 +19,9 @@ export const header = (buffer: Buffer): E.Either<Error, Header> =>
       magic: magic(buffer),
       protocol: protocol(buffer),
       networkProtocol: int32_le(buffer)(12),
-      mapName: E.of(str(buffer)(13)(260)),
-      gameDirectory: E.of(str(buffer)(274)(260)),
-      mapChecksum: uint32_le(buffer)(535),
+      mapName: E.of(str(buffer)(16)(260)),
+      gameDirectory: E.of(str(buffer)(276)(260)),
+      mapChecksum: uint32_le(buffer)(536),
     })
   );
 
