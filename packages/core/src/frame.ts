@@ -1,11 +1,11 @@
 import { either as E } from "fp-ts";
 import { sequenceS } from "fp-ts/lib/Apply";
 import { pipe } from "fp-ts/lib/function";
-import { uint8_be } from "./parser";
+import { float32_le, int32_le, uint8_be } from "./parser";
 import { toError } from "./utils";
 
 type FrameType =
-  | "netmsg"
+  | `netmsg-${NetMsgFrameType}`
   | "start"
   | "console"
   | "client"
@@ -14,6 +14,8 @@ type FrameType =
   | "weapon"
   | "sound"
   | "buffer";
+
+type NetMsgFrameType = "start" | "normal" | `unknown-${number}`;
 
 export type Header = {
   readonly type: FrameType;
@@ -45,7 +47,18 @@ const frameType_ = (a: number): FrameType => {
     case 9:
       return "buffer";
     default:
-      return "netmsg";
+      return `netmsg-${netMsgFrameType_(a)}`;
+  }
+};
+
+const netMsgFrameType_ = (a: number): NetMsgFrameType => {
+  switch (a) {
+    case 0:
+      return "start";
+    case 1:
+      return "normal";
+    default:
+      return `unknown-${a}`;
   }
 };
 
@@ -54,9 +67,7 @@ const frameType =
   (cursor = 0) =>
     pipe(
       uint8_be(buffer)(cursor),
-      E.chain(
-        E.fromPredicate((a) => a >= 1 && a <= 9, toError("invalid frame type"))
-      ),
+      E.chain(E.fromPredicate((a) => a <= 9, toError("invalid frame type"))),
       E.map(frameType_)
     );
 
@@ -65,8 +76,8 @@ const frameHeader =
   (cursor = 0) =>
     sequenceS(E.Applicative)({
       type: frameType(buffer)(cursor),
-      time: E.of(0),
-      frame: E.of(0),
+      time: float32_le(buffer)(cursor + 1),
+      frame: int32_le(buffer)(cursor + 1 + 4),
     });
 
 const frame =
