@@ -1,4 +1,4 @@
-import { io } from "fp-ts";
+import { io as IO } from "fp-ts";
 import type { InspectOptions } from "util";
 
 export const not = (a: boolean): boolean => !a;
@@ -10,8 +10,8 @@ export const eq =
 
 export const dir =
   (options: InspectOptions) =>
-  (obj: unknown): io.IO<void> =>
-    io.of(console.dir(obj, options));
+  (obj: unknown): IO.IO<void> =>
+    IO.of(console.dir(obj, options));
 
 export const dumpObject = dir({ depth: Infinity });
 
