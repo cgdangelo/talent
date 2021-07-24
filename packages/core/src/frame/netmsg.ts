@@ -1,7 +1,7 @@
 import { either as E } from "fp-ts";
 import { sequenceS } from "fp-ts/lib/Apply";
 import { pipe } from "fp-ts/lib/function";
-import { float32_le, int32_le, xyz } from "../parser";
+import { float32_le, int32_le, point } from "../parser";
 
 export type NetMsg = {
   readonly info: unknown;
@@ -41,11 +41,11 @@ const netMsgInfo =
     pipe(
       sequenceS(E.Applicative)({
         timestamp:      float32_le  (buffer)(cursor),
-        viewOrigin:     xyz         (buffer)(cursor + 4),
-        viewAngles:     xyz         (buffer)(cursor + 4 + 12),
-        forward:        xyz         (buffer)(cursor + 4 + 12 + 12),
-        right:          xyz         (buffer)(cursor + 4 + 12 + 12 + 12),
-        up:             xyz         (buffer)(cursor + 4 + 12 + 12 + 12 + 12),
+        viewOrigin:     point       (buffer)(cursor + 4),
+        viewAngles:     point       (buffer)(cursor + 4 + 12),
+        forward:        point       (buffer)(cursor + 4 + 12 + 12),
+        right:          point       (buffer)(cursor + 4 + 12 + 12 + 12),
+        up:             point       (buffer)(cursor + 4 + 12 + 12 + 12 + 12),
         frameTime:      float32_le  (buffer)(cursor + 4 + 12 + 12 + 12 + 12 + 12),
         time:           float32_le  (buffer)(cursor + 4 + 12 + 12 + 12 + 12 + 12 + 4),
         intermission:   int32_le    (buffer)(cursor + 4 + 12 + 12 + 12 + 12 + 12 + 4 + 4),
@@ -53,15 +53,15 @@ const netMsgInfo =
         spectator:      int32_le    (buffer)(cursor + 4 + 12 + 12 + 12 + 12 + 12 + 4 + 4 + 4 + 4),
         onGround:       int32_le    (buffer)(cursor + 4 + 12 + 12 + 12 + 12 + 12 + 4 + 4 + 4 + 4 + 4),
         waterLevel:     int32_le    (buffer)(cursor + 4 + 12 + 12 + 12 + 12 + 12 + 4 + 4 + 4 + 4 + 4 + 4),
-        simVel:         xyz         (buffer)(cursor + 4 + 12 + 12 + 12 + 12 + 12 + 4 + 4 + 4 + 4 + 4 + 4 + 4),
-        simOrg:         xyz         (buffer)(cursor + 4 + 12 + 12 + 12 + 12 + 12 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 12),
-        viewHeight:     xyz         (buffer)(cursor + 4 + 12 + 12 + 12 + 12 + 12 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 12 + 12),
+        simVel:         point       (buffer)(cursor + 4 + 12 + 12 + 12 + 12 + 12 + 4 + 4 + 4 + 4 + 4 + 4 + 4),
+        simOrg:         point       (buffer)(cursor + 4 + 12 + 12 + 12 + 12 + 12 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 12),
+        viewHeight:     point       (buffer)(cursor + 4 + 12 + 12 + 12 + 12 + 12 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 12 + 12),
         idealPitch:     float32_le  (buffer)(cursor + 4 + 12 + 12 + 12 + 12 + 12 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 12 + 12 + 12),
-        cl_viewangles:  xyz         (buffer)(cursor + 4 + 12 + 12 + 12 + 12 + 12 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 12 + 12 + 12 + 4),
+        cl_viewangles:  point       (buffer)(cursor + 4 + 12 + 12 + 12 + 12 + 12 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 12 + 12 + 12 + 4),
         health:         int32_le    (buffer)(cursor + 4 + 12 + 12 + 12 + 12 + 12 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 12 + 12 + 12 + 4 + 12),
-        crosshairAngle: xyz         (buffer)(cursor + 4 + 12 + 12 + 12 + 12 + 12 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 12 + 12 + 12 + 4 + 12 + 4),
+        crosshairAngle: point       (buffer)(cursor + 4 + 12 + 12 + 12 + 12 + 12 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 12 + 12 + 12 + 4 + 12 + 4),
         viewSize:       float32_le  (buffer)(cursor + 4 + 12 + 12 + 12 + 12 + 12 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 12 + 12 + 12 + 4 + 12 + 4 + 12),
-        punchAngle:     xyz         (buffer)(cursor + 4 + 12 + 12 + 12 + 12 + 12 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 12 + 12 + 12 + 4 + 12 + 4 + 12 + 4),
+        punchAngle:     point       (buffer)(cursor + 4 + 12 + 12 + 12 + 12 + 12 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 12 + 12 + 12 + 4 + 12 + 4 + 12 + 4),
         maxClients:     int32_le    (buffer)(cursor + 4 + 12 + 12 + 12 + 12 + 12 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 12 + 12 + 12 + 4 + 12 + 4 + 12 + 4 + 12),
         viewEntity:     int32_le    (buffer)(cursor + 4 + 12 + 12 + 12 + 12 + 12 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 12 + 12 + 12 + 4 + 12 + 4 + 12 + 4 + 12 + 4),
         playerNum:      int32_le    (buffer)(cursor + 4 + 12 + 12 + 12 + 12 + 12 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 12 + 12 + 12 + 4 + 12 + 4 + 12 + 4 + 12 + 4 + 4),

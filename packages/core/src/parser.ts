@@ -3,6 +3,12 @@ import { sequenceS } from "fp-ts/lib/Apply";
 import { flow, pipe } from "fp-ts/lib/function";
 import { eq, not } from "./utils";
 
+export type Point = {
+  readonly x: number;
+  readonly y: number;
+  readonly z: number;
+};
+
 export const str =
   (buffer: Buffer) =>
   (cursor = 0) =>
@@ -48,18 +54,9 @@ export const float32_le =
   (cursor = 0): E.Either<Error, number> =>
     E.tryCatch(() => buffer.readFloatLE(cursor), E.toError);
 
-export const xyz =
+export const point =
   (buffer: Buffer) =>
-  (
-    cursor = 0
-  ): E.Either<
-    Error,
-    {
-      readonly x: number;
-      readonly y: number;
-      readonly z: number;
-    }
-  > =>
+  (cursor = 0): E.Either<Error, Point> =>
     sequenceS(E.Applicative)({
       x: float32_le(buffer)(cursor),
       y: float32_le(buffer)(cursor + 4),
