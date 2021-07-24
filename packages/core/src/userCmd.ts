@@ -1,13 +1,13 @@
 import { either as E } from "fp-ts";
 import { sequenceS } from "fp-ts/lib/Apply";
 import { pipe } from "fp-ts/lib/function";
+import type { Point } from "./parser";
 import {
   float32_le,
   int16_le,
   int32_le,
   int8_be,
   point,
-  Point,
   uint16_le,
   uint8_be,
 } from "./parser";
