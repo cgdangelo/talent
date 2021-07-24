@@ -1,7 +1,7 @@
 import { either as E } from "fp-ts";
 import { sequenceS } from "fp-ts/lib/Apply";
 import { pipe } from "fp-ts/lib/function";
-import { netMsg } from "./frame/netmsg";
+import { netMsg } from "./netMsg";
 import { float32_le, int32_le, uint8_be } from "./parser";
 import { toError } from "./utils";
 

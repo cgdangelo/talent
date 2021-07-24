@@ -1,7 +1,7 @@
 import { either as E } from "fp-ts";
 import { sequenceS } from "fp-ts/lib/Apply";
 import { pipe } from "fp-ts/lib/function";
-import { float32_le, int32_le, point } from "../parser";
+import { float32_le, int32_le, point } from "./parser";
 
 export type NetMsg = {
   readonly info: unknown;

@@ -1,8 +1,8 @@
 import { either as E } from "fp-ts";
 import { sequenceT } from "fp-ts/lib/Apply";
 import { pipe } from "fp-ts/lib/function";
-import type { DirectoryEntry } from "./directory-entry";
-import { directoryEntry } from "./directory-entry";
+import type { DirectoryEntry } from "./directoryEntry";
+import { directoryEntry } from "./directoryEntry";
 import { int32_le, uint32_le } from "./parser";
 import { toError } from "./utils";
 
