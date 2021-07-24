@@ -1,10 +1,11 @@
 import { either as E } from "fp-ts";
 import { sequenceS } from "fp-ts/lib/Apply";
 import { pipe } from "fp-ts/lib/function";
+import { netMsg } from "./frame/netmsg";
 import { float32_le, int32_le, uint8_be } from "./parser";
 import { toError } from "./utils";
 
-type FrameType =
+export type FrameType =
   | `netmsg-${NetMsgFrameType}`
   | "start"
   | "console"
@@ -17,15 +18,15 @@ type FrameType =
 
 type NetMsgFrameType = "start" | "normal" | `unknown-${number}`;
 
-export type Header = {
-  readonly type: FrameType;
+export type FrameHeader = {
+  readonly frameType: FrameType;
   readonly time: number;
   readonly frame: number;
 };
 
 export type Frame = {
-  readonly header: Header;
-  readonly data: unknown;
+  readonly frameHeader: FrameHeader;
+  readonly frameData: unknown;
 };
 
 const frameType_ = (a: number): FrameType => {
@@ -75,7 +76,7 @@ const frameHeader =
   (buffer: Buffer) =>
   (cursor = 0) =>
     sequenceS(E.Applicative)({
-      type: frameType(buffer)(cursor),
+      frameType: frameType(buffer)(cursor),
       time: float32_le(buffer)(cursor + 1),
       frame: int32_le(buffer)(cursor + 1 + 4),
     });
@@ -83,10 +84,34 @@ const frameHeader =
 const frame =
   (buffer: Buffer) =>
   (cursor = 0) =>
-    sequenceS(E.Applicative)({
-      header: frameHeader(buffer)(cursor),
-      data: E.of(undefined),
-    });
+    pipe(
+      frameHeader(buffer)(cursor),
+      E.chain((frameHeader) =>
+        pipe(
+          frameData(buffer)(cursor + 1 + 4 + 4)(frameHeader.frameType),
+          E.map((frameData) => ({ frameHeader, frameData }))
+        )
+      )
+      // TODO Repeat until frameNextSection
+    );
+
+const frameData =
+  (buffer: Buffer) =>
+  (cursor = 0) =>
+  (frameType: FrameType): E.Either<Error, unknown> => {
+    switch (frameType) {
+      case "netmsg-normal":
+        return E.right("foo");
+
+      case "netmsg-start":
+        return netMsg(buffer)(cursor);
+
+      default:
+        return frameType.startsWith("netmsg-unknown")
+          ? E.right("baz")
+          : E.right(frameType);
+    }
+  };
 
 export const frames =
   (buffer: Buffer) =>
