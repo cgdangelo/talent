@@ -44,10 +44,30 @@ export const int32_le =
   (cursor = 0): E.Either<Error, number> =>
     E.tryCatch(() => buffer.readInt32LE(cursor), E.toError);
 
+export const uint16_le =
+  (buffer: Buffer) =>
+  (cursor = 0): E.Either<Error, number> =>
+    E.tryCatch(() => buffer.readUInt16LE(cursor), E.toError);
+
+export const int16_le =
+  (buffer: Buffer) =>
+  (cursor = 0): E.Either<Error, number> =>
+    E.tryCatch(() => buffer.readInt16LE(cursor), E.toError);
+
 export const uint8_be =
   (buffer: Buffer) =>
   (cursor = 0): E.Either<Error, number> =>
     E.tryCatch(() => buffer.readUIntBE(cursor, 1), E.toError);
+
+export const int8_be =
+  (buffer: Buffer) =>
+  (cursor = 0): E.Either<Error, number> =>
+    E.tryCatch(() => buffer.readIntBE(cursor, 1), E.toError);
+
+export const uint8_le =
+  (buffer: Buffer) =>
+  (cursor = 0): E.Either<Error, number> =>
+    E.tryCatch(() => buffer.readUIntLE(cursor, 1), E.toError);
 
 export const float32_le =
   (buffer: Buffer) =>

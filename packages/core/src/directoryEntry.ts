@@ -1,7 +1,8 @@
 import { either as E } from "fp-ts";
 import { sequenceS } from "fp-ts/lib/Apply";
 import { pipe } from "fp-ts/lib/function";
-import { Frame, frames } from "./frame";
+import type { Frame } from "./frame";
+import { frames } from "./frame";
 import { float32_le, int32_le, str } from "./parser";
 
 export type DirectoryEntry = {
