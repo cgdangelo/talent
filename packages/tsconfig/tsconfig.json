@@ -4,7 +4,6 @@
     "declarationMap": true,
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
-    "isolatedModules": true,
     "lib": ["es2019"],
     "module": "commonjs",
     "moduleResolution": "node",
