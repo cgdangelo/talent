@@ -1,7 +1,73 @@
 import { array as A, either as E, option as O } from "fp-ts";
+import type { Applicative2 } from "fp-ts/lib/Applicative";
 import { sequenceS } from "fp-ts/lib/Apply";
+import type { Chain2 } from "fp-ts/lib/Chain";
 import { flow, pipe } from "fp-ts/lib/function";
+import type { Functor2 } from "fp-ts/lib/Functor";
+import type { Monad2 } from "fp-ts/lib/Monad";
 import { eq, not } from "./utils";
+
+type Stream<I> = { readonly buffer: I; readonly cursor: number };
+
+export type Parser<I, A> = (
+  stream: Stream<I>
+) => E.Either<Error, ParseResult<I, A>>;
+
+type ParseResult<I, A> = { readonly value: A; readonly next: Stream<I> };
+
+const URI = "Parser";
+
+type URI = typeof URI;
+
+declare module "fp-ts/lib/HKT" {
+  interface URItoKind2<E, A> {
+    [URI]: Parser<E, A>;
+  }
+}
+
+export const Functor: Functor2<URI> = {
+  URI,
+  map: (fa, f) =>
+    flow(
+      fa,
+      E.map((r) => ({ ...r, value: f(r.value) }))
+    ),
+};
+
+export const Applicative: Applicative2<URI> = {
+  URI,
+  ap: (fab, fa) =>
+    flow(
+      fab,
+      E.chain(({ value: a2b, next }) =>
+        pipe(
+          fa(next),
+          E.map((r) => ({ ...r, value: a2b(r.value) }))
+        )
+      )
+    ),
+  map: Functor.map,
+  of: (a) => (i) => E.right({ value: a, next: i }),
+};
+
+export const Chain: Chain2<URI> = {
+  URI,
+  ap: Applicative.ap,
+  map: Applicative.map,
+  chain: (fa, f) =>
+    flow(
+      fa,
+      E.chain(({ value, next }) => f(value)(next))
+    ),
+};
+
+export const Monad: Monad2<URI> = {
+  URI,
+  ap: Applicative.ap,
+  chain: Chain.chain,
+  map: Applicative.map,
+  of: Applicative.of,
+};
 
 export type Point = {
   readonly x: number;

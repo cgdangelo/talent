@@ -1,6 +1,7 @@
 import { either as E } from "fp-ts";
 import { sequenceS } from "fp-ts/lib/Apply";
-import { int32_le, Point } from "./parser";
+import type { Point } from "./parser";
+import { int32_le } from "./parser";
 import { float32_le, point, str } from "./parser";
 
 export type MoveVars = {
