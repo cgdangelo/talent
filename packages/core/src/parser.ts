@@ -91,10 +91,15 @@ export const Monad: Monad2<URI> = {
   of,
 };
 
-const success: <I, A>(value: A, next: Stream<I>) => ParseResult<I, A> = (
-  value,
-  next
-) => E.right({ value, next });
+export const success: <I, A>(
+  value: A,
+  input: Stream<I>,
+  next: number
+) => ParseResult<I, A> = (value, input, next) =>
+  E.right({ value, next: { ...input, cursor: next } });
+
+export const failure: <I, A = never>(e: Error) => ParseResult<I, A> = (e) =>
+  E.left(e);
 
 export type Point = {
   readonly x: number;
@@ -102,65 +107,71 @@ export type Point = {
   readonly z: number;
 };
 
+export const skip: <I>(byteLength: number) => Parser<I, void> =
+  (byteLength) => (i) =>
+    success(undefined, i, i.cursor + byteLength);
+
+export const seek: <I>(byteOffset: number) => Parser<I, void> =
+  (byteOffset) => (i) =>
+    success(undefined, i, byteOffset);
+
 // TODO Need a manyN combinator
 export const str: (byteLength: number) => Parser<Buffer, string> =
   (byteLength) => (i) =>
-    success("", { ...i, cursor: i.cursor + byteLength });
+    success("".padStart(byteLength, "X"), i, i.cursor + byteLength);
 
 export const char: Parser<Buffer, string> = (i) =>
   pipe(
     E.tryCatch(() => i.buffer.readInt8(i.cursor), E.toError),
-    E.chain((x) =>
-      success(String.fromCharCode(x), { ...i, cursor: i.cursor + 1 })
-    )
+    E.chain((x) => success(String.fromCharCode(x), i, i.cursor + 1))
   );
 
 export const uint32_le: Parser<Buffer, number> = (i) =>
   pipe(
     E.tryCatch(() => i.buffer.readUInt32LE(i.cursor), E.toError),
-    E.chain((x) => success(x, { ...i, cursor: i.cursor + 4 }))
+    E.chain((x) => success(x, i, i.cursor + 4))
   );
 
 export const int32_le: Parser<Buffer, number> = (i) =>
   pipe(
     E.tryCatch(() => i.buffer.readInt32LE(i.cursor), E.toError),
-    E.chain((x) => success(x, { ...i, cursor: i.cursor + 4 }))
+    E.chain((x) => success(x, i, i.cursor + 4))
   );
 
 export const uint16_le: Parser<Buffer, number> = (i) =>
   pipe(
     E.tryCatch(() => i.buffer.readUInt16LE(i.cursor), E.toError),
-    E.chain((x) => success(x, { ...i, cursor: i.cursor + 2 }))
+    E.chain((x) => success(x, i, i.cursor + 2))
   );
 
 export const int16_le: Parser<Buffer, number> = (i) =>
   pipe(
     E.tryCatch(() => i.buffer.readInt16LE(i.cursor), E.toError),
-    E.chain((x) => success(x, { ...i, cursor: i.cursor + 2 }))
+    E.chain((x) => success(x, i, i.cursor + 2))
   );
 
 export const uint8_be: Parser<Buffer, number> = (i) =>
   pipe(
     E.tryCatch(() => i.buffer.readUIntBE(i.cursor, 1), E.toError),
-    E.chain((x) => success(x, { ...i, cursor: i.cursor + 1 }))
+    E.chain((x) => success(x, i, i.cursor + 1))
   );
 
 export const int8_be: Parser<Buffer, number> = (i) =>
   pipe(
     E.tryCatch(() => i.buffer.readIntBE(i.cursor, 1), E.toError),
-    E.chain((x) => success(x, { ...i, cursor: i.cursor + 1 }))
+    E.chain((x) => success(x, i, i.cursor + 1))
   );
 
 export const uint8_le: Parser<Buffer, number> = (i) =>
   pipe(
     E.tryCatch(() => i.buffer.readUIntLE(i.cursor, 1), E.toError),
-    E.chain((x) => success(x, { ...i, cursor: i.cursor + 1 }))
+    E.chain((x) => success(x, i, i.cursor + 1))
   );
 
 export const float32_le: Parser<Buffer, number> = (i) =>
   pipe(
     E.tryCatch(() => i.buffer.readFloatLE(i.cursor), E.toError),
-    E.chain((x) => success(x, { ...i, cursor: i.cursor + 4 }))
+    E.chain((x) => success(x, i, i.cursor + 4))
   );
 
 export const point: Parser<Buffer, Point> = sequenceS(Applicative)({
