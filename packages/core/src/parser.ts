@@ -25,48 +25,69 @@ declare module "fp-ts/lib/HKT" {
   }
 }
 
+const ap_: Applicative2<URI>["ap"] = (fab, fa) =>
+  flow(
+    fab,
+    E.chain(({ value: a2b, next }) =>
+      pipe(
+        fa(next),
+        E.map((r) => ({ ...r, value: a2b(r.value) }))
+      )
+    )
+  );
+
+const map_: Functor2<URI>["map"] = (fa, f) =>
+  flow(
+    fa,
+    E.map((r) => ({ ...r, value: f(r.value) }))
+  );
+
+const chain_: Chain2<URI>["chain"] = (fa, f) =>
+  flow(
+    fa,
+    E.chain(({ value, next }) => f(value)(next))
+  );
+
+export const ap: <I, A, B>(
+  fab: Parser<I, (a: A) => B>
+) => (fa: Parser<I, A>) => Parser<I, B> = (fab) => (fa) => ap_(fab, fa);
+
+export const chain: <I, A, B>(
+  fa: Parser<I, A>
+) => (f: (a: A) => Parser<I, B>) => Parser<I, B> = (fa) => (f) => chain_(fa, f);
+
+export const map: <I, A, B>(
+  fa: Parser<I, A>
+) => (f: (a: A) => B) => Parser<I, B> = (fa) => (f) => map_(fa, f);
+
+export const of: <I, A>(a: A) => Parser<I, A> = (a) => (i) =>
+  E.right({ value: a, next: i });
+
 export const Functor: Functor2<URI> = {
   URI,
-  map: (fa, f) =>
-    flow(
-      fa,
-      E.map((r) => ({ ...r, value: f(r.value) }))
-    ),
+  map: map_,
 };
 
 export const Applicative: Applicative2<URI> = {
   URI,
-  ap: (fab, fa) =>
-    flow(
-      fab,
-      E.chain(({ value: a2b, next }) =>
-        pipe(
-          fa(next),
-          E.map((r) => ({ ...r, value: a2b(r.value) }))
-        )
-      )
-    ),
-  map: Functor.map,
-  of: (a) => (i) => E.right({ value: a, next: i }),
+  ap: ap_,
+  map: map_,
+  of,
 };
 
 export const Chain: Chain2<URI> = {
   URI,
-  ap: Applicative.ap,
-  map: Applicative.map,
-  chain: (fa, f) =>
-    flow(
-      fa,
-      E.chain(({ value, next }) => f(value)(next))
-    ),
+  ap: ap_,
+  map: map_,
+  chain: chain_,
 };
 
 export const Monad: Monad2<URI> = {
   URI,
-  ap: Applicative.ap,
-  chain: Chain.chain,
-  map: Applicative.map,
-  of: Applicative.of,
+  ap: ap_,
+  chain: chain_,
+  map: map_,
+  of,
 };
 
 export type Point = {
