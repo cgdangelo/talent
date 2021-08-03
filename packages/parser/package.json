@@ -1,9 +1,9 @@
 {
-  "name": "@talent/core",
+  "name": "@talent/parser",
   "version": "0.0.0",
   "description": "> TODO: description",
   "author": "Charles D'Angelo <c.g.dangelo@gmail.com>",
-  "homepage": "",
+  "homepage": "https://github.com/cgdangelo/talent#readme",
   "license": "MIT",
   "main": "lib/index.js",
   "directories": {
@@ -12,15 +12,14 @@
   "files": [
     "lib"
   ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cgdangelo/talent.git"
+  },
   "scripts": {
     "test": "echo \"Error: run tests from root\" && exit 1"
   },
-  "dependencies": {
-    "@talent/parser": "workspace:packages/parser",
-    "fp-ts": "^2.10.5"
-  },
-  "devDependencies": {
-    "@talent/tsconfig": "^0.0.0",
-    "@types/node": "^15.12.4"
+  "bugs": {
+    "url": "https://github.com/cgdangelo/talent/issues"
   }
 }

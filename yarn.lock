@@ -1738,9 +1738,16 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@talent/core@workspace:packages/core"
   dependencies:
+    "@talent/parser": "workspace:packages/parser"
     "@talent/tsconfig": ^0.0.0
     "@types/node": ^15.12.4
     fp-ts: ^2.10.5
+  languageName: unknown
+  linkType: soft
+
+"@talent/parser@workspace:packages/parser":
+  version: 0.0.0-use.local
+  resolution: "@talent/parser@workspace:packages/parser"
   languageName: unknown
   linkType: soft
 
