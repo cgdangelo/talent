@@ -5,22 +5,11 @@ import type { Chain2 } from "fp-ts/lib/Chain";
 import { flow, pipe } from "fp-ts/lib/function";
 import type { Functor2 } from "fp-ts/lib/Functor";
 import type { Monad2 } from "fp-ts/lib/Monad";
-
-export type Stream<I> = {
-  readonly buffer: I;
-  readonly cursor: number;
-};
+import type { ParseResult } from "./ParseResult";
+import { success } from "./ParseResult";
+import type { Stream } from "./Stream";
 
 export type Parser<I, A> = (stream: Stream<I>) => ParseResult<I, A>;
-
-export type ParseResult<I, A> = E.Either<ParseFailure, ParseSuccess<I, A>>;
-
-export type ParseFailure = Error;
-
-export type ParseSuccess<I, A> = {
-  readonly value: A;
-  readonly next: Stream<I>;
-};
 
 export const URI = "Parser";
 
@@ -89,16 +78,6 @@ export const Monad: Monad2<URI> = {
   map: map_,
   of,
 };
-
-export const success: <I, A>(
-  value: A,
-  input: Stream<I>,
-  next: number
-) => ParseResult<I, A> = (value, input, next) =>
-  E.right({ value, next: { ...input, cursor: next } });
-
-export const failure: <I, A = never>(e: Error) => ParseResult<I, A> = (e) =>
-  E.left(e);
 
 export type Point = {
   readonly x: number;

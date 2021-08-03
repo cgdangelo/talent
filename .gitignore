@@ -3,6 +3,9 @@ packages/*/lib
 *.tsbuildinfo
 .eslintcache
 coverage
+.DS_Store
+{npm,yarn}-debug.log
+yarn-error.log
 
 # Yarn v3
 .yarn/*
