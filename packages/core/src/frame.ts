@@ -1,8 +1,7 @@
-import { either as E } from "fp-ts";
+import * as P from "@talent/parser";
 import { sequenceS } from "fp-ts/lib/Apply";
 import { pipe } from "fp-ts/lib/function";
 import { netMsg } from "./netMsg";
-import { float32_le, int32_le, uint8_be } from "./parser";
 import { toError } from "./utils";
 
 export type FrameType =
@@ -63,57 +62,49 @@ const netMsgFrameType_ = (a: number): NetMsgFrameType => {
   }
 };
 
-const frameType =
-  (buffer: Buffer) =>
-  (cursor = 0) =>
+const frameType: P.Parser<Buffer, FrameType> = pipe(
+  P.uint8_be,
+  P.sat((a) => a <= 9, toError("invalid frame type")),
+  P.map(frameType_)
+);
+
+const frameHeader: P.Parser<Buffer, FrameHeader> = sequenceS(P.Applicative)({
+  frameType,
+  time: P.float32_le,
+  frame: P.int32_le,
+});
+
+const frame: P.Parser<Buffer, Frame> = pipe(
+  frameHeader,
+  P.chain((frameHeader) =>
     pipe(
-      uint8_be(buffer)(cursor),
-      E.chain(E.fromPredicate((a) => a <= 9, toError("invalid frame type"))),
-      E.map(frameType_)
-    );
+      frameData(frameHeader.frameType),
+      P.map((frameData) => ({ frameHeader, frameData }))
+    )
+  )
+  // TODO Repeat until frameNextSection
+);
 
-const frameHeader =
-  (buffer: Buffer) =>
-  (cursor = 0) =>
-    sequenceS(E.Applicative)({
-      frameType: frameType(buffer)(cursor),
-      time: float32_le(buffer)(cursor + 1),
-      frame: int32_le(buffer)(cursor + 1 + 4),
-    });
+const frameData: (frameType: FrameType) => P.Parser<Buffer, unknown> = (
+  frameType
+) => {
+  switch (frameType) {
+    case "netmsg-normal":
+      return P.of("foo");
 
-const frame =
-  (buffer: Buffer) =>
-  (cursor = 0) =>
-    pipe(
-      frameHeader(buffer)(cursor),
-      E.chain((frameHeader) =>
-        pipe(
-          frameData(buffer)(cursor + 1 + 4 + 4)(frameHeader.frameType),
-          E.map((frameData) => ({ frameHeader, frameData }))
-        )
-      )
-      // TODO Repeat until frameNextSection
-    );
+    case "netmsg-start":
+      return netMsg;
 
-const frameData =
-  (buffer: Buffer) =>
-  (cursor = 0) =>
-  (frameType: FrameType): E.Either<Error, unknown> => {
-    switch (frameType) {
-      case "netmsg-normal":
-        return E.right("foo");
+    default:
+      return frameType.startsWith("netmsg-unknown")
+        ? P.of("baz")
+        : P.of(frameType);
+  }
+};
 
-      case "netmsg-start":
-        return netMsg(buffer)(cursor);
+export const frames: P.Parser<Buffer, readonly Frame[]> = pipe(
+  frame,
 
-      default:
-        return frameType.startsWith("netmsg-unknown")
-          ? E.right("baz")
-          : E.right(frameType);
-    }
-  };
-
-export const frames =
-  (buffer: Buffer) =>
-  (cursor = 0): E.Either<Error, readonly Frame[]> =>
-    E.sequenceArray([frame(buffer)(cursor)]);
+  // TODO Actually parse the rest.
+  P.map((a) => [a])
+);

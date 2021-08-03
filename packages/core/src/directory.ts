@@ -1,55 +1,41 @@
-import { either as E } from "fp-ts";
+import * as P from "@talent/parser";
 import { sequenceT } from "fp-ts/lib/Apply";
 import { pipe } from "fp-ts/lib/function";
 import type { DirectoryEntry } from "./directoryEntry";
 import { directoryEntry } from "./directoryEntry";
-import { int32_le, uint32_le } from "./parser";
 import { toError } from "./utils";
-
-const DIRECTORY_ENTRY_LENGTH = 4 + 64 + 8 + 12;
 
 export type Directory = {
   readonly entries: readonly DirectoryEntry[];
 };
 
-export const directory = (buffer: Buffer): E.Either<Error, Directory> =>
+const directoryOffset: P.Parser<Buffer, number> = (i) =>
   pipe(
-    directoryOffset(buffer),
-    E.chain(directoryEntries(buffer)),
-    E.map((entries) => ({ entries }))
+    P.uint32_le,
+    P.chain((a) =>
+      a === i.buffer.byteLength - 96 * 2
+        ? P.succeed(a)
+        : P.fail(toError("directory entries offset did not match expected")(a))
+    ),
+    (x) => x(i)
   );
 
-const directoryOffset = (buffer: Buffer) =>
-  pipe(
-    uint32_le(buffer)(540),
-    E.chain(
-      E.fromPredicate(
-        (a) => a === buffer.byteLength - 4 - 92 * 2,
-        toError("directory entries offset did not match expected")
-      )
-    )
-  );
+const validateDirectoryEntries: P.Parser<Buffer, number> = pipe(
+  P.int32_le,
+  P.chain((a) =>
+    a === 2
+      ? P.succeed(a)
+      : P.fail(toError("unexpected number of directory entries")(a))
+  )
+);
 
-const directoryEntries = (buffer: Buffer) => (directoryOffset: number) =>
-  pipe(
-    validateDirectoryEntries(buffer)(directoryOffset),
+const directoryEntries: P.Parser<Buffer, readonly DirectoryEntry[]> = pipe(
+  validateDirectoryEntries,
+  P.chain(() => sequenceT(P.Applicative)(directoryEntry, directoryEntry))
+);
 
-    E.chain(() =>
-      sequenceT(E.Applicative)(
-        directoryEntry(buffer)(directoryOffset + 4),
-        directoryEntry(buffer)(directoryOffset + 8 + DIRECTORY_ENTRY_LENGTH)
-      )
-    )
-  );
-
-const validateDirectoryEntries =
-  (buffer: Buffer) => (directoryOffset: number) =>
-    pipe(
-      int32_le(buffer)(directoryOffset),
-      E.chain(
-        E.fromPredicate(
-          (a) => a === 2,
-          toError("unexpected number of directory entries")
-        )
-      )
-    );
+export const directory: P.Parser<Buffer, Directory> = pipe(
+  directoryOffset,
+  P.chain(() => directoryEntries),
+  P.map((entries) => ({ entries }))
+);

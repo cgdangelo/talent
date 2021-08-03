@@ -82,18 +82,23 @@ export const fail: <I, A = never>(e: Error) => Parser<I, A> = (e) => () =>
   failure(e);
 
 export const skip: <I>(byteLength: number) => Parser<I, void> =
-  (byteLength) => (i) =>
-    success(undefined, i, i.cursor + byteLength);
+  (byteLength) =>
+  <I>(i: Stream<I>) =>
+    success<I, undefined>(undefined, i, i.cursor + byteLength);
 
 export const seek: <I>(byteOffset: number) => Parser<I, void> =
   (byteOffset) => (i) =>
     success(undefined, i, byteOffset);
 
+// FIXME No idea what's wrong with these.
+export function sat<A>(
+  f: Predicate<A>,
+  onFail: (a: unknown) => Error
+): <I>(fa: Parser<I, A>) => Parser<I, A>;
 export function sat<A, B extends A>(
   f: Refinement<A, B>,
   onFail: (a: unknown) => Error
 ): <I>(fa: Parser<I, A>) => Parser<I, B>;
-
 export function sat<A>(
   f: Predicate<A>,
   onFail: (a: unknown) => Error

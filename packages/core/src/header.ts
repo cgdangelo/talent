@@ -14,12 +14,16 @@ export type Header = {
 
 const magic: P.Parser<Buffer, "HLDEMO"> = pipe(
   P.str(8),
-  P.sat((a): a is "HLDEMO" => a === "HLDEMO", toError("unsupported magic"))
+  P.chain((a) =>
+    a === "HLDEMO" ? P.succeed(a) : P.fail(toError("unsupported magic")(a))
+  )
 );
 
 const protocol: P.Parser<Buffer, 5> = pipe(
   P.int32_le,
-  P.sat((a): a is 5 => a === 5, toError("unsupported protocol"))
+  P.chain((a) =>
+    a === 5 ? P.succeed(a) : P.fail(toError("unsupported protocol")(a))
+  )
 );
 
 export const header: P.Parser<Buffer, Header> = sequenceS(P.Applicative)({
