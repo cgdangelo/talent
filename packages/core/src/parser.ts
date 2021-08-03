@@ -6,18 +6,25 @@ import { flow, pipe } from "fp-ts/lib/function";
 import type { Functor2 } from "fp-ts/lib/Functor";
 import type { Monad2 } from "fp-ts/lib/Monad";
 
-type Stream<I> = { readonly buffer: I; readonly cursor: number };
+export type Stream<I> = {
+  readonly buffer: I;
+  readonly cursor: number;
+};
 
 export type Parser<I, A> = (stream: Stream<I>) => ParseResult<I, A>;
 
-export type ParseResult<I, A> = E.Either<
-  Error,
-  { readonly value: A; readonly next: Stream<I> }
->;
+export type ParseResult<I, A> = E.Either<ParseFailure, ParseSuccess<I, A>>;
 
-const URI = "Parser";
+export type ParseFailure = Error;
 
-type URI = typeof URI;
+export type ParseSuccess<I, A> = {
+  readonly value: A;
+  readonly next: Stream<I>;
+};
+
+export const URI = "Parser";
+
+export type URI = typeof URI;
 
 declare module "fp-ts/lib/HKT" {
   interface URItoKind2<E, A> {
