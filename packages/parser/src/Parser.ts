@@ -2,11 +2,12 @@ import { either as E } from "fp-ts";
 import type { Applicative2 } from "fp-ts/lib/Applicative";
 import { sequenceS } from "fp-ts/lib/Apply";
 import type { Chain2 } from "fp-ts/lib/Chain";
+import type { Predicate, Refinement } from "fp-ts/lib/function";
 import { flow, pipe } from "fp-ts/lib/function";
 import type { Functor2 } from "fp-ts/lib/Functor";
 import type { Monad2 } from "fp-ts/lib/Monad";
 import type { ParseResult } from "./ParseResult";
-import { success } from "./ParseResult";
+import { failure, success } from "./ParseResult";
 import type { Stream } from "./Stream";
 
 export type Parser<I, A> = (stream: Stream<I>) => ParseResult<I, A>;
@@ -75,11 +76,10 @@ export const Monad: Monad2<URI> = {
   of,
 };
 
-export type Point = {
-  readonly x: number;
-  readonly y: number;
-  readonly z: number;
-};
+export const succeed: <I, A>(a: A) => Parser<I, A> = of;
+
+export const fail: <E, I, A = never>(e: E) => Parser<I, A> = (e) => () =>
+  failure(e);
 
 export const skip: <I>(byteLength: number) => Parser<I, void> =
   (byteLength) => (i) =>
@@ -88,6 +88,18 @@ export const skip: <I>(byteLength: number) => Parser<I, void> =
 export const seek: <I>(byteOffset: number) => Parser<I, void> =
   (byteOffset) => (i) =>
     success(undefined, i, byteOffset);
+
+export function sat<E, A, B extends A>(
+  f: Refinement<A, B>,
+  onFail: (a: unknown) => E
+): <I>(fa: Parser<I, A>) => Parser<I, B>;
+
+export function sat<E, A>(
+  f: Predicate<A>,
+  onFail: (a: unknown) => E
+): <I>(fa: Parser<I, A>) => Parser<I, A> {
+  return chain((a) => (f(a) ? succeed(a) : fail(onFail(a))));
+}
 
 // TODO Need a manyN combinator
 export const str: (byteLength: number) => Parser<Buffer, string> =
@@ -147,6 +159,12 @@ export const float32_le: Parser<Buffer, number> = (i) =>
     E.tryCatch(() => i.buffer.readFloatLE(i.cursor), E.toError),
     E.chain((a) => success(a, i, i.cursor + 4))
   );
+
+export type Point = {
+  readonly x: number;
+  readonly y: number;
+  readonly z: number;
+};
 
 export const point: Parser<Buffer, Point> = sequenceS(Applicative)({
   x: float32_le,
