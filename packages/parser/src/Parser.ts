@@ -24,11 +24,7 @@ declare module "fp-ts/lib/HKT" {
 const ap_: Applicative2<URI>["ap"] = (fab, fa) =>
   chain_(fab, (f) => map_(fa, f));
 
-const map_: Functor2<URI>["map"] = (fa, f) =>
-  flow(
-    fa,
-    E.map((r) => ({ ...r, value: f(r.value) }))
-  );
+const map_: Functor2<URI>["map"] = (fa, f) => chain_(fa, (a) => of(f(a)));
 
 const chain_: Chain2<URI>["chain"] = (fa, f) =>
   flow(
@@ -101,55 +97,55 @@ export const str: (byteLength: number) => Parser<Buffer, string> =
 export const char: Parser<Buffer, string> = (i) =>
   pipe(
     E.tryCatch(() => i.buffer.readInt8(i.cursor), E.toError),
-    E.chain((x) => success(String.fromCharCode(x), i, i.cursor + 1))
+    E.chain((a) => success(String.fromCharCode(a), i, i.cursor + 1))
   );
 
 export const uint32_le: Parser<Buffer, number> = (i) =>
   pipe(
     E.tryCatch(() => i.buffer.readUInt32LE(i.cursor), E.toError),
-    E.chain((x) => success(x, i, i.cursor + 4))
+    E.chain((a) => success(a, i, i.cursor + 4))
   );
 
 export const int32_le: Parser<Buffer, number> = (i) =>
   pipe(
     E.tryCatch(() => i.buffer.readInt32LE(i.cursor), E.toError),
-    E.chain((x) => success(x, i, i.cursor + 4))
+    E.chain((a) => success(a, i, i.cursor + 4))
   );
 
 export const uint16_le: Parser<Buffer, number> = (i) =>
   pipe(
     E.tryCatch(() => i.buffer.readUInt16LE(i.cursor), E.toError),
-    E.chain((x) => success(x, i, i.cursor + 2))
+    E.chain((a) => success(a, i, i.cursor + 2))
   );
 
 export const int16_le: Parser<Buffer, number> = (i) =>
   pipe(
     E.tryCatch(() => i.buffer.readInt16LE(i.cursor), E.toError),
-    E.chain((x) => success(x, i, i.cursor + 2))
+    E.chain((a) => success(a, i, i.cursor + 2))
   );
 
 export const uint8_be: Parser<Buffer, number> = (i) =>
   pipe(
     E.tryCatch(() => i.buffer.readUIntBE(i.cursor, 1), E.toError),
-    E.chain((x) => success(x, i, i.cursor + 1))
+    E.chain((a) => success(a, i, i.cursor + 1))
   );
 
 export const int8_be: Parser<Buffer, number> = (i) =>
   pipe(
     E.tryCatch(() => i.buffer.readIntBE(i.cursor, 1), E.toError),
-    E.chain((x) => success(x, i, i.cursor + 1))
+    E.chain((a) => success(a, i, i.cursor + 1))
   );
 
 export const uint8_le: Parser<Buffer, number> = (i) =>
   pipe(
     E.tryCatch(() => i.buffer.readUIntLE(i.cursor, 1), E.toError),
-    E.chain((x) => success(x, i, i.cursor + 1))
+    E.chain((a) => success(a, i, i.cursor + 1))
   );
 
 export const float32_le: Parser<Buffer, number> = (i) =>
   pipe(
     E.tryCatch(() => i.buffer.readFloatLE(i.cursor), E.toError),
-    E.chain((x) => success(x, i, i.cursor + 4))
+    E.chain((a) => success(a, i, i.cursor + 4))
   );
 
 export const point: Parser<Buffer, Point> = sequenceS(Applicative)({
