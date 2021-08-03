@@ -10,7 +10,7 @@ type Stream<I> = { readonly buffer: I; readonly cursor: number };
 
 export type Parser<I, A> = (stream: Stream<I>) => ParseResult<I, A>;
 
-type ParseResult<I, A> = E.Either<
+export type ParseResult<I, A> = E.Either<
   Error,
   { readonly value: A; readonly next: Stream<I> }
 >;
@@ -26,15 +26,7 @@ declare module "fp-ts/lib/HKT" {
 }
 
 const ap_: Applicative2<URI>["ap"] = (fab, fa) =>
-  flow(
-    fab,
-    E.chain(({ value: a2b, next }) =>
-      pipe(
-        fa(next),
-        E.map((r) => ({ ...r, value: a2b(r.value) }))
-      )
-    )
-  );
+  chain_(fab, (f) => map_(fa, f));
 
 const map_: Functor2<URI>["map"] = (fa, f) =>
   flow(
@@ -62,7 +54,7 @@ export const map: <A, B>(
 ) => <I>(fa: Parser<I, A>) => Parser<I, B> = (f) => (fa) => map_(fa, f);
 
 export const of: <I, A>(a: A) => Parser<I, A> = (a) => (i) =>
-  E.right({ value: a, next: i });
+  success(a, i, i.cursor);
 
 export const Functor: Functor2<URI> = {
   URI,
