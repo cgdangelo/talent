@@ -78,7 +78,7 @@ export const Monad: Monad2<URI> = {
 
 export const succeed: <I, A>(a: A) => Parser<I, A> = of;
 
-export const fail: <E, I, A = never>(e: E) => Parser<I, A> = (e) => () =>
+export const fail: <I, A = never>(e: Error) => Parser<I, A> = (e) => () =>
   failure(e);
 
 export const skip: <I>(byteLength: number) => Parser<I, void> =
@@ -89,14 +89,14 @@ export const seek: <I>(byteOffset: number) => Parser<I, void> =
   (byteOffset) => (i) =>
     success(undefined, i, byteOffset);
 
-export function sat<E, A, B extends A>(
+export function sat<A, B extends A>(
   f: Refinement<A, B>,
-  onFail: (a: unknown) => E
+  onFail: (a: unknown) => Error
 ): <I>(fa: Parser<I, A>) => Parser<I, B>;
 
-export function sat<E, A>(
+export function sat<A>(
   f: Predicate<A>,
-  onFail: (a: unknown) => E
+  onFail: (a: unknown) => Error
 ): <I>(fa: Parser<I, A>) => Parser<I, A> {
   return chain((a) => (f(a) ? succeed(a) : fail(onFail(a))));
 }
