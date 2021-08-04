@@ -1,4 +1,4 @@
-import { either as E } from "fp-ts";
+import { array as A, either as E } from "fp-ts";
 import type { Applicative2 } from "fp-ts/lib/Applicative";
 import { sequenceS } from "fp-ts/lib/Apply";
 import type { Chain2 } from "fp-ts/lib/Chain";
@@ -81,6 +81,11 @@ export const succeed: <I, A>(a: A) => Parser<I, A> = of;
 export const fail: <I, A = never>(e: Error) => Parser<I, A> = (e) => () =>
   failure(e);
 
+export const manyN: <I, A>(fa: Parser<I, A>, n: number) => Parser<I, A[]> = (
+  fa,
+  n
+) => pipe(A.replicate(n, fa), A.sequence(Applicative));
+
 export const skip: <I>(byteLength: number) => Parser<I, void> =
   (byteLength) =>
   <I>(i: Stream<I>) =>
@@ -106,15 +111,18 @@ export function sat<A>(
   return chain((a) => (f(a) ? succeed(a) : fail(onFail(a))));
 }
 
-// TODO Need a manyN combinator
-export const str: (byteLength: number) => Parser<Buffer, string> =
-  (byteLength) => (i) =>
-    success("".padStart(byteLength, "X"), i, i.cursor + byteLength);
-
 export const char: Parser<Buffer, string> = (i) =>
   pipe(
     E.tryCatch(() => i.buffer.readInt8(i.cursor), E.toError),
     E.chain((a) => success(String.fromCharCode(a), i, i.cursor + 1))
+  );
+
+export const str: (byteLength: number) => Parser<Buffer, string> = (
+  byteLength
+) =>
+  pipe(
+    manyN(char, byteLength),
+    map((as) => as.join(""))
   );
 
 export const uint32_le: Parser<Buffer, number> = (i) =>
