@@ -30,7 +30,7 @@ export const directoryEntry: P.Parser<Buffer, DirectoryEntry> = pipe(
 
   P.chain((a) =>
     pipe(
-      P.seek<Buffer>(a.offset),
+      P.seek(a.offset),
       P.chain(() => frames),
       P.map((frames) => ({ ...a, frames }))
     )

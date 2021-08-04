@@ -39,14 +39,10 @@ const directoryEntries: P.Parser<Buffer, readonly DirectoryEntry[]> = pipe(
   directoryOffset,
   P.chain((a) =>
     pipe(
-      P.seek<Buffer>(a),
+      P.seek(a),
       P.chain(() => validateDirectoryEntries),
       P.chain(() =>
-        sequenceT(P.Applicative)(
-          directoryEntry,
-          P.seek<Buffer>(a + 96),
-          directoryEntry
-        )
+        sequenceT(P.Applicative)(directoryEntry, P.seek(a + 96), directoryEntry)
       ),
       P.map(([a, _, b]) => [a, b])
     )

@@ -86,13 +86,14 @@ export const manyN: <I, A>(fa: Parser<I, A>, n: number) => Parser<I, A[]> = (
   n
 ) => pipe(A.replicate(n, fa), A.sequence(Applicative));
 
-export const skip: <I>(byteLength: number) => Parser<I, void> =
-  (byteLength) =>
-  <I>(i: Stream<I>) =>
-    success<I, undefined>(undefined, i, i.cursor + byteLength);
+export const skip =
+  (byteLength: number) =>
+  <I>(i: Stream<I>): ParseResult<I, undefined> =>
+    success(undefined, i, i.cursor + byteLength);
 
-export const seek: <I>(byteOffset: number) => Parser<I, void> =
-  (byteOffset) => (i) =>
+export const seek =
+  (byteOffset: number) =>
+  <I>(i: Stream<I>): ParseResult<I, undefined> =>
     success(undefined, i, byteOffset);
 
 // FIXME No idea what's wrong with these.

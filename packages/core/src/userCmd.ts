@@ -20,21 +20,23 @@ export type UserCmd = {
 export const userCmd: P.Parser<Buffer, UserCmd> = sequenceS(P.Applicative)({
   lerpMs: P.int16_le,
   ms: P.uint8_be,
-  //              skip 1
   viewAngles: pipe(
-    // TODO Get rid of this type param?
-    P.skip<Buffer>(1),
+    P.skip(1),
     P.chain(() => P.point)
   ),
   forwardMove: P.float32_le,
   sideMove: P.float32_le,
   upMove: P.float32_le,
   lightLevel: P.int8_be,
-  //              skip 1
-  buttons: P.uint16_le,
+  buttons: pipe(
+    P.skip(1),
+    P.chain(() => P.uint16_le)
+  ),
   impulse: P.int8_be,
   weaponSelect: P.int8_be,
-  //              skip 2
-  impactIndex: P.int32_le,
+  impactIndex: pipe(
+    P.skip(2),
+    P.chain(() => P.int32_le)
+  ),
   impactPosition: P.point,
 });
