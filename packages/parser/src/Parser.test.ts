@@ -1,7 +1,7 @@
 import * as P from "./Parser";
 import { failure, success } from "./ParseResult";
 
-test.skip("str", () => {
+test("str", () => {
   const buffer = Buffer.from("foo");
 
   expect(P.str(1)({ buffer, cursor: 0 })).toStrictEqual(
@@ -14,7 +14,9 @@ test.skip("str", () => {
 
   expect(
     P.str(3)({ buffer: Buffer.from("foo bar baz"), cursor: 4 })
-  ).toStrictEqual(success("bar", { buffer, cursor: 4 }, 7));
+  ).toStrictEqual(
+    success("bar", { buffer: Buffer.from("foo bar baz"), cursor: 4 }, 7)
+  );
 });
 
 test("char", () => {
