@@ -106,5 +106,5 @@ export const frames: P.Parser<Buffer, readonly Frame[]> = pipe(
   frame,
 
   // TODO Actually parse the rest.
-  P.map(() => [])
+  P.map((a) => [a])
 );

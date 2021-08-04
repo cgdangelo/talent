@@ -1,4 +1,5 @@
 import { array as A, either as E } from "fp-ts";
+import type { Alt2 } from "fp-ts/lib/Alt";
 import type { Applicative2 } from "fp-ts/lib/Applicative";
 import { sequenceS } from "fp-ts/lib/Apply";
 import type { Chain2 } from "fp-ts/lib/Chain";
@@ -75,6 +76,15 @@ export const Monad: Monad2<URI> = {
   map: map_,
   of,
 };
+
+export const Alt: Alt2<URI> = {
+  URI,
+  alt: (fa, that) => (i) => pipe(fa(i), (s) => (E.isRight(s) ? s : that()(i))),
+  map: map_,
+};
+
+export const withLog: <I, A>(fa: Parser<I, A>) => Parser<I, A> = (fa) => (i) =>
+  pipe(console.log(i), () => fa(i));
 
 export const succeed: <I, A>(a: A) => Parser<I, A> = of;
 
