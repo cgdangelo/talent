@@ -59,12 +59,3 @@ export const netMsg: P.Parser<Buffer, NetMsg> = pipe(
     )
   )
 );
-
-// E.chain((netMsg) =>
-//   pipe(
-//     msg(buffer)(cursor + 436 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4)(
-//       netMsg.msgLength
-//     ),
-//     E.map((msg) => ({ ...netMsg, msg }))
-//   )
-// )

@@ -28,15 +28,11 @@ export const directoryEntry: P.Parser<Buffer, DirectoryEntry> = pipe(
     fileLength: P.int32_le,
   }),
 
-  (x) => x,
-
   P.chain((a) =>
     pipe(
       P.seek<Buffer>(a.offset),
       P.chain(() => frames),
       P.map((frames) => ({ ...a, frames }))
     )
-  ),
-
-  (x) => x
+  )
 );

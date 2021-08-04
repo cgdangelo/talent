@@ -15,7 +15,9 @@ export type Header = {
 const magic: P.Parser<Buffer, "HLDEMO"> = pipe(
   P.str(8),
   P.chain((a) =>
-    a === "HLDEMO" ? P.succeed(a) : P.fail(toError("unsupported magic")(a))
+    a === "HLDEMO\x00\x00"
+      ? P.succeed("HLDEMO")
+      : P.fail(toError("unsupported magic")(a))
   )
 );
 

@@ -13,9 +13,15 @@ const directoryOffset: P.Parser<Buffer, number> = (i) =>
   pipe(
     P.uint32_le,
     P.chain((a) =>
-      a === i.buffer.byteLength - 96 * 2
+      a === i.buffer.byteLength - 4 - 92 * 2
         ? P.succeed(a)
-        : P.fail(toError("directory entries offset did not match expected")(a))
+        : P.fail(
+            toError(
+              `directory entries offset did not match expected ${
+                i.buffer.byteLength - 4 - 92 * 2
+              }`
+            )(a)
+          )
     ),
     (x) => x(i)
   );
@@ -30,12 +36,24 @@ const validateDirectoryEntries: P.Parser<Buffer, number> = pipe(
 );
 
 const directoryEntries: P.Parser<Buffer, readonly DirectoryEntry[]> = pipe(
-  validateDirectoryEntries,
-  P.chain(() => sequenceT(P.Applicative)(directoryEntry, directoryEntry))
+  directoryOffset,
+  P.chain((a) =>
+    pipe(
+      P.seek<Buffer>(a),
+      P.chain(() => validateDirectoryEntries),
+      P.chain(() =>
+        sequenceT(P.Applicative)(
+          directoryEntry,
+          P.seek<Buffer>(a + 96),
+          directoryEntry
+        )
+      ),
+      P.map(([a, _, b]) => [a, b])
+    )
+  )
 );
 
 export const directory: P.Parser<Buffer, Directory> = pipe(
-  directoryOffset,
-  P.chain(() => directoryEntries),
+  directoryEntries,
   P.map((entries) => ({ entries }))
 );
