@@ -1,4 +1,4 @@
-import { dir, dumpObject, eq, not } from "../src/utils";
+import { eq, not } from "../src/utils";
 
 test("not", () => {
   expect(not(true)).toBe(false);
@@ -13,24 +13,4 @@ test("eq", () => {
   expect(eq("foo")("bar")).toBe(false);
 
   expect(eq({})({})).toBe(false);
-});
-
-test("dir", () => {
-  const consoleDir = jest.spyOn(console, "dir").mockImplementation(() => {
-    /* noop */
-  });
-
-  dir({})("foo");
-
-  expect(consoleDir).toHaveBeenCalledWith("foo", {});
-});
-
-test("dumpObject", () => {
-  const consoleDir = jest.spyOn(console, "dir").mockImplementation(() => {
-    /* noop */
-  });
-
-  dumpObject("foo");
-
-  expect(consoleDir).toHaveBeenCalledWith("foo", { depth: Infinity });
 });
