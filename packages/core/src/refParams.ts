@@ -32,13 +32,19 @@ export type RefParams = {
   readonly smoothing: number;
   readonly ptrCmd: number;
   readonly ptrMoveVars: number;
-  readonly viewPort: readonly [number, number, number, number];
+  readonly viewPort: readonly [
+    _: number,
+    _: number,
+    width: number,
+    height: number
+  ];
   readonly nextView: number;
   readonly onlyClientDraw: number;
 };
 
-const viewPort: P.Parser<Buffer, readonly [number, number, number, number]> =
-  sequenceT(P.Applicative)(P.int32_le, P.int32_le, P.int32_le, P.int32_le);
+const viewPort: P.Parser<Buffer, RefParams["viewPort"]> = sequenceT(
+  P.Applicative
+)(P.int32_le, P.int32_le, P.int32_le, P.int32_le);
 
 export const refParams: P.Parser<Buffer, RefParams> = sequenceS(P.Applicative)({
   viewOrigin: P.point,

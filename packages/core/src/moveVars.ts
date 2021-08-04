@@ -1,5 +1,6 @@
 import * as P from "@talent/parser";
 import { sequenceS } from "fp-ts/lib/Apply";
+import { pipe } from "fp-ts/lib/function";
 
 export type MoveVars = {
   readonly gravity: number;
@@ -22,9 +23,11 @@ export type MoveVars = {
   readonly skyName: string;
   readonly rollAngle: number;
   readonly rollSpeed: number;
-  readonly skyColorR: number;
-  readonly skyColorG: number;
-  readonly skyColorB: number;
+  readonly skyColor: {
+    readonly r: number;
+    readonly g: number;
+    readonly b: number;
+  };
   readonly skyVec: P.Point;
 };
 
@@ -49,8 +52,9 @@ export const moveVars: P.Parser<Buffer, MoveVars> = sequenceS(P.Applicative)({
   skyName: P.str(32),
   rollAngle: P.float32_le,
   rollSpeed: P.float32_le,
-  skyColorR: P.float32_le,
-  skyColorG: P.float32_le,
-  skyColorB: P.float32_le,
+  skyColor: pipe(
+    P.point,
+    P.map(({ x: r, y: g, z: b }) => ({ r, g, b }))
+  ),
   skyVec: P.point,
 });
