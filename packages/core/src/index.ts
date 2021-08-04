@@ -5,6 +5,8 @@ import { readFile } from "fs/promises";
 import { demo } from "./demo";
 import { eq, not } from "./utils";
 
+const foo = "bar";
+
 const readFileContents = (
   path: string
 ): TE.TaskEither<Error, P.Stream<Buffer>> =>
