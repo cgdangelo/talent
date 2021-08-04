@@ -1,9 +1,9 @@
+import * as P from "@talent/parser";
 import { either as E } from "fp-ts";
 import { sequenceS } from "fp-ts/lib/Apply";
 import { pipe } from "fp-ts/lib/function";
 import type { NetMsgInfo } from "./netMsgInfo";
 import { netMsgInfo } from "./netMsgInfo";
-import { int32_le } from "./parser";
 import { toError } from "./utils";
 
 export type NetMsg = {
@@ -19,54 +19,43 @@ export type NetMsg = {
   readonly msg: unknown;
 };
 
-export const netMsg =
-  (buffer: Buffer) =>
-  (cursor = 0): E.Either<Error, NetMsg> =>
+const msgLength: P.Parser<Buffer, number> = pipe(
+  P.int32_le,
+  P.chain((a) =>
+    a > 0 && a < 65_536
+      ? P.succeed(a)
+      : P.fail(toError("invalid netmsg length")(a))
+  )
+);
+
+const msg: (msgLength: number) => P.Parser<Buffer, Buffer> =
+  (msgLength) => (i) =>
     pipe(
-      // prettier-ignore
-      sequenceS(E.Applicative)({
-        info: netMsgInfo(buffer)(cursor),
-        incomingSequence: int32_le(buffer)(cursor + 436),
-        incomingAcknowledged: int32_le(buffer)(cursor + 436 + 4),
-        incomingReliableAcknowledged: int32_le(buffer)(cursor + 436 + 4 + 4),
-        incomingReliableSequence: int32_le(buffer)(cursor + 436 + 4 + 4 + 4),
-        outgoingSequence: int32_le(buffer)(cursor + 436 + 4 + 4 + 4 + 4),
-        reliableSequence: int32_le(buffer)(cursor + 436 + 4 + 4 + 4 + 4 + 4),
-        lastReliableSequence: int32_le(buffer)(cursor + 436 + 4 + 4 + 4 + 4 + 4 + 4),
-        msgLength: msgLength(buffer)(cursor + 436 + 4 + 4 + 4 + 4 + 4 + 4 + 4),
-      }),
-      E.chain((netMsg) =>
-        pipe(
-          msg(buffer)(cursor + 436 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4)(
-            netMsg.msgLength
-          ),
-          E.map((msg) => ({ ...netMsg, msg }))
-        )
-      )
+      E.tryCatch(
+        () => i.buffer.slice(i.cursor, i.cursor + msgLength),
+        E.toError
+      ),
+      // FIXME Kinda gross.
+      E.chain((a) => P.success(a, i, i.cursor + msgLength))
     );
 
-const msgLength =
-  (buffer: Buffer) =>
-  (cursor = 0) =>
-    pipe(
-      int32_le(buffer)(cursor),
-      E.chainFirst(
-        E.fromPredicate(
-          (a) => a > 0 && a < 65_536,
-          toError("invalid netmsg length")
-        )
-      )
-    );
+export const netMsg: P.Parser<Buffer, NetMsg> = pipe(
+  sequenceS(P.Applicative)({
+    info: netMsgInfo,
+    incomingSequence: P.int32_le,
+    incomingAcknowledged: P.int32_le,
+    incomingReliableAcknowledged: P.int32_le,
+    incomingReliableSequence: P.int32_le,
+    outgoingSequence: P.int32_le,
+    reliableSequence: P.int32_le,
+    lastReliableSequence: P.int32_le,
+    msgLength,
+  }),
 
-const msg =
-  (buffer: Buffer) =>
-  (cursor = 0) =>
-  (msgLength: number) =>
-    E.tryCatch(
-      () =>
-        buffer.slice(
-          cursor + 232 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4,
-          cursor + 232 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + msgLength
-        ),
-      E.toError
-    );
+  P.chain((a) =>
+    pipe(
+      msg(a.msgLength),
+      P.map((msg) => ({ ...a, msg }))
+    )
+  )
+);

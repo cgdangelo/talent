@@ -4,11 +4,10 @@
   "description": "> TODO: description",
   "author": "Charles D'Angelo <c.g.dangelo@gmail.com>",
   "homepage": "",
-  "license": "ISC",
-  "main": "lib/core.js",
+  "license": "MIT",
+  "main": "lib/index.js",
   "directories": {
-    "lib": "lib",
-    "test": "__tests__"
+    "lib": "lib"
   },
   "files": [
     "lib"
@@ -17,6 +16,7 @@
     "test": "echo \"Error: run tests from root\" && exit 1"
   },
   "dependencies": {
+    "@talent/parser": "workspace:packages/parser",
     "fp-ts": "^2.10.5"
   },
   "devDependencies": {

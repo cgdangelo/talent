@@ -3,3 +3,15 @@ packages/*/lib
 *.tsbuildinfo
 .eslintcache
 coverage
+.DS_Store
+{npm,yarn}-debug.log
+yarn-error.log
+
+# Yarn v3
+.yarn/*
+!.yarn/cache
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/sdks
+!.yarn/versions

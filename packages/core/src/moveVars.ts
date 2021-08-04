@@ -1,7 +1,5 @@
-import { either as E } from "fp-ts";
+import * as P from "@talent/parser";
 import { sequenceS } from "fp-ts/lib/Apply";
-import { int32_le, Point } from "./parser";
-import { float32_le, point, str } from "./parser";
 
 export type MoveVars = {
   readonly gravity: number;
@@ -27,36 +25,32 @@ export type MoveVars = {
   readonly skyColorR: number;
   readonly skyColorG: number;
   readonly skyColorB: number;
-  readonly skyVec: Point;
+  readonly skyVec: P.Point;
 };
 
-export const moveVars =
-  (buffer: Buffer) =>
-  (cursor = 0): E.Either<Error, MoveVars> =>
-    // prettier-ignore
-    sequenceS(E.Applicative)({
-      gravity:           float32_le  (buffer)(cursor),
-      stopSpeed:         float32_le  (buffer)(cursor + 4),
-      maxSpeed:          float32_le  (buffer)(cursor + 4 + 4),
-      spectatorMaxSpeed: float32_le  (buffer)(cursor + 4 + 4 + 4),
-      accelerate:        float32_le  (buffer)(cursor + 4 + 4 + 4 + 4),
-      airAccelerate:     float32_le  (buffer)(cursor + 4 + 4 + 4 + 4 + 4),
-      waterAccelerate:   float32_le  (buffer)(cursor + 4 + 4 + 4 + 4 + 4 + 4),
-      friction:          float32_le  (buffer)(cursor + 4 + 4 + 4 + 4 + 4 + 4 + 4),
-      edgeFriction:      float32_le  (buffer)(cursor + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4),
-      waterFriction:     float32_le  (buffer)(cursor + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4),
-      entGravity:        float32_le  (buffer)(cursor + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4),
-      bounce:            float32_le  (buffer)(cursor + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4),
-      stepSize:          float32_le  (buffer)(cursor + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4),
-      maxVelocity:       float32_le  (buffer)(cursor + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4),
-      zMax:              float32_le  (buffer)(cursor + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4),
-      waveHeight:        float32_le  (buffer)(cursor + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4),
-      footsteps:         int32_le    (buffer)(cursor + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4),
-      skyName:     E.of( str         (buffer)(cursor + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4)(32)),
-      rollAngle:         float32_le  (buffer)(cursor + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 32),
-      rollSpeed:         float32_le  (buffer)(cursor + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 32 + 4),
-      skyColorR:         float32_le  (buffer)(cursor + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 32 + 4 + 4),
-      skyColorG:         float32_le  (buffer)(cursor + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 32 + 4 + 4 + 4),
-      skyColorB:         float32_le  (buffer)(cursor + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 32 + 4 + 4 + 4 + 4),
-      skyVec:            point       (buffer)(cursor + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 32 + 4 + 4 + 4 + 4 + 4),
-    });
+export const moveVars: P.Parser<Buffer, MoveVars> = sequenceS(P.Applicative)({
+  gravity: P.float32_le,
+  stopSpeed: P.float32_le,
+  maxSpeed: P.float32_le,
+  spectatorMaxSpeed: P.float32_le,
+  accelerate: P.float32_le,
+  airAccelerate: P.float32_le,
+  waterAccelerate: P.float32_le,
+  friction: P.float32_le,
+  edgeFriction: P.float32_le,
+  waterFriction: P.float32_le,
+  entGravity: P.float32_le,
+  bounce: P.float32_le,
+  stepSize: P.float32_le,
+  maxVelocity: P.float32_le,
+  zMax: P.float32_le,
+  waveHeight: P.float32_le,
+  footsteps: P.int32_le,
+  skyName: P.str(32),
+  rollAngle: P.float32_le,
+  rollSpeed: P.float32_le,
+  skyColorR: P.float32_le,
+  skyColorG: P.float32_le,
+  skyColorB: P.float32_le,
+  skyVec: P.point,
+});

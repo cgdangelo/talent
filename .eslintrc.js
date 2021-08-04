@@ -14,10 +14,10 @@ module.exports = {
     "prettier",
   ],
   rules: {
-    "prettier/prettier": "error",
     "@typescript-eslint/consistent-type-imports": [
       "error",
       { prefer: "type-imports" },
     ],
+    "prettier/prettier": "off",
   },
 };

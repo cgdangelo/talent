@@ -4,7 +4,7 @@
   "description": "> TODO: description",
   "author": "Charles D'Angelo <c.g.dangelo@gmail.com>",
   "homepage": "",
-  "license": "ISC",
+  "license": "MIT",
   "main": "tsconfig.json",
   "files": [
     "tsconfig.json"
