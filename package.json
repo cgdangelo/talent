@@ -4,8 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "build": "tsc -b",
     "lint": "eslint packages/*/src",
-    "prettier-check": "prettier --check packages/*/src",
+    "format-check": "prettier -c packages/*/src",
     "test": "jest",
     "prepare": "husky install"
   },

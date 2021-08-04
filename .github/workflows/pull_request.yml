@@ -9,12 +9,26 @@ jobs:
   checks:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v2
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Setup Node environment
+        uses: actions/setup-node@v2
         with:
           node-version: "14"
           cache: "yarn"
-      - run: yarn install --immutable --immutable-cache
-      - run: yarn test
-      - run: yarn prettier-check
-      - run: yarn lint
+
+      - name: Install dependencies
+        run: yarn install --immutable --immutable-cache
+
+      - name: Check types
+        run: yarn build
+
+      - name: Run tests
+        run: yarn test
+
+      - name: Check code style
+        run: yarn lint
+
+      - name: Check formatting
+        run: yarn format-check
