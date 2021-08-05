@@ -1,6 +1,6 @@
 import { sequenceS } from "fp-ts/lib/Apply";
 import { moveVars } from "./moveVars";
-import * as P from "@talent/parser";
+import { parser as P } from "@talent/parser";
 import type { RefParams } from "./refParams";
 import { refParams } from "./refParams";
 import { userCmd } from "./userCmd";

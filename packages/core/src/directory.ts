@@ -1,4 +1,4 @@
-import * as P from "@talent/parser";
+import { parser as P } from "@talent/parser";
 import { sequenceT } from "fp-ts/lib/Apply";
 import { pipe } from "fp-ts/lib/function";
 import type { DirectoryEntry } from "./directoryEntry";

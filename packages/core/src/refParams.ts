@@ -1,4 +1,4 @@
-import * as P from "@talent/parser";
+import { parser as P } from "@talent/parser";
 import { sequenceS, sequenceT } from "fp-ts/lib/Apply";
 
 export type RefParams = {

@@ -1,4 +1,4 @@
-import * as P from "@talent/parser";
+import { parser as P, parseResult as PR } from "@talent/parser";
 import { either as E } from "fp-ts";
 import { sequenceS } from "fp-ts/lib/Apply";
 import { pipe } from "fp-ts/lib/function";
@@ -36,7 +36,7 @@ const msg: (msgLength: number) => P.Parser<Buffer, Buffer> =
         E.toError
       ),
       // FIXME Kinda gross.
-      E.chain((a) => P.success(a, i, i.cursor + msgLength))
+      E.chain((a) => PR.success(a, i, i.cursor + msgLength))
     );
 
 export const netMsg: P.Parser<Buffer, NetMsg> = pipe(
