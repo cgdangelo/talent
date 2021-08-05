@@ -28,7 +28,7 @@ const main = pipe(
   validateDemoPath(process.argv[2]),
   TE.fromEither,
   TE.chain(readFileContents),
-  TE.chainEitherK(demo)
+  TE.chainEitherKW(demo)
 );
 
 main()

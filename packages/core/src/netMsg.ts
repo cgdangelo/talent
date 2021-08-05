@@ -1,6 +1,4 @@
 import { buffer as B, parser as P, parseResult as PR } from "@talent/parser";
-import { of as stream } from "@talent/parser/lib/Stream";
-import { either as E } from "fp-ts";
 import { sequenceS } from "fp-ts/lib/Apply";
 import { pipe } from "fp-ts/lib/function";
 import type { NetMsgInfo } from "./netMsgInfo";
@@ -31,14 +29,7 @@ const msgLength: P.Parser<Buffer, number> = pipe(
 
 const msg: (msgLength: number) => P.Parser<Buffer, Buffer> =
   (msgLength) => (i) =>
-    pipe(
-      E.tryCatch(
-        () => i.buffer.slice(i.cursor, i.cursor + msgLength),
-        E.toError
-      ),
-      // FIXME Kinda gross.
-      E.chain((a) => PR.success(a, i, stream(i.buffer, i.cursor + msgLength)))
-    );
+    PR.success(i.buffer.slice(i.cursor, i.cursor + msgLength), i, i);
 
 export const netMsg: P.Parser<Buffer, NetMsg> = pipe(
   sequenceS(P.Applicative)({

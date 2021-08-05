@@ -1,6 +1,6 @@
 import { either as E } from "fp-ts";
 import { sequenceS } from "fp-ts/lib/Apply";
-import { pipe } from "fp-ts/lib/function";
+import { constant, pipe } from "fp-ts/lib/function";
 import * as P from "./Parser";
 import { success } from "./ParseResult";
 import type { Stream } from "./Stream";
@@ -10,7 +10,7 @@ const sizedL: <A>(
   fs: (a: Stream<Buffer>) => Stream<Buffer>
 ) => P.Parser<Buffer, A> = (f, fs) => (i) =>
   pipe(
-    E.tryCatch(() => f(i), E.toError),
+    E.tryCatch(() => f(i), constant(`failed to parse ${i} bytes`)),
     E.chain((a) => success(a, i, fs(i)))
   );
 

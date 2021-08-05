@@ -104,7 +104,7 @@ export const withLog: <I, A>(fa: Parser<I, A>) => Parser<I, A> = (fa) => (i) =>
 
 export const succeed: <I, A>(a: A) => Parser<I, A> = of;
 
-export const fail: <I, A = never>(e: Error) => Parser<I, A> = (e) => () =>
+export const fail: <I, A = never>(e: string) => Parser<I, A> = (e) => () =>
   failure(e);
 
 export const manyN: <I, A>(fa: Parser<I, A>, n: number) => Parser<I, A[]> = (

@@ -7,5 +7,5 @@ export const eq =
 
 export const toError =
   <A>(message: string) =>
-  (a: A): Error =>
-    new Error(`${message}: ${a}`);
+  (a: A): string =>
+    `${message}: ${a}`;
