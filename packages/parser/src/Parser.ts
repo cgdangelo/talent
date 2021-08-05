@@ -113,11 +113,11 @@ export const manyN: <I, A>(fa: Parser<I, A>, n: number) => Parser<I, A[]> = (
 ) => pipe(A.replicate(n, fa), A.sequence(Applicative));
 
 export const skip =
-  (byteLength: number) =>
+  (length: number) =>
   <I>(i: Stream<I>): ParseResult<I, undefined> =>
-    success(undefined, i, stream(i.buffer, i.cursor + byteLength));
+    success(undefined, i, stream(i.buffer, i.cursor + length));
 
 export const seek =
-  (byteOffset: number) =>
+  (offset: number) =>
   <I>(i: Stream<I>): ParseResult<I, undefined> =>
-    success(undefined, i, stream(i.buffer, byteOffset));
+    success(undefined, i, stream(i.buffer, offset));
