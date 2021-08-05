@@ -1,4 +1,5 @@
-import * as P from "@talent/parser";
+import { buffer as B, parser as P, parseResult as PR } from "@talent/parser";
+import { of as stream } from "@talent/parser/lib/Stream";
 import { either as E } from "fp-ts";
 import { sequenceS } from "fp-ts/lib/Apply";
 import { pipe } from "fp-ts/lib/function";
@@ -20,7 +21,7 @@ export type NetMsg = {
 };
 
 const msgLength: P.Parser<Buffer, number> = pipe(
-  P.int32_le,
+  B.int32_le,
   P.chain((a) =>
     a > 0 && a < 65_536
       ? P.succeed(a)
@@ -36,19 +37,19 @@ const msg: (msgLength: number) => P.Parser<Buffer, Buffer> =
         E.toError
       ),
       // FIXME Kinda gross.
-      E.chain((a) => P.success(a, i, i.cursor + msgLength))
+      E.chain((a) => PR.success(a, i, stream(i.buffer, i.cursor + msgLength)))
     );
 
 export const netMsg: P.Parser<Buffer, NetMsg> = pipe(
   sequenceS(P.Applicative)({
     info: netMsgInfo,
-    incomingSequence: P.int32_le,
-    incomingAcknowledged: P.int32_le,
-    incomingReliableAcknowledged: P.int32_le,
-    incomingReliableSequence: P.int32_le,
-    outgoingSequence: P.int32_le,
-    reliableSequence: P.int32_le,
-    lastReliableSequence: P.int32_le,
+    incomingSequence: B.int32_le,
+    incomingAcknowledged: B.int32_le,
+    incomingReliableAcknowledged: B.int32_le,
+    incomingReliableSequence: B.int32_le,
+    outgoingSequence: B.int32_le,
+    reliableSequence: B.int32_le,
+    lastReliableSequence: B.int32_le,
     msgLength,
   }),
 

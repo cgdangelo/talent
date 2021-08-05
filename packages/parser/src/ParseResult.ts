@@ -8,15 +8,15 @@ export type ParseFailure = Error;
 
 export type ParseSuccess<I, A> = {
   readonly value: A;
+  readonly input: Stream<I>;
   readonly next: Stream<I>;
 };
 
 export const success: <I, A>(
   value: A,
   input: Stream<I>,
-  next: number
-) => ParseResult<I, A> = (value, input, next) =>
-  right({ value, next: { ...input, cursor: next } });
+  next: Stream<I>
+) => ParseResult<I, A> = (value, input, next) => right({ value, input, next });
 
 export const failure: <I, A = never>(e: Error) => ParseResult<I, A> = (e) =>
   left(e);

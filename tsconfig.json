@@ -1,7 +1,7 @@
 {
   "references": [
-    { "path": "./packages/core" },
-    { "path": "./packages/parser" }
+    { "path": "./packages/parser" },
+    { "path": "./packages/core" }
   ],
   "files": []
 }

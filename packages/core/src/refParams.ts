@@ -1,12 +1,12 @@
-import * as P from "@talent/parser";
+import { buffer as B, parser as P } from "@talent/parser";
 import { sequenceS, sequenceT } from "fp-ts/lib/Apply";
 
 export type RefParams = {
-  readonly viewOrigin: P.Point;
-  readonly viewAngles: P.Point;
-  readonly forward: P.Point;
-  readonly right: P.Point;
-  readonly up: P.Point;
+  readonly viewOrigin: B.Point;
+  readonly viewAngles: B.Point;
+  readonly forward: B.Point;
+  readonly right: B.Point;
+  readonly up: B.Point;
   readonly frameTime: number;
   readonly time: number;
   readonly intermission: number;
@@ -14,15 +14,15 @@ export type RefParams = {
   readonly spectator: number;
   readonly onGround: number;
   readonly waterLevel: number;
-  readonly simVel: P.Point;
-  readonly simOrg: P.Point;
-  readonly viewHeight: P.Point;
+  readonly simVel: B.Point;
+  readonly simOrg: B.Point;
+  readonly viewHeight: B.Point;
   readonly idealPitch: number;
-  readonly cl_viewangles: P.Point;
+  readonly cl_viewangles: B.Point;
   readonly health: number;
-  readonly crosshairAngle: P.Point;
+  readonly crosshairAngle: B.Point;
   readonly viewSize: number;
-  readonly punchAngle: P.Point;
+  readonly punchAngle: B.Point;
   readonly maxClients: number;
   readonly viewEntity: number;
   readonly playerNum: number;
@@ -44,40 +44,40 @@ export type RefParams = {
 
 const viewPort: P.Parser<Buffer, RefParams["viewPort"]> = sequenceT(
   P.Applicative
-)(P.int32_le, P.int32_le, P.int32_le, P.int32_le);
+)(B.int32_le, B.int32_le, B.int32_le, B.int32_le);
 
 export const refParams: P.Parser<Buffer, RefParams> = sequenceS(P.Applicative)({
-  viewOrigin: P.point,
-  viewAngles: P.point,
-  forward: P.point,
-  right: P.point,
-  up: P.point,
-  frameTime: P.float32_le,
-  time: P.float32_le,
-  intermission: P.int32_le,
-  paused: P.int32_le,
-  spectator: P.int32_le,
-  onGround: P.int32_le,
-  waterLevel: P.int32_le,
-  simVel: P.point,
-  simOrg: P.point,
-  viewHeight: P.point,
-  idealPitch: P.float32_le,
-  cl_viewangles: P.point,
-  health: P.int32_le,
-  crosshairAngle: P.point,
-  viewSize: P.float32_le,
-  punchAngle: P.point,
-  maxClients: P.int32_le,
-  viewEntity: P.int32_le,
-  playerNum: P.int32_le,
-  maxEntities: P.int32_le,
-  demoPlayback: P.int32_le,
-  hardware: P.int32_le,
-  smoothing: P.int32_le,
-  ptrCmd: P.int32_le,
-  ptrMoveVars: P.int32_le,
+  viewOrigin: B.point,
+  viewAngles: B.point,
+  forward: B.point,
+  right: B.point,
+  up: B.point,
+  frameTime: B.float32_le,
+  time: B.float32_le,
+  intermission: B.int32_le,
+  paused: B.int32_le,
+  spectator: B.int32_le,
+  onGround: B.int32_le,
+  waterLevel: B.int32_le,
+  simVel: B.point,
+  simOrg: B.point,
+  viewHeight: B.point,
+  idealPitch: B.float32_le,
+  cl_viewangles: B.point,
+  health: B.int32_le,
+  crosshairAngle: B.point,
+  viewSize: B.float32_le,
+  punchAngle: B.point,
+  maxClients: B.int32_le,
+  viewEntity: B.int32_le,
+  playerNum: B.int32_le,
+  maxEntities: B.int32_le,
+  demoPlayback: B.int32_le,
+  hardware: B.int32_le,
+  smoothing: B.int32_le,
+  ptrCmd: B.int32_le,
+  ptrMoveVars: B.int32_le,
   viewPort,
-  nextView: P.int32_le,
-  onlyClientDraw: P.int32_le,
+  nextView: B.int32_le,
+  onlyClientDraw: B.int32_le,
 });

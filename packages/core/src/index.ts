@@ -1,13 +1,11 @@
-import type * as P from "@talent/parser";
+import type { Stream } from "@talent/parser/lib/Stream";
 import { either as E, string as S, taskEither as TE } from "fp-ts";
 import { constant, flow, pipe } from "fp-ts/lib/function";
 import { readFile } from "fs/promises";
 import { demo } from "./demo";
 import { eq, not } from "./utils";
 
-const readFileContents = (
-  path: string
-): TE.TaskEither<Error, P.Stream<Buffer>> =>
+const readFileContents = (path: string): TE.TaskEither<Error, Stream<Buffer>> =>
   pipe(
     TE.tryCatch(() => readFile(path), E.toError),
     TE.map((buffer) => ({ buffer, cursor: 0 }))

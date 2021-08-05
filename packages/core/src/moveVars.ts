@@ -1,4 +1,4 @@
-import * as P from "@talent/parser";
+import { buffer as B, parser as P } from "@talent/parser";
 import { sequenceS } from "fp-ts/lib/Apply";
 import { pipe } from "fp-ts/lib/function";
 
@@ -28,33 +28,33 @@ export type MoveVars = {
     readonly g: number;
     readonly b: number;
   };
-  readonly skyVec: P.Point;
+  readonly skyVec: B.Point;
 };
 
 export const moveVars: P.Parser<Buffer, MoveVars> = sequenceS(P.Applicative)({
-  gravity: P.float32_le,
-  stopSpeed: P.float32_le,
-  maxSpeed: P.float32_le,
-  spectatorMaxSpeed: P.float32_le,
-  accelerate: P.float32_le,
-  airAccelerate: P.float32_le,
-  waterAccelerate: P.float32_le,
-  friction: P.float32_le,
-  edgeFriction: P.float32_le,
-  waterFriction: P.float32_le,
-  entGravity: P.float32_le,
-  bounce: P.float32_le,
-  stepSize: P.float32_le,
-  maxVelocity: P.float32_le,
-  zMax: P.float32_le,
-  waveHeight: P.float32_le,
-  footsteps: P.int32_le,
-  skyName: P.str(32),
-  rollAngle: P.float32_le,
-  rollSpeed: P.float32_le,
+  gravity: B.float32_le,
+  stopSpeed: B.float32_le,
+  maxSpeed: B.float32_le,
+  spectatorMaxSpeed: B.float32_le,
+  accelerate: B.float32_le,
+  airAccelerate: B.float32_le,
+  waterAccelerate: B.float32_le,
+  friction: B.float32_le,
+  edgeFriction: B.float32_le,
+  waterFriction: B.float32_le,
+  entGravity: B.float32_le,
+  bounce: B.float32_le,
+  stepSize: B.float32_le,
+  maxVelocity: B.float32_le,
+  zMax: B.float32_le,
+  waveHeight: B.float32_le,
+  footsteps: B.int32_le,
+  skyName: B.str(32),
+  rollAngle: B.float32_le,
+  rollSpeed: B.float32_le,
   skyColor: pipe(
-    P.point,
+    B.point,
     P.map(({ x: r, y: g, z: b }) => ({ r, g, b }))
   ),
-  skyVec: P.point,
+  skyVec: B.point,
 });
