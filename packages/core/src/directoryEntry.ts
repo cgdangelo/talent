@@ -1,4 +1,4 @@
-import { parser as P } from "@talent/parser";
+import { buffer as B, parser as P } from "@talent/parser";
 import { sequenceS } from "fp-ts/lib/Apply";
 import { pipe } from "fp-ts/lib/function";
 import type { Frame } from "./frame";
@@ -18,14 +18,14 @@ export type DirectoryEntry = {
 
 export const directoryEntry: P.Parser<Buffer, DirectoryEntry> = pipe(
   sequenceS(P.Applicative)({
-    type: P.int32_le,
-    description: P.str(64),
-    flags: P.int32_le,
-    cdTrack: P.int32_le,
-    trackTime: P.float32_le,
-    frameCount: P.int32_le,
-    offset: P.int32_le,
-    fileLength: P.int32_le,
+    type: B.int32_le,
+    description: B.str(64),
+    flags: B.int32_le,
+    cdTrack: B.int32_le,
+    trackTime: B.float32_le,
+    frameCount: B.int32_le,
+    offset: B.int32_le,
+    fileLength: B.int32_le,
   }),
 
   P.chain((a) =>

@@ -1,4 +1,4 @@
-import { parser as P } from "@talent/parser";
+import { buffer as B, parser as P } from "@talent/parser";
 import { sequenceS } from "fp-ts/lib/Apply";
 import { pipe } from "fp-ts/lib/function";
 import { toError } from "./utils";
@@ -13,7 +13,7 @@ export type Header = {
 };
 
 const magic: P.Parser<Buffer, "HLDEMO"> = pipe(
-  P.str(8),
+  B.str(8),
   P.chain((a) =>
     a === "HLDEMO\x00\x00"
       ? P.succeed("HLDEMO")
@@ -22,7 +22,7 @@ const magic: P.Parser<Buffer, "HLDEMO"> = pipe(
 );
 
 const protocol: P.Parser<Buffer, 5> = pipe(
-  P.int32_le,
+  B.int32_le,
   P.chain((a) =>
     a === 5 ? P.succeed(a) : P.fail(toError("unsupported protocol")(a))
   )
@@ -31,8 +31,8 @@ const protocol: P.Parser<Buffer, 5> = pipe(
 export const header: P.Parser<Buffer, Header> = sequenceS(P.Applicative)({
   magic,
   protocol,
-  networkProtocol: P.int32_le,
-  mapName: P.str(260),
-  gameDirectory: P.str(260),
-  mapChecksum: P.uint32_le,
+  networkProtocol: B.int32_le,
+  mapName: B.str(260),
+  gameDirectory: B.str(260),
+  mapChecksum: B.uint32_le,
 });

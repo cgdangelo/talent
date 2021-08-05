@@ -1,4 +1,4 @@
-import { parser as P } from "@talent/parser";
+import { buffer as B, parser as P } from "@talent/parser";
 import { sequenceT } from "fp-ts/lib/Apply";
 import { pipe } from "fp-ts/lib/function";
 import type { DirectoryEntry } from "./directoryEntry";
@@ -11,7 +11,7 @@ export type Directory = {
 
 const directoryOffset: P.Parser<Buffer, number> = (i) =>
   pipe(
-    P.uint32_le,
+    B.uint32_le,
     P.chain((a) =>
       a === i.buffer.byteLength - 4 - 92 * 2
         ? P.succeed(a)
@@ -27,7 +27,7 @@ const directoryOffset: P.Parser<Buffer, number> = (i) =>
   );
 
 const validateDirectoryEntries: P.Parser<Buffer, number> = pipe(
-  P.int32_le,
+  B.int32_le,
   P.chain((a) =>
     a === 2
       ? P.succeed(a)

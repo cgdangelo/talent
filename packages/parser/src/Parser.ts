@@ -1,9 +1,8 @@
 import { array as A, either as E } from "fp-ts";
 import type { Alt2 } from "fp-ts/lib/Alt";
 import type { Applicative2 } from "fp-ts/lib/Applicative";
-import { sequenceS } from "fp-ts/lib/Apply";
 import type { Chain2 } from "fp-ts/lib/Chain";
-import type { Lazy, Predicate, Refinement } from "fp-ts/lib/function";
+import type { Lazy } from "fp-ts/lib/function";
 import { flow, pipe } from "fp-ts/lib/function";
 import type { Functor2 } from "fp-ts/lib/Functor";
 import type { Monad2 } from "fp-ts/lib/Monad";
@@ -33,10 +32,19 @@ const ap_: Applicative2<URI>["ap"] = (fab, fa) =>
 const chain_: Chain2<URI>["chain"] = (fa, f) =>
   flow(
     fa,
-    E.chain(({ value, next }) => f(value)(next))
+    E.chain(({ value, next: input }) =>
+      pipe(
+        f(value)(input),
+        E.chain(({ value, next }) => success(value, input, next))
+      )
+    )
   );
 
-const map_: Functor2<URI>["map"] = (fa, f) => chain_(fa, (a) => of(f(a)));
+const map_: Functor2<URI>["map"] = (fa, f) => (i) =>
+  pipe(
+    fa(i),
+    E.map((a) => ({ ...a, value: f(a.value) }))
+  );
 
 export const alt: <E, A>(
   fa: Parser<E, A>
@@ -113,95 +121,3 @@ export const seek =
   (byteOffset: number) =>
   <I>(i: Stream<I>): ParseResult<I, undefined> =>
     success(undefined, i, stream(i.buffer, byteOffset));
-
-// FIXME No idea what's wrong with these.
-export function sat<A>(
-  f: Predicate<A>,
-  onFail: (a: unknown) => Error
-): <I>(fa: Parser<I, A>) => Parser<I, A>;
-export function sat<A, B extends A>(
-  f: Refinement<A, B>,
-  onFail: (a: unknown) => Error
-): <I>(fa: Parser<I, A>) => Parser<I, B>;
-export function sat<A>(
-  f: Predicate<A>,
-  onFail: (a: unknown) => Error
-): <I>(fa: Parser<I, A>) => Parser<I, A> {
-  return chain((a) => (f(a) ? succeed(a) : fail(onFail(a))));
-}
-
-export const char: Parser<Buffer, string> = (i) =>
-  pipe(
-    E.tryCatch(() => i.buffer.readInt8(i.cursor), E.toError),
-    E.chain((a) =>
-      success(String.fromCharCode(a), i, stream(i.buffer, i.cursor + 1))
-    )
-  );
-
-export const str: (byteLength: number) => Parser<Buffer, string> = (
-  byteLength
-) =>
-  pipe(
-    manyN(char, byteLength),
-    map((as) => as.join(""))
-  );
-
-export const uint32_le: Parser<Buffer, number> = (i) =>
-  pipe(
-    E.tryCatch(() => i.buffer.readUInt32LE(i.cursor), E.toError),
-    E.chain((a) => success(a, i, stream(i.buffer, i.cursor + 4)))
-  );
-
-export const int32_le: Parser<Buffer, number> = (i) =>
-  pipe(
-    E.tryCatch(() => i.buffer.readInt32LE(i.cursor), E.toError),
-    E.chain((a) => success(a, i, stream(i.buffer, i.cursor + 4)))
-  );
-
-export const uint16_le: Parser<Buffer, number> = (i) =>
-  pipe(
-    E.tryCatch(() => i.buffer.readUInt16LE(i.cursor), E.toError),
-    E.chain((a) => success(a, i, stream(i.buffer, i.cursor + 2)))
-  );
-
-export const int16_le: Parser<Buffer, number> = (i) =>
-  pipe(
-    E.tryCatch(() => i.buffer.readInt16LE(i.cursor), E.toError),
-    E.chain((a) => success(a, i, stream(i.buffer, i.cursor + 2)))
-  );
-
-export const uint8_be: Parser<Buffer, number> = (i) =>
-  pipe(
-    E.tryCatch(() => i.buffer.readUIntBE(i.cursor, 1), E.toError),
-    E.chain((a) => success(a, i, stream(i.buffer, i.cursor + 1)))
-  );
-
-export const int8_be: Parser<Buffer, number> = (i) =>
-  pipe(
-    E.tryCatch(() => i.buffer.readIntBE(i.cursor, 1), E.toError),
-    E.chain((a) => success(a, i, stream(i.buffer, i.cursor + 1)))
-  );
-
-export const uint8_le: Parser<Buffer, number> = (i) =>
-  pipe(
-    E.tryCatch(() => i.buffer.readUIntLE(i.cursor, 1), E.toError),
-    E.chain((a) => success(a, i, stream(i.buffer, i.cursor + 1)))
-  );
-
-export const float32_le: Parser<Buffer, number> = (i) =>
-  pipe(
-    E.tryCatch(() => i.buffer.readFloatLE(i.cursor), E.toError),
-    E.chain((a) => success(a, i, stream(i.buffer, i.cursor + 4)))
-  );
-
-export type Point = {
-  readonly x: number;
-  readonly y: number;
-  readonly z: number;
-};
-
-export const point: Parser<Buffer, Point> = sequenceS(Applicative)({
-  x: float32_le,
-  y: float32_le,
-  z: float32_le,
-});

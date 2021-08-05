@@ -7,8 +7,8 @@ export type ParseResult<I, A> = Either<ParseFailure, ParseSuccess<I, A>>;
 export type ParseFailure = Error;
 
 export type ParseSuccess<I, A> = {
-  readonly input: Stream<I>;
   readonly value: A;
+  readonly input: Stream<I>;
   readonly next: Stream<I>;
 };
 
