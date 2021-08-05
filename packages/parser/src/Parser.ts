@@ -3,7 +3,7 @@ import type { Alt2 } from "fp-ts/lib/Alt";
 import type { Applicative2 } from "fp-ts/lib/Applicative";
 import { sequenceS } from "fp-ts/lib/Apply";
 import type { Chain2 } from "fp-ts/lib/Chain";
-import type { Predicate, Refinement } from "fp-ts/lib/function";
+import type { Lazy, Predicate, Refinement } from "fp-ts/lib/function";
 import { flow, pipe } from "fp-ts/lib/function";
 import type { Functor2 } from "fp-ts/lib/Functor";
 import type { Monad2 } from "fp-ts/lib/Monad";
@@ -23,16 +23,24 @@ declare module "fp-ts/lib/HKT" {
   }
 }
 
+const alt_: Alt2<URI>["alt"] = (fa, that) => (i) =>
+  pipe(fa(i), (s) => (E.isRight(s) ? s : that()(i)));
+
 const ap_: Applicative2<URI>["ap"] = (fab, fa) =>
   chain_(fab, (f) => map_(fa, f));
-
-const map_: Functor2<URI>["map"] = (fa, f) => chain_(fa, (a) => of(f(a)));
 
 const chain_: Chain2<URI>["chain"] = (fa, f) =>
   flow(
     fa,
     E.chain(({ value, next }) => f(value)(next))
   );
+
+const map_: Functor2<URI>["map"] = (fa, f) => chain_(fa, (a) => of(f(a)));
+
+export const alt: <E, A>(
+  fa: Parser<E, A>
+) => (that: Lazy<Parser<E, A>>) => Parser<E, A> = (fa) => (that) =>
+  alt_(fa, that);
 
 export const ap: <I, A>(
   fa: Parser<I, A>
@@ -50,8 +58,9 @@ export const map: <A, B>(
 export const of: <I, A>(a: A) => Parser<I, A> = (a) => (i) =>
   success(a, i, i.cursor);
 
-export const Functor: Functor2<URI> = {
+export const Alt: Alt2<URI> = {
   URI,
+  alt: alt_,
   map: map_,
 };
 
@@ -69,18 +78,17 @@ export const Chain: Chain2<URI> = {
   chain: chain_,
 };
 
+export const Functor: Functor2<URI> = {
+  URI,
+  map: map_,
+};
+
 export const Monad: Monad2<URI> = {
   URI,
   ap: ap_,
   chain: chain_,
   map: map_,
   of,
-};
-
-export const Alt: Alt2<URI> = {
-  URI,
-  alt: (fa, that) => (i) => pipe(fa(i), (s) => (E.isRight(s) ? s : that()(i))),
-  map: map_,
 };
 
 export const withLog: <I, A>(fa: Parser<I, A>) => Parser<I, A> = (fa) => (i) =>
