@@ -1,7 +1,7 @@
+import type { Stream } from "@talent/parser/lib/Stream";
 import { either as E, string as S, taskEither as TE } from "fp-ts";
 import { constant, flow, pipe } from "fp-ts/lib/function";
 import { readFile } from "fs/promises";
-import type { Stream } from "@talent/parser/lib/Stream";
 import { demo } from "./demo";
 import { eq, not } from "./utils";
 

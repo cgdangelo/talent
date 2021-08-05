@@ -10,6 +10,7 @@ import type { Monad2 } from "fp-ts/lib/Monad";
 import type { ParseResult } from "./ParseResult";
 import { failure, success } from "./ParseResult";
 import type { Stream } from "./Stream";
+import { of as stream } from "./Stream";
 
 export type Parser<I, A> = (stream: Stream<I>) => ParseResult<I, A>;
 
@@ -55,8 +56,7 @@ export const map: <A, B>(
   f: (a: A) => B
 ) => <I>(fa: Parser<I, A>) => Parser<I, B> = (f) => (fa) => map_(fa, f);
 
-export const of: <I, A>(a: A) => Parser<I, A> = (a) => (i) =>
-  success(a, i, i.cursor);
+export const of: <I, A>(a: A) => Parser<I, A> = (a) => (i) => success(a, i, i);
 
 export const Alt: Alt2<URI> = {
   URI,
@@ -107,12 +107,12 @@ export const manyN: <I, A>(fa: Parser<I, A>, n: number) => Parser<I, A[]> = (
 export const skip =
   (byteLength: number) =>
   <I>(i: Stream<I>): ParseResult<I, undefined> =>
-    success(undefined, i, i.cursor + byteLength);
+    success(undefined, i, stream(i.buffer, i.cursor + byteLength));
 
 export const seek =
   (byteOffset: number) =>
   <I>(i: Stream<I>): ParseResult<I, undefined> =>
-    success(undefined, i, byteOffset);
+    success(undefined, i, stream(i.buffer, byteOffset));
 
 // FIXME No idea what's wrong with these.
 export function sat<A>(
@@ -133,7 +133,9 @@ export function sat<A>(
 export const char: Parser<Buffer, string> = (i) =>
   pipe(
     E.tryCatch(() => i.buffer.readInt8(i.cursor), E.toError),
-    E.chain((a) => success(String.fromCharCode(a), i, i.cursor + 1))
+    E.chain((a) =>
+      success(String.fromCharCode(a), i, stream(i.buffer, i.cursor + 1))
+    )
   );
 
 export const str: (byteLength: number) => Parser<Buffer, string> = (
@@ -147,49 +149,49 @@ export const str: (byteLength: number) => Parser<Buffer, string> = (
 export const uint32_le: Parser<Buffer, number> = (i) =>
   pipe(
     E.tryCatch(() => i.buffer.readUInt32LE(i.cursor), E.toError),
-    E.chain((a) => success(a, i, i.cursor + 4))
+    E.chain((a) => success(a, i, stream(i.buffer, i.cursor + 4)))
   );
 
 export const int32_le: Parser<Buffer, number> = (i) =>
   pipe(
     E.tryCatch(() => i.buffer.readInt32LE(i.cursor), E.toError),
-    E.chain((a) => success(a, i, i.cursor + 4))
+    E.chain((a) => success(a, i, stream(i.buffer, i.cursor + 4)))
   );
 
 export const uint16_le: Parser<Buffer, number> = (i) =>
   pipe(
     E.tryCatch(() => i.buffer.readUInt16LE(i.cursor), E.toError),
-    E.chain((a) => success(a, i, i.cursor + 2))
+    E.chain((a) => success(a, i, stream(i.buffer, i.cursor + 2)))
   );
 
 export const int16_le: Parser<Buffer, number> = (i) =>
   pipe(
     E.tryCatch(() => i.buffer.readInt16LE(i.cursor), E.toError),
-    E.chain((a) => success(a, i, i.cursor + 2))
+    E.chain((a) => success(a, i, stream(i.buffer, i.cursor + 2)))
   );
 
 export const uint8_be: Parser<Buffer, number> = (i) =>
   pipe(
     E.tryCatch(() => i.buffer.readUIntBE(i.cursor, 1), E.toError),
-    E.chain((a) => success(a, i, i.cursor + 1))
+    E.chain((a) => success(a, i, stream(i.buffer, i.cursor + 1)))
   );
 
 export const int8_be: Parser<Buffer, number> = (i) =>
   pipe(
     E.tryCatch(() => i.buffer.readIntBE(i.cursor, 1), E.toError),
-    E.chain((a) => success(a, i, i.cursor + 1))
+    E.chain((a) => success(a, i, stream(i.buffer, i.cursor + 1)))
   );
 
 export const uint8_le: Parser<Buffer, number> = (i) =>
   pipe(
     E.tryCatch(() => i.buffer.readUIntLE(i.cursor, 1), E.toError),
-    E.chain((a) => success(a, i, i.cursor + 1))
+    E.chain((a) => success(a, i, stream(i.buffer, i.cursor + 1)))
   );
 
 export const float32_le: Parser<Buffer, number> = (i) =>
   pipe(
     E.tryCatch(() => i.buffer.readFloatLE(i.cursor), E.toError),
-    E.chain((a) => success(a, i, i.cursor + 4))
+    E.chain((a) => success(a, i, stream(i.buffer, i.cursor + 4)))
   );
 
 export type Point = {
