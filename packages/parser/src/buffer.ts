@@ -4,51 +4,40 @@ import { flow, pipe } from "fp-ts/lib/function";
 import * as P from "./Parser";
 import { success } from "./ParseResult";
 import type { Stream } from "./Stream";
+import { of as stream } from "./Stream";
 
 export type BufferParser<A> = P.Parser<Buffer, A>;
 
 const pluckErrorMsg: (e: unknown) => string = flow(E.toError, (e) => e.message);
 
-const sizedL: <A>(
+export const byteSized: <A>(
   f: (a: Stream<Buffer>) => A,
-  fs: (a: Stream<Buffer>) => Stream<Buffer>
-) => BufferParser<A> = (f, fs) => (i) =>
+  byteLength: number
+) => BufferParser<A> = (f, byteLength) => (i) =>
   pipe(
     E.tryCatch(() => f(i), pluckErrorMsg),
-    E.chain((a) => success(a, i, fs(i)))
+    E.chain((a) => success(a, i, stream(i.buffer, i.cursor + byteLength)))
   );
 
 export const int_le: (
   bitLength: 8 | 16 | 24 | 32 | 40 | 48
 ) => BufferParser<number> = (bitLength) =>
-  sizedL(
-    (i) => i.buffer.readIntLE(i.cursor, bitLength / 8),
-    (i) => ({ ...i, cursor: i.cursor + bitLength / 8 })
-  );
+  byteSized((i) => i.buffer.readIntLE(i.cursor, bitLength / 8), bitLength / 8);
 
 export const uint_le: (
   bitLength: 8 | 16 | 24 | 32 | 40 | 48
 ) => BufferParser<number> = (bitLength) =>
-  sizedL(
-    (i) => i.buffer.readUIntLE(i.cursor, bitLength / 8),
-    (i) => ({ ...i, cursor: i.cursor + bitLength / 8 })
-  );
+  byteSized((i) => i.buffer.readUIntLE(i.cursor, bitLength / 8), bitLength / 8);
 
 export const int_be: (
   bitLength: 8 | 16 | 24 | 32 | 40 | 48
 ) => BufferParser<number> = (bitLength) =>
-  sizedL(
-    (i) => i.buffer.readIntBE(i.cursor, bitLength / 8),
-    (i) => ({ ...i, cursor: i.cursor + bitLength / 8 })
-  );
+  byteSized((i) => i.buffer.readIntBE(i.cursor, bitLength / 8), bitLength / 8);
 
 export const uint_be: (
   bitLength: 8 | 16 | 24 | 32 | 40 | 48
 ) => BufferParser<number> = (bitLength) =>
-  sizedL(
-    (i) => i.buffer.readUIntBE(i.cursor, bitLength / 8),
-    (i) => ({ ...i, cursor: i.cursor + bitLength / 8 })
-  );
+  byteSized((i) => i.buffer.readUIntBE(i.cursor, bitLength / 8), bitLength / 8);
 
 export const char: BufferParser<string> = pipe(
   int_le(8),
@@ -73,9 +62,9 @@ export const uint8_le: BufferParser<number> = int_le(8);
 
 export const uint8_be: BufferParser<number> = uint_be(8);
 
-export const float32_le: BufferParser<number> = sizedL(
+export const float32_le: BufferParser<number> = byteSized(
   (i) => i.buffer.readFloatLE(i.cursor),
-  (i) => ({ ...i, cursor: i.cursor + 4 })
+  4
 );
 
 // TODO Move this to the goldsrc package.

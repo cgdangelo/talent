@@ -1,8 +1,14 @@
+import { pipe } from "fp-ts/lib/function";
 import * as B from "./buffer";
-import { failure, success } from "./ParseResult";
+import * as P from "./Parser";
+import { success } from "./ParseResult";
 import { of as stream } from "./Stream";
 
 describe("buffer", () => {
+  test("byteSized", () => {
+    expect(pipe(stream(Buffer.alloc(0)), B.byteSized(P.of("a"), 4)));
+  });
+
   test.each([
     [8, -1],
     [16, -257],
@@ -13,7 +19,7 @@ describe("buffer", () => {
   ] as const)("int_le %d", (bitLength, expected) => {
     const buffer = Buffer.of(-1, -2, -3, -4, -5, -6);
 
-    expect(B.int_le(bitLength)(stream(buffer))).toStrictEqual(
+    expect(pipe(stream(buffer), B.int_le(bitLength))).toStrictEqual(
       success(expected, stream(buffer), stream(buffer, bitLength / 8))
     );
   });
@@ -28,7 +34,7 @@ describe("buffer", () => {
   ] as const)("uint_le %d", (bitLength, expected) => {
     const buffer = Buffer.of(1, 2, 3, 4, 5, 6);
 
-    expect(B.uint_le(bitLength)(stream(buffer))).toStrictEqual(
+    expect(pipe(stream(buffer), B.uint_le(bitLength))).toStrictEqual(
       success(expected, stream(buffer), stream(buffer, bitLength / 8))
     );
   });
@@ -43,7 +49,7 @@ describe("buffer", () => {
   ] as const)("int_be %d", (bitLength, expected) => {
     const buffer = Buffer.of(-1, -2, -3, -4, -5, -6);
 
-    expect(B.int_be(bitLength)(stream(buffer))).toStrictEqual(
+    expect(pipe(stream(buffer), B.int_be(bitLength))).toStrictEqual(
       success(expected, stream(buffer), stream(buffer, bitLength / 8))
     );
   });
@@ -58,7 +64,7 @@ describe("buffer", () => {
   ] as const)("uint_be %d", (bitLength, expected) => {
     const buffer = Buffer.of(1, 2, 3, 4, 5, 6);
 
-    expect(B.uint_be(bitLength)(stream(buffer))).toStrictEqual(
+    expect(pipe(stream(buffer), B.uint_be(bitLength))).toStrictEqual(
       success(expected, stream(buffer), stream(buffer, bitLength / 8))
     );
   });
@@ -66,39 +72,33 @@ describe("buffer", () => {
   test("char", () => {
     const buffer = Buffer.from("foo");
 
-    expect(B.char(stream(buffer))).toStrictEqual(
+    expect(pipe(stream(buffer), B.char)).toStrictEqual(
       success("f", stream(buffer), stream(buffer, 1))
     );
 
-    expect(B.char(stream(buffer, 1))).toStrictEqual(
+    expect(pipe(stream(buffer, 1), B.char)).toStrictEqual(
       success("o", stream(buffer, 1), stream(buffer, 2))
     );
 
-    expect(B.char(stream(buffer, 2))).toStrictEqual(
+    expect(pipe(stream(buffer, 2), B.char)).toStrictEqual(
       success("o", stream(buffer, 2), stream(buffer, 3))
-    );
-
-    expect(B.char(stream(buffer, -1))).toStrictEqual(
-      failure(
-        'RangeError [ERR_OUT_OF_RANGE]: The value of "offset" is out of range. It must be >= 0 and <= 2. Received -1'
-      )
     );
   });
 
   test("str", () => {
     const buffer = Buffer.from("foo");
 
-    expect(B.str(1)(stream(buffer))).toStrictEqual(
+    expect(pipe(stream(buffer), B.str(1))).toStrictEqual(
       success("f", stream(buffer), stream(buffer, 1))
     );
 
-    expect(B.str(3)(stream(buffer))).toStrictEqual(
+    expect(pipe(stream(buffer), B.str(3))).toStrictEqual(
       success("foo", stream(buffer), stream(buffer, 3))
     );
 
     const longerBuffer = Buffer.from("foo bar baz");
 
-    expect(B.str(3)(stream(longerBuffer, 4))).toStrictEqual(
+    expect(pipe(stream(longerBuffer, 4), B.str(3))).toStrictEqual(
       success("bar", stream(longerBuffer, 4), stream(longerBuffer, 7))
     );
   });
@@ -106,7 +106,7 @@ describe("buffer", () => {
   test("float32_le", () => {
     const buffer = Buffer.of(1, 2, 3, 4);
 
-    expect(B.float32_le(stream(buffer))).toStrictEqual(
+    expect(pipe(stream(buffer), B.float32_le)).toStrictEqual(
       success(1.539989614439558e-36, stream(buffer), stream(buffer, 4))
     );
   });
@@ -114,7 +114,7 @@ describe("buffer", () => {
   test("point", () => {
     const buffer = Buffer.of(1, 2, 3, 4, 1, 2, 3, 4, 1, 2, 3, 4);
 
-    expect(B.point(stream(buffer))).toStrictEqual(
+    expect(pipe(stream(buffer), B.point)).toStrictEqual(
       success(
         {
           x: 1.539989614439558e-36,
