@@ -61,20 +61,20 @@ const netMsgFrameType_ = (a: number): NetMsgFrameType => {
   }
 };
 
-const frameType: P.Parser<Buffer, FrameType> = pipe(
+const frameType: B.BufferParser<FrameType> = pipe(
   B.uint8_be,
   // FIXME FIXME FIXME
   // P.sat((a) => a <= 9, toError("invalid frame type")),
   P.map(frameType_)
 );
 
-const frameHeader: P.Parser<Buffer, FrameHeader> = sequenceS(P.Applicative)({
+const frameHeader: B.BufferParser<FrameHeader> = sequenceS(P.Applicative)({
   frameType,
   time: B.float32_le,
   frame: B.int32_le,
 });
 
-const frame: P.Parser<Buffer, Frame> = pipe(
+const frame: B.BufferParser<Frame> = pipe(
   frameHeader,
   P.chain((frameHeader) =>
     pipe(
@@ -85,7 +85,7 @@ const frame: P.Parser<Buffer, Frame> = pipe(
   // TODO Repeat until frameNextSection
 );
 
-const frameData: (frameType: FrameType) => P.Parser<Buffer, unknown> = (
+const frameData: (frameType: FrameType) => B.BufferParser<unknown> = (
   frameType
 ) => {
   switch (frameType) {
@@ -102,7 +102,7 @@ const frameData: (frameType: FrameType) => P.Parser<Buffer, unknown> = (
   }
 };
 
-export const frames: P.Parser<Buffer, readonly Frame[]> = pipe(
+export const frames: B.BufferParser<readonly Frame[]> = pipe(
   frame,
 
   // TODO Actually parse the rest.

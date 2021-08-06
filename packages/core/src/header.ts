@@ -12,7 +12,7 @@ export type Header = {
   readonly protocol: 5;
 };
 
-const magic: P.Parser<Buffer, "HLDEMO"> = pipe(
+const magic: B.BufferParser<"HLDEMO"> = pipe(
   B.str(8),
   P.chain((a) =>
     a === "HLDEMO\x00\x00"
@@ -21,14 +21,14 @@ const magic: P.Parser<Buffer, "HLDEMO"> = pipe(
   )
 );
 
-const protocol: P.Parser<Buffer, 5> = pipe(
+const protocol: B.BufferParser<5> = pipe(
   B.int32_le,
   P.chain((a) =>
     a === 5 ? P.succeed(a) : P.fail(toError("unsupported protocol")(a))
   )
 );
 
-export const header: P.Parser<Buffer, Header> = sequenceS(P.Applicative)({
+export const header: B.BufferParser<Header> = sequenceS(P.Applicative)({
   magic,
   protocol,
   networkProtocol: B.int32_le,

@@ -31,7 +31,7 @@ export type MoveVars = {
   readonly skyVec: B.Point;
 };
 
-export const moveVars: P.Parser<Buffer, MoveVars> = sequenceS(P.Applicative)({
+export const moveVars: B.BufferParser<MoveVars> = sequenceS(P.Applicative)({
   gravity: B.float32_le,
   stopSpeed: B.float32_le,
   maxSpeed: B.float32_le,

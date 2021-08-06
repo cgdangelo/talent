@@ -10,9 +10,7 @@ export type NetMsgInfo = {
   readonly refParams: RefParams;
 };
 
-export const netMsgInfo: P.Parser<Buffer, NetMsgInfo> = sequenceS(
-  P.Applicative
-)({
+export const netMsgInfo: B.BufferParser<NetMsgInfo> = sequenceS(P.Applicative)({
   timestamp: B.float32_le,
   refParams,
   userCmd,

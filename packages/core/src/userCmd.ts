@@ -17,7 +17,7 @@ export type UserCmd = {
   readonly impactPosition: B.Point;
 };
 
-export const userCmd: P.Parser<Buffer, UserCmd> = sequenceS(P.Applicative)({
+export const userCmd: B.BufferParser<UserCmd> = sequenceS(P.Applicative)({
   lerpMs: B.int16_le,
   ms: B.uint8_be,
   viewAngles: pipe(

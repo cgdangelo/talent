@@ -3,9 +3,9 @@ import * as P from "./Parser";
 import * as PR from "./ParseResult";
 import type { Stream } from "./Stream";
 
-const empty: Stream<unknown> = { buffer: undefined, cursor: 0 };
+const empty: Stream<never[]> = { buffer: [], cursor: 0 };
 
-const resultS = <A>(a: A): PR.ParseResult<unknown, A> =>
+const resultS = <A>(a: A): PR.ParseResult<never[], A> =>
   PR.success(a, empty, empty);
 
 const resultF: <I, A = never>(e: string) => PR.ParseResult<I, A> = (e) =>

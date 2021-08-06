@@ -1,3 +1,4 @@
+import type { buffer as B} from "@talent/parser";
 import { parser as P } from "@talent/parser";
 import { sequenceS } from "fp-ts/lib/Apply";
 import type { Directory } from "./directory";
@@ -10,7 +11,7 @@ export type Demo = {
   readonly directory: Directory;
 };
 
-export const demo: P.Parser<Buffer, Demo> = sequenceS(P.Applicative)({
+export const demo: B.BufferParser<Demo> = sequenceS(P.Applicative)({
   header,
   directory,
 });
