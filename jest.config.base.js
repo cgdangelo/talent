@@ -1,8 +1,8 @@
 "use strict";
 
 module.exports = {
-  collectCoverage: true,
-  // collectCoverageFrom: ["<rootDir>/src/**/*.ts"],
+  // collectCoverage: true,
+  collectCoverageFrom: ["<rootDir>/src/*.ts"],
   coverageDirectory: "<rootDir>/coverage/",
   coveragePathIgnorePatterns: ["<rootDir>/lib/", "<rootDir>/node_modules/"],
   // coverageThreshold: {

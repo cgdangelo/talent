@@ -98,9 +98,6 @@ export const Monad: Monad2<URI> = {
   of,
 };
 
-export const withLog: <I, A>(fa: Parser<I, A>) => Parser<I, A> = (fa) => (i) =>
-  pipe(console.log(i), () => fa(i));
-
 export const succeed: <I, A>(a: A) => Parser<I, A> = of;
 
 export const fail: <I, A = never>(e: string) => Parser<I, A> = (e) => () =>
