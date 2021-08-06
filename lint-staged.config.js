@@ -1,6 +1,6 @@
 "use strict";
 
 module.exports = {
-  "*.ts": () => ["tsc -b", "eslint --cache --fix"],
+  "*.ts": () => ["yarn build", "yarn lint --fix"],
   "*": "prettier -u -w",
 };
