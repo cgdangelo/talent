@@ -35,7 +35,7 @@ test("char", () => {
     success("o", stream(buffer, 2), stream(buffer, 3))
   );
 
-  expect(B.char(stream(buffer, -1))).toStrictEqual(failure(expect.any(Error)));
+  expect(B.char(stream(buffer, -1))).toStrictEqual(failure("TODO"));
 });
 
 test("uint32_le", () => {

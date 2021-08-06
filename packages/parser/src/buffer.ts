@@ -10,7 +10,7 @@ const sizedL: <A>(
   fs: (a: Stream<Buffer>) => Stream<Buffer>
 ) => P.Parser<Buffer, A> = (f, fs) => (i) =>
   pipe(
-    E.tryCatch(() => f(i), constant(`failed to parse ${i} bytes`)),
+    E.tryCatch(() => f(i), constant("TODO")),
     E.chain((a) => success(a, i, fs(i)))
   );
 
