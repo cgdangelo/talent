@@ -1,12 +1,15 @@
-import { buffer as B, parser as P } from "@talent/parser";
+import { parser as P } from "@talent/parser";
+import { buffer as B } from "@talent/parser-buffer";
 import { sequenceS, sequenceT } from "fp-ts/lib/Apply";
+import type { Point } from "./Point";
+import { point } from "./Point";
 
 export type RefParams = {
-  readonly viewOrigin: B.Point;
-  readonly viewAngles: B.Point;
-  readonly forward: B.Point;
-  readonly right: B.Point;
-  readonly up: B.Point;
+  readonly viewOrigin: Point;
+  readonly viewAngles: Point;
+  readonly forward: Point;
+  readonly right: Point;
+  readonly up: Point;
   readonly frameTime: number;
   readonly time: number;
   readonly intermission: number;
@@ -14,15 +17,15 @@ export type RefParams = {
   readonly spectator: number;
   readonly onGround: number;
   readonly waterLevel: number;
-  readonly simVel: B.Point;
-  readonly simOrg: B.Point;
-  readonly viewHeight: B.Point;
+  readonly simVel: Point;
+  readonly simOrg: Point;
+  readonly viewHeight: Point;
   readonly idealPitch: number;
-  readonly cl_viewangles: B.Point;
+  readonly cl_viewangles: Point;
   readonly health: number;
-  readonly crosshairAngle: B.Point;
+  readonly crosshairAngle: Point;
   readonly viewSize: number;
-  readonly punchAngle: B.Point;
+  readonly punchAngle: Point;
   readonly maxClients: number;
   readonly viewEntity: number;
   readonly playerNum: number;
@@ -47,11 +50,11 @@ const viewPort: B.BufferParser<RefParams["viewPort"]> = sequenceT(
 )(B.int32_le, B.int32_le, B.int32_le, B.int32_le);
 
 export const refParams: B.BufferParser<RefParams> = sequenceS(P.Applicative)({
-  viewOrigin: B.point,
-  viewAngles: B.point,
-  forward: B.point,
-  right: B.point,
-  up: B.point,
+  viewOrigin: point,
+  viewAngles: point,
+  forward: point,
+  right: point,
+  up: point,
   frameTime: B.float32_le,
   time: B.float32_le,
   intermission: B.int32_le,
@@ -59,15 +62,15 @@ export const refParams: B.BufferParser<RefParams> = sequenceS(P.Applicative)({
   spectator: B.int32_le,
   onGround: B.int32_le,
   waterLevel: B.int32_le,
-  simVel: B.point,
-  simOrg: B.point,
-  viewHeight: B.point,
+  simVel: point,
+  simOrg: point,
+  viewHeight: point,
   idealPitch: B.float32_le,
-  cl_viewangles: B.point,
+  cl_viewangles: point,
   health: B.int32_le,
-  crosshairAngle: B.point,
+  crosshairAngle: point,
   viewSize: B.float32_le,
-  punchAngle: B.point,
+  punchAngle: point,
   maxClients: B.int32_le,
   viewEntity: B.int32_le,
   playerNum: B.int32_le,

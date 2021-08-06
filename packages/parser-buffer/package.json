@@ -1,5 +1,5 @@
 {
-  "name": "@talent/core",
+  "name": "@talent/parser-buffer",
   "version": "0.0.0",
   "description": "> TODO: description",
   "author": "Charles D'Angelo <c.g.dangelo@gmail.com>",
@@ -18,8 +18,5 @@
   "dependencies": {
     "@talent/parser": "workspace:packages/parser",
     "fp-ts": "^2.10.5"
-  },
-  "devDependencies": {
-    "@types/node": "^15.12.4"
   }
 }

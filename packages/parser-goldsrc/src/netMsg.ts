@@ -1,9 +1,9 @@
-import { buffer as B, parser as P, parseResult as PR } from "@talent/parser";
+import { parser as P, parseResult as PR } from "@talent/parser";
+import { buffer as B } from "@talent/parser-buffer";
 import { sequenceS } from "fp-ts/lib/Apply";
 import { pipe } from "fp-ts/lib/function";
 import type { NetMsgInfo } from "./netMsgInfo";
 import { netMsgInfo } from "./netMsgInfo";
-import { toError } from "./utils";
 
 export type NetMsg = {
   readonly info: NetMsgInfo;
@@ -21,9 +21,7 @@ export type NetMsg = {
 const msgLength: B.BufferParser<number> = pipe(
   B.int32_le,
   P.chain((a) =>
-    a > 0 && a < 65_536
-      ? P.succeed(a)
-      : P.fail(toError("invalid netmsg length")(a))
+    a > 0 && a < 65_536 ? P.succeed(a) : P.fail(`invalid netmsg length ${a}`)
   )
 );
 

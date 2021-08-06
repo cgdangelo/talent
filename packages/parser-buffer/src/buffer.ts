@@ -1,10 +1,9 @@
+import * as P from "@talent/parser/lib/Parser";
+import { success } from "@talent/parser/lib/ParseResult";
+import type { Stream } from "@talent/parser/lib/Stream";
+import { of as stream } from "@talent/parser/lib/Stream";
 import { either as E } from "fp-ts";
-import { sequenceS } from "fp-ts/lib/Apply";
 import { flow, pipe } from "fp-ts/lib/function";
-import * as P from "./Parser";
-import { success } from "./ParseResult";
-import type { Stream } from "./Stream";
-import { of as stream } from "./Stream";
 
 export type BufferParser<A> = P.Parser<Buffer, A>;
 
@@ -66,16 +65,3 @@ export const float32_le: BufferParser<number> = byteSized(
   (i) => i.buffer.readFloatLE(i.cursor),
   4
 );
-
-// TODO Move this to the goldsrc package.
-export type Point = {
-  readonly x: number;
-  readonly y: number;
-  readonly z: number;
-};
-
-export const point: BufferParser<Point> = sequenceS(P.Applicative)({
-  x: float32_le,
-  y: float32_le,
-  z: float32_le,
-});

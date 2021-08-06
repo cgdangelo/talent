@@ -1,9 +1,9 @@
-import { buffer as B, parser as P } from "@talent/parser";
+import { parser as P } from "@talent/parser";
+import { buffer as B } from "@talent/parser-buffer";
 import { sequenceT } from "fp-ts/lib/Apply";
 import { pipe } from "fp-ts/lib/function";
 import type { DirectoryEntry } from "./directoryEntry";
 import { directoryEntry } from "./directoryEntry";
-import { toError } from "./utils";
 
 export type Directory = {
   readonly entries: readonly DirectoryEntry[];
@@ -29,7 +29,7 @@ const validateDirectoryEntries: B.BufferParser<number> = pipe(
   P.chain((a) =>
     a === 2
       ? P.succeed(a)
-      : P.fail(toError("unexpected number of directory entries")(a))
+      : P.fail(`unexpected number of directory entries: ${a}`)
   )
 );
 

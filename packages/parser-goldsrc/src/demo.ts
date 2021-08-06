@@ -1,5 +1,5 @@
-import type { buffer as B } from "@talent/parser";
 import { parser as P } from "@talent/parser";
+import type { buffer as B } from "@talent/parser-buffer";
 import { sequenceS } from "fp-ts/lib/Apply";
 import type { Directory } from "./directory";
 import { directory } from "./directory";

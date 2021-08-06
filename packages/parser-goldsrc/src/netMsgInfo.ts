@@ -1,6 +1,8 @@
-import { buffer as B, parser as P } from "@talent/parser";
+import { parser as P } from "@talent/parser";
+import { buffer as B } from "@talent/parser-buffer";
 import { sequenceS } from "fp-ts/lib/Apply";
 import { moveVars } from "./moveVars";
+import { point } from "./Point";
 import type { RefParams } from "./refParams";
 import { refParams } from "./refParams";
 import { userCmd } from "./userCmd";
@@ -15,6 +17,6 @@ export const netMsgInfo: B.BufferParser<NetMsgInfo> = sequenceS(P.Applicative)({
   refParams,
   userCmd,
   moveVars,
-  view: B.point,
+  view: point,
   viewModel: B.int32_le,
 });
