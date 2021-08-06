@@ -16,7 +16,7 @@ export type DirectoryEntry = {
   readonly type: number;
 };
 
-export const directoryEntry: P.Parser<Buffer, DirectoryEntry> = pipe(
+export const directoryEntry: B.BufferParser<DirectoryEntry> = pipe(
   sequenceS(P.Applicative)({
     type: B.int32_le,
     description: B.str(64),

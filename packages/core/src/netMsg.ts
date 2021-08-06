@@ -18,7 +18,7 @@ export type NetMsg = {
   readonly msg: unknown;
 };
 
-const msgLength: P.Parser<Buffer, number> = pipe(
+const msgLength: B.BufferParser<number> = pipe(
   B.int32_le,
   P.chain((a) =>
     a > 0 && a < 65_536
@@ -27,11 +27,10 @@ const msgLength: P.Parser<Buffer, number> = pipe(
   )
 );
 
-const msg: (msgLength: number) => P.Parser<Buffer, Buffer> =
-  (msgLength) => (i) =>
-    PR.success(i.buffer.slice(i.cursor, i.cursor + msgLength), i, i);
+const msg: (msgLength: number) => B.BufferParser<Buffer> = (msgLength) => (i) =>
+  PR.success(i.buffer.slice(i.cursor, i.cursor + msgLength), i, i);
 
-export const netMsg: P.Parser<Buffer, NetMsg> = pipe(
+export const netMsg: B.BufferParser<NetMsg> = pipe(
   sequenceS(P.Applicative)({
     info: netMsgInfo,
     incomingSequence: B.int32_le,

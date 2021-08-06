@@ -9,7 +9,7 @@ export type Directory = {
   readonly entries: readonly DirectoryEntry[];
 };
 
-const directoryOffset: P.Parser<Buffer, number> = (i) =>
+const directoryOffset: B.BufferParser<number> = (i) =>
   pipe(
     B.uint32_le,
     P.chain((a) =>
@@ -24,7 +24,7 @@ const directoryOffset: P.Parser<Buffer, number> = (i) =>
     (x) => x(i)
   );
 
-const validateDirectoryEntries: P.Parser<Buffer, number> = pipe(
+const validateDirectoryEntries: B.BufferParser<number> = pipe(
   B.int32_le,
   P.chain((a) =>
     a === 2
@@ -33,7 +33,7 @@ const validateDirectoryEntries: P.Parser<Buffer, number> = pipe(
   )
 );
 
-const directoryEntries: P.Parser<Buffer, readonly DirectoryEntry[]> = pipe(
+const directoryEntries: B.BufferParser<readonly DirectoryEntry[]> = pipe(
   directoryOffset,
   P.chain((a) =>
     pipe(
@@ -47,7 +47,7 @@ const directoryEntries: P.Parser<Buffer, readonly DirectoryEntry[]> = pipe(
   )
 );
 
-export const directory: P.Parser<Buffer, Directory> = pipe(
+export const directory: B.BufferParser<Directory> = pipe(
   directoryEntries,
   P.map((entries) => ({ entries }))
 );

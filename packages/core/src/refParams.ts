@@ -42,11 +42,11 @@ export type RefParams = {
   readonly onlyClientDraw: number;
 };
 
-const viewPort: P.Parser<Buffer, RefParams["viewPort"]> = sequenceT(
+const viewPort: B.BufferParser<RefParams["viewPort"]> = sequenceT(
   P.Applicative
 )(B.int32_le, B.int32_le, B.int32_le, B.int32_le);
 
-export const refParams: P.Parser<Buffer, RefParams> = sequenceS(P.Applicative)({
+export const refParams: B.BufferParser<RefParams> = sequenceS(P.Applicative)({
   viewOrigin: B.point,
   viewAngles: B.point,
   forward: B.point,

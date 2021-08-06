@@ -1,11 +1,12 @@
 import { pipe } from "fp-ts/lib/function";
 import * as P from "./Parser";
 import * as PR from "./ParseResult";
+import { of as stream } from "./Stream";
 import type { Stream } from "./Stream";
 
-const empty: Stream<unknown> = { buffer: undefined, cursor: 0 };
+const empty: Stream<never[]> = { buffer: [], cursor: 0 };
 
-const resultS = <A>(a: A): PR.ParseResult<unknown, A> =>
+const resultS = <A>(a: A): PR.ParseResult<never[], A> =>
   PR.success(a, empty, empty);
 
 const resultF: <I, A = never>(e: string) => PR.ParseResult<I, A> = (e) =>
@@ -102,5 +103,31 @@ describe("Parser", () => {
         P.map((a) => a.repeat(3))
       )(empty)
     ).toStrictEqual(resultF("a"));
+  });
+
+  test.todo("succeed");
+
+  test.todo("fail");
+
+  test.todo("manyN");
+
+  test("skip", () => {
+    expect(pipe(empty, P.skip(10))).toStrictEqual(
+      PR.success(undefined, empty, stream(empty.buffer, 10))
+    );
+
+    expect(pipe(stream(empty.buffer, 10), P.skip(10))).toStrictEqual(
+      PR.success(undefined, stream(empty.buffer, 10), stream(empty.buffer, 20))
+    );
+  });
+
+  test("seek", () => {
+    expect(pipe(empty, P.seek(10))).toStrictEqual(
+      PR.success(undefined, empty, stream(empty.buffer, 10))
+    );
+
+    expect(pipe(stream(empty.buffer, 100), P.seek(1))).toStrictEqual(
+      PR.success(undefined, stream(empty.buffer, 100), stream(empty.buffer, 1))
+    );
   });
 });
