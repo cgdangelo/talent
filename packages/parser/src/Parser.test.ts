@@ -87,4 +87,20 @@ describe("Parser", () => {
       )(empty)
     ).toStrictEqual(resultF("a"));
   });
+
+  test("map", () => {
+    expect(
+      pipe(
+        P.of("a"),
+        P.map((a) => a.repeat(3))
+      )(empty)
+    ).toStrictEqual(resultS("aaa"));
+
+    expect(
+      pipe(
+        P.fail<unknown, string>("a"),
+        P.map((a) => a.repeat(3))
+      )(empty)
+    ).toStrictEqual(resultF("a"));
+  });
 });
