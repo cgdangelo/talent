@@ -46,10 +46,9 @@ const map_: Functor2<URI>["map"] = (fa, f) => (i) =>
     E.map((a) => ({ ...a, value: f(a.value) }))
   );
 
-export const alt: <E, A>(
-  fa: Parser<E, A>
-) => (that: Lazy<Parser<E, A>>) => Parser<E, A> = (fa) => (that) =>
-  alt_(fa, that);
+export const alt: <I, A>(
+  that: Lazy<Parser<I, A>>
+) => (fa: Parser<I, A>) => Parser<I, A> = (that) => (fa) => alt_(fa, that);
 
 export const ap: <I, A>(
   fa: Parser<I, A>
