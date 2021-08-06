@@ -1,4 +1,5 @@
-import { buffer as B, parser as P } from "@talent/parser";
+import { parser as P } from "@talent/parser";
+import { buffer as B } from "@talent/parser-buffer";
 import { sequenceS } from "fp-ts/lib/Apply";
 import { moveVars } from "./moveVars";
 import type { RefParams } from "./refParams";

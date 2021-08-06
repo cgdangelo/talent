@@ -1,6 +1,7 @@
 import { array as A, either as E } from "fp-ts";
 import type { Alt2 } from "fp-ts/lib/Alt";
 import type { Applicative2 } from "fp-ts/lib/Applicative";
+import type { Apply2 } from "fp-ts/lib/Apply";
 import type { Chain2 } from "fp-ts/lib/Chain";
 import type { Lazy } from "fp-ts/lib/function";
 import { flow, pipe } from "fp-ts/lib/function";
@@ -26,15 +27,14 @@ declare module "fp-ts/lib/HKT" {
 const alt_: Alt2<URI>["alt"] = (fa, that) => (i) =>
   pipe(fa(i), (s) => (E.isRight(s) ? s : that()(i)));
 
-const ap_: Applicative2<URI>["ap"] = (fab, fa) =>
-  chain_(fab, (f) => map_(fa, f));
+const ap_: Apply2<URI>["ap"] = (fab, fa) => chain_(fab, (f) => map_(fa, f));
 
 const chain_: Chain2<URI>["chain"] = (fa, f) =>
   flow(
     fa,
-    E.chain(({ value, next: input }) =>
+    E.chain(({ value, input, next }) =>
       pipe(
-        f(value)(input),
+        f(value)(next),
         E.chain(({ value, next }) => success(value, input, next))
       )
     )

@@ -1739,8 +1739,25 @@ __metadata:
   resolution: "@talent/core@workspace:packages/core"
   dependencies:
     "@talent/parser": "workspace:packages/parser"
-    "@talent/tsconfig": ^0.0.0
     "@types/node": ^15.12.4
+    fp-ts: ^2.10.5
+  languageName: unknown
+  linkType: soft
+
+"@talent/parser-buffer@workspace:packages/parser-buffer":
+  version: 0.0.0-use.local
+  resolution: "@talent/parser-buffer@workspace:packages/parser-buffer"
+  dependencies:
+    "@talent/parser": "workspace:packages/parser"
+    fp-ts: ^2.10.5
+  languageName: unknown
+  linkType: soft
+
+"@talent/parser-goldsrc@workspace:packages/parser-goldsrc":
+  version: 0.0.0-use.local
+  resolution: "@talent/parser-goldsrc@workspace:packages/parser-goldsrc"
+  dependencies:
+    "@talent/parser-buffer": "workspace:packages/parser-buffer"
     fp-ts: ^2.10.5
   languageName: unknown
   linkType: soft
@@ -1751,7 +1768,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@talent/tsconfig@^0.0.0, @talent/tsconfig@workspace:packages/tsconfig":
+"@talent/tsconfig@workspace:packages/tsconfig":
   version: 0.0.0-use.local
   resolution: "@talent/tsconfig@workspace:packages/tsconfig"
   languageName: unknown

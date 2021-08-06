@@ -1,5 +1,5 @@
 {
-  "name": "@talent/core",
+  "name": "@talent/parser-goldsrc",
   "version": "0.0.0",
   "description": "> TODO: description",
   "author": "Charles D'Angelo <c.g.dangelo@gmail.com>",
@@ -16,10 +16,7 @@
     "test": "echo \"Error: run tests from root\" && exit 1"
   },
   "dependencies": {
-    "@talent/parser": "workspace:packages/parser",
+    "@talent/parser-buffer": "workspace:packages/parser-buffer",
     "fp-ts": "^2.10.5"
-  },
-  "devDependencies": {
-    "@types/node": "^15.12.4"
   }
 }

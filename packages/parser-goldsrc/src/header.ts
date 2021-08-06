@@ -1,7 +1,7 @@
-import { buffer as B, parser as P } from "@talent/parser";
+import { parser as P } from "@talent/parser";
+import { buffer as B } from "@talent/parser-buffer";
 import { sequenceS } from "fp-ts/lib/Apply";
 import { pipe } from "fp-ts/lib/function";
-import { toError } from "./utils";
 
 export type Header = {
   readonly gameDirectory: string;
@@ -17,14 +17,14 @@ const magic: B.BufferParser<"HLDEMO"> = pipe(
   P.chain((a) =>
     a === "HLDEMO\x00\x00"
       ? P.succeed("HLDEMO")
-      : P.fail(toError("unsupported magic")(a))
+      : P.fail(`unsupported magic: ${a}`)
   )
 );
 
 const protocol: B.BufferParser<5> = pipe(
   B.int32_le,
   P.chain((a) =>
-    a === 5 ? P.succeed(a) : P.fail(toError("unsupported protocol")(a))
+    a === 5 ? P.succeed(a) : P.fail(`unsupported protocol: ${a}`)
   )
 );
 

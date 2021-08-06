@@ -1,4 +1,5 @@
-import { buffer as B, parser as P } from "@talent/parser";
+import { parser as P } from "@talent/parser";
+import { buffer as B } from "@talent/parser-buffer";
 import { sequenceS } from "fp-ts/lib/Apply";
 import { pipe } from "fp-ts/lib/function";
 import { netMsg } from "./netMsg";
@@ -63,8 +64,6 @@ const netMsgFrameType_ = (a: number): NetMsgFrameType => {
 
 const frameType: B.BufferParser<FrameType> = pipe(
   B.uint8_be,
-  // FIXME FIXME FIXME
-  // P.sat((a) => a <= 9, toError("invalid frame type")),
   P.map(frameType_)
 );
 
