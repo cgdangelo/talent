@@ -126,4 +126,12 @@ describe("buffer", () => {
       success(1.539989614439558e-36, stream(buffer), stream(buffer, 4))
     );
   });
+
+  test("take", () => {
+    const buffer = Buffer.alloc(100);
+
+    expect(pipe(stream(buffer), B.take(50))).toStrictEqual(
+      success(Buffer.alloc(50), stream(buffer), stream(buffer, 50))
+    );
+  });
 });
