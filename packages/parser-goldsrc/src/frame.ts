@@ -125,7 +125,8 @@ const frameData: (frameType: FrameType) => B.BufferParser<unknown> = (
 };
 
 export const frames: B.BufferParser<readonly Frame[]> = P.manyTill(
-  P.withLog(frame),
+  frame,
+
   pipe(
     frameHeader,
     P.chain((a) => (a.frameType === "next" ? P.succeed("") : P.fail(""))),

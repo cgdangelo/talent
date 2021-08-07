@@ -1,5 +1,4 @@
 import { pipe } from "fp-ts/lib/function";
-import { either as E } from "fp-ts";
 import * as P from "./Parser";
 import * as PR from "./ParseResult";
 import type { Stream } from "./Stream";
@@ -129,40 +128,6 @@ describe("Parser", () => {
 
     expect(pipe(stream(empty.buffer, 100), P.seek(1))).toStrictEqual(
       PR.success(undefined, stream(empty.buffer, 100), stream(empty.buffer, 1))
-    );
-  });
-
-  test("manyTill", () => {
-    const buffer = Buffer.from("foo bar baz");
-
-    const charP: P.Parser<Buffer, string> = (i) =>
-      pipe(
-        E.tryCatch(
-          () => i.buffer.readInt8(i.cursor),
-          (e) => `${e}`
-        ),
-        E.map(String.fromCharCode),
-        E.fold(
-          (e) => PR.failure(`${e}`),
-          (a) => PR.success(a, i, stream(i.buffer, i.cursor + 1))
-        )
-      );
-
-    const closingP: P.Parser<Buffer, string> = pipe(
-      charP,
-      P.chain((a) => (a === " " ? P.succeed(a) : P.fail(a)))
-    );
-
-    expect(pipe(stream(buffer), P.manyTill(charP, closingP))).toStrictEqual(
-      PR.success([..."foo"], stream(buffer), stream(buffer, 3))
-    );
-
-    expect(pipe(stream(buffer, 3), P.manyTill(charP, closingP))).toStrictEqual(
-      PR.success([], stream(buffer, 3), stream(buffer, 3))
-    );
-
-    expect(pipe(stream(buffer, 8), P.manyTill(charP, closingP))).toStrictEqual(
-      PR.success([..."baz"], stream(buffer, 8), stream(buffer, 11))
     );
   });
 });
