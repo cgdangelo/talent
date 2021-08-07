@@ -1,13 +1,20 @@
-import { array as A, either as E } from "fp-ts";
+import {
+  array as A,
+  either as E,
+  readonlyArray as RA,
+  readonlyNonEmptyArray as RNEA,
+} from "fp-ts";
 import type { Alt2 } from "fp-ts/lib/Alt";
 import type { Applicative2 } from "fp-ts/lib/Applicative";
 import type { Apply2 } from "fp-ts/lib/Apply";
 import type { Chain2 } from "fp-ts/lib/Chain";
+import type { ChainRec2 } from "fp-ts/lib/ChainRec";
+import { tailRec } from "fp-ts/lib/ChainRec";
 import type { Lazy } from "fp-ts/lib/function";
 import { flow, pipe } from "fp-ts/lib/function";
 import type { Functor2 } from "fp-ts/lib/Functor";
 import type { Monad2 } from "fp-ts/lib/Monad";
-import type { ParseResult } from "./ParseResult";
+import type { ParseResult, ParseSuccess } from "./ParseResult";
 import { failure, success } from "./ParseResult";
 import type { Stream } from "./Stream";
 import { of as stream } from "./Stream";
@@ -39,6 +46,32 @@ const chain_: Chain2<URI>["chain"] = (fa, f) =>
       )
     )
   );
+
+// https://github.com/gcanti/parser-ts/blob/master/src/Parser.ts#L534-L549
+const chainRec_: ChainRec2<URI>["chainRec"] = <I, A, B>(
+  a: A,
+  f: (a: A) => Parser<I, E.Either<A, B>>
+): Parser<I, B> => {
+  type Next<I, A> = { readonly stream: Stream<I>; readonly value: A };
+
+  const split =
+    (start: Stream<I>) =>
+    (
+      result: ParseSuccess<I, E.Either<A, B>>
+    ): E.Either<Next<I, A>, ParseResult<I, B>> =>
+      E.isLeft(result.value)
+        ? E.left({ value: result.value.left, stream: result.next })
+        : E.right(success(result.value.right, result.next, start));
+
+  return (start) =>
+    tailRec({ value: a, stream: start }, (state) => {
+      const result = f(state.value)(state.stream);
+      if (E.isLeft(result)) {
+        return E.right(failure(""));
+      }
+      return split(start)(result.right);
+    });
+};
 
 const map_: Functor2<URI>["map"] = (fa, f) => (i) =>
   pipe(
@@ -85,6 +118,14 @@ export const Chain: Chain2<URI> = {
   chain: chain_,
 };
 
+export const ChainRec: ChainRec2<URI> = {
+  URI,
+  ap: ap_,
+  chain: chain_,
+  chainRec: chainRec_,
+  map: map_,
+};
+
 export const Functor: Functor2<URI> = {
   URI,
   map: map_,
@@ -117,3 +158,45 @@ export const seek =
   (offset: number) =>
   <I>(i: Stream<I>): ParseResult<I, undefined> =>
     success(undefined, i, stream(i.buffer, offset));
+
+export const many1Till = <I, A, B>(
+  parser: Parser<I, A>,
+  terminator: Parser<I, B>
+): Parser<I, RNEA.ReadonlyNonEmptyArray<A>> =>
+  pipe(
+    parser,
+    chain((x) =>
+      chainRec_(RNEA.of(x), (acc) =>
+        pipe(
+          terminator,
+          map(() => E.right(acc)),
+          alt(() =>
+            pipe(
+              parser,
+              map((a) => E.left(RNEA.snoc(acc, a)))
+            )
+          )
+        )
+      )
+    )
+  );
+
+export const manyTill = <I, A, B>(
+  parser: Parser<I, A>,
+  terminator: Parser<I, B>
+): Parser<I, ReadonlyArray<A>> =>
+  pipe(
+    terminator,
+    map<B, ReadonlyArray<A>>(() => RA.empty),
+    alt<I, ReadonlyArray<A>>(() => many1Till(parser, terminator))
+  );
+
+export const withLog = <I, A>(fa: Parser<I, A>): Parser<I, A> =>
+  pipe(
+    fa,
+    chain((a) => {
+      console.log("parsed", a);
+
+      return succeed(a);
+    })
+  );

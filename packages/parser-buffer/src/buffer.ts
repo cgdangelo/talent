@@ -65,3 +65,8 @@ export const float32_le: BufferParser<number> = byteSized(
   (i) => i.buffer.readFloatLE(i.cursor),
   4
 );
+
+export const take: (byteLength: number) => BufferParser<Buffer> = (
+  byteLength
+) =>
+  byteSized((i) => i.buffer.slice(i.cursor, i.cursor + byteLength), byteLength);
