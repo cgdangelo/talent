@@ -117,3 +117,48 @@ export const seek =
   (offset: number) =>
   <I>(i: Stream<I>): ParseResult<I, undefined> =>
     success(undefined, i, stream(i.buffer, offset));
+
+export const manyTill =
+  <I, A, B>(p: Parser<I, A>, closingP: Parser<I, B>): Parser<I, readonly A[]> =>
+  (i) => {
+    // Attempt to parse closingP.
+    //
+    // If successful, return accumulated value.
+    //
+    // If failed, attempt to parse p.
+    //
+    // If successful, add to accumulated value and restart.
+    //
+    // If failed, return accumulated value.
+
+    function manyTill_(
+      i: Stream<I>,
+      acc: ParseResult<I, A>[] = []
+    ): typeof acc {
+      const closingPR = closingP(i);
+
+      if (E.isRight(closingPR)) {
+        return acc;
+      }
+
+      const pPR = p(i);
+
+      if (E.isLeft(pPR)) {
+        return acc;
+      }
+
+      acc.push(pPR);
+
+      return manyTill_(pPR.right.next, acc);
+    }
+
+    return pipe(manyTill_(i), E.sequenceArray, (mas) =>
+      E.isRight(mas)
+        ? success(
+            mas.right.map((a) => a.value),
+            i,
+            mas.right[mas.right.length - 1]?.next ?? i
+          )
+        : failure("")
+    );
+  };
