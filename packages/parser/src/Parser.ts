@@ -121,16 +121,6 @@ export const seek =
 export const manyTill =
   <I, A, B>(p: Parser<I, A>, closingP: Parser<I, B>): Parser<I, readonly A[]> =>
   (i) => {
-    // Attempt to parse closingP.
-    //
-    // If successful, return accumulated value.
-    //
-    // If failed, attempt to parse p.
-    //
-    // If successful, add to accumulated value and restart.
-    //
-    // If failed, return accumulated value.
-
     function manyTill_(
       i: Stream<I>,
       acc: ParseResult<I, A>[] = []
@@ -162,3 +152,13 @@ export const manyTill =
         : failure("")
     );
   };
+
+export const withLog = <I, A>(fa: Parser<I, A>): Parser<I, A> =>
+  pipe(
+    fa,
+    chain((a) => {
+      console.log("parsed", a);
+
+      return succeed(a);
+    })
+  );
