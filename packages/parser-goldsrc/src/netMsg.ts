@@ -1,4 +1,4 @@
-import { parser as P, parseResult as PR } from "@talent/parser";
+import { parser as P } from "@talent/parser";
 import { buffer as B } from "@talent/parser-buffer";
 import { sequenceS } from "fp-ts/lib/Apply";
 import { pipe } from "fp-ts/lib/function";
@@ -25,8 +25,8 @@ const msgLength: B.BufferParser<number> = pipe(
   )
 );
 
-const msg: (msgLength: number) => B.BufferParser<Buffer> = (msgLength) => (i) =>
-  PR.success(i.buffer.slice(i.cursor, i.cursor + msgLength), i, i);
+const msg: (msgLength: number) => B.BufferParser<Buffer> = (msgLength) =>
+  B.take(msgLength);
 
 export const netMsg: B.BufferParser<NetMsg> = pipe(
   sequenceS(P.Applicative)({

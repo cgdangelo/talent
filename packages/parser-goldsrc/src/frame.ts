@@ -81,29 +81,24 @@ const frame: B.BufferParser<Frame> = pipe(
       P.map((frameData) => ({ frameHeader, frameData }))
     )
   )
-  // TODO Repeat until frameNextSection
 );
 
 const frameData: (frameType: FrameType) => B.BufferParser<unknown> = (
   frameType
 ) => {
   switch (frameType) {
-    case "netmsg-normal":
-      return P.of("foo");
-
     case "netmsg-start":
       return netMsg;
 
     default:
-      return frameType.startsWith("netmsg-unknown")
-        ? P.of("baz")
-        : P.of(frameType);
+      return P.of(frameType);
   }
 };
 
-export const frames: B.BufferParser<readonly Frame[]> = pipe(
+export const frames: B.BufferParser<readonly Frame[]> = P.manyTill(
   frame,
-
-  // TODO Actually parse the rest.
-  P.map((a) => [a])
+  pipe(
+    frameHeader,
+    P.chain((a) => (a.frameType === "next" ? P.succeed("") : P.fail("")))
+  )
 );
