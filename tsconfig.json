@@ -1,6 +1,6 @@
 {
   "references": [
-    { "path": "./packages/core" },
+    { "path": "./packages/cli" },
     { "path": "./packages/parser" },
     { "path": "./packages/parser-buffer" },
     { "path": "./packages/parser-goldsrc" }

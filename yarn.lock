@@ -1734,9 +1734,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@talent/core@workspace:packages/core":
+"@talent/cli@workspace:packages/cli":
   version: 0.0.0-use.local
-  resolution: "@talent/core@workspace:packages/core"
+  resolution: "@talent/cli@workspace:packages/cli"
   dependencies:
     "@talent/parser": "workspace:packages/parser"
     "@types/node": ^15.12.4
