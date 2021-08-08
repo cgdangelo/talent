@@ -8,7 +8,7 @@
     "lint": "eslint packages/*/src",
     "format-check": "prettier -c packages/*/src",
     "test": "jest",
-    "prepare": "husky install"
+    "postinstallDev": "husky install"
   },
   "keywords": [],
   "author": "Charles D'Angelo",
