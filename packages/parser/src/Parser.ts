@@ -66,9 +66,11 @@ const chainRec_: ChainRec2<URI>["chainRec"] = <I, A, B>(
   return (start) =>
     tailRec({ value: a, stream: start }, (state) => {
       const result = f(state.value)(state.stream);
+
       if (E.isLeft(result)) {
-        return E.right(failure(""));
+        return E.right(failure(result.left));
       }
+
       return split(start)(result.right);
     });
 };
@@ -195,7 +197,7 @@ export const withLog = <I, A>(fa: Parser<I, A>): Parser<I, A> =>
   pipe(
     fa,
     chain((a) => {
-      console.log("parsed", a);
+      console.dir(a, { depth: Infinity });
 
       return succeed(a);
     })
