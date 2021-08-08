@@ -21,6 +21,6 @@
     "fp-ts": "^2.11.1"
   },
   "devDependencies": {
-    "@types/node": "^15.12.4"
+    "@types/node": "^16.4.13"
   }
 }
