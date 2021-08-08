@@ -1,7 +1,7 @@
 import { buffer as B } from "@talent/parser-buffer";
 import { parser as P } from "@talent/parser";
-import type { Point } from "./Point";
-import { point } from "./Point";
+import type { Point } from "../Point";
+import { point } from "../Point";
 import { sequenceS } from "fp-ts/lib/Apply";
 
 export type Event = {

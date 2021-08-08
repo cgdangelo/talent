@@ -2,8 +2,8 @@ import { parser as P } from "@talent/parser";
 import { buffer as B } from "@talent/parser-buffer";
 import { sequenceS } from "fp-ts/lib/Apply";
 import { pipe } from "fp-ts/lib/function";
-import type { Point } from "./Point";
-import { point } from "./Point";
+import type { Point } from "../Point";
+import { point } from "../Point";
 
 export type MoveVars = {
   readonly gravity: number;
