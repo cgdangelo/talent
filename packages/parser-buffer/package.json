@@ -17,6 +17,6 @@
   },
   "dependencies": {
     "@talent/parser": "workspace:packages/parser",
-    "fp-ts": "^2.10.5"
+    "fp-ts": "^2.11.1"
   }
 }

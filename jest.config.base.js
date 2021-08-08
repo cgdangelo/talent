@@ -4,7 +4,7 @@ module.exports = {
   // collectCoverage: true,
   collectCoverageFrom: ["<rootDir>/src/*.ts"],
   coverageDirectory: "<rootDir>/coverage/",
-  coveragePathIgnorePatterns: ["<rootDir>/lib/", "<rootDir>/node_modules/"],
+  coveragePathIgnorePatterns: ["<rootDir>/lib/"],
   // coverageThreshold: {
   //   global: {
   //     branches: 100,

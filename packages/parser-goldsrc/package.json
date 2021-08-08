@@ -15,7 +15,8 @@
     "test": "echo \"Error: run tests from root\" && exit 1"
   },
   "dependencies": {
+    "@talent/parser": "workspace:packages/parser",
     "@talent/parser-buffer": "workspace:packages/parser-buffer",
-    "fp-ts": "^2.10.5"
+    "fp-ts": "^2.11.1"
   }
 }

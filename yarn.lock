@@ -1739,8 +1739,9 @@ __metadata:
   resolution: "@talent/cli@workspace:packages/cli"
   dependencies:
     "@talent/parser": "workspace:packages/parser"
+    "@talent/parser-goldsrc": "workspace:packages/parser-goldsrc"
     "@types/node": ^15.12.4
-    fp-ts: ^2.10.5
+    fp-ts: ^2.11.1
   languageName: unknown
   linkType: soft
 
@@ -1749,7 +1750,7 @@ __metadata:
   resolution: "@talent/parser-buffer@workspace:packages/parser-buffer"
   dependencies:
     "@talent/parser": "workspace:packages/parser"
-    fp-ts: ^2.10.5
+    fp-ts: ^2.11.1
   languageName: unknown
   linkType: soft
 
@@ -1757,20 +1758,25 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@talent/parser-goldsrc@workspace:packages/parser-goldsrc"
   dependencies:
+    "@talent/parser": "workspace:packages/parser"
     "@talent/parser-buffer": "workspace:packages/parser-buffer"
-    fp-ts: ^2.10.5
+    fp-ts: ^2.11.1
   languageName: unknown
   linkType: soft
 
 "@talent/parser@workspace:packages/parser":
   version: 0.0.0-use.local
   resolution: "@talent/parser@workspace:packages/parser"
+  dependencies:
+    fp-ts: ^2.11.1
   languageName: unknown
   linkType: soft
 
 "@talent/tsconfig@workspace:packages/tsconfig":
   version: 0.0.0-use.local
   resolution: "@talent/tsconfig@workspace:packages/tsconfig"
+  dependencies:
+    fp-ts: ^2.11.1
   languageName: unknown
   linkType: soft
 
@@ -3961,10 +3967,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"fp-ts@npm:^2.10.5":
-  version: 2.10.5
-  resolution: "fp-ts@npm:2.10.5"
-  checksum: 3b47a32c99c6496b10a84aeaaa3d83c47d3102685dabc77bfbb50ce16e28098dc1c08db2db0d06b225c3a9610c292fa9a2ebb9a5886e80ae2b95e870eb8e1223
+"fp-ts@npm:^2.11.1":
+  version: 2.11.1
+  resolution: "fp-ts@npm:2.11.1"
+  checksum: 3c13ef05919de51466039ad01d1002093adb38a239c3d096271aad1433f0d7b3ba753b27eafdbd0d1139971f48f1d4044d99ec2b6c452b8d2b17916b9faf98a2
   languageName: node
   linkType: hard
 
@@ -8334,6 +8340,7 @@ fsevents@^2.3.2:
     eslint: ^7.29.0
     eslint-config-prettier: ^8.3.0
     eslint-plugin-prettier: ^3.4.0
+    fp-ts: ^2.11.1
     husky: ">=6"
     jest: ^27.0.6
     lerna: ^4.0.0
