@@ -70,6 +70,11 @@ const netMsgFrameType_ = (a: number): NetMsgFrameType => {
 
 const frameType: B.BufferParser<FrameType> = pipe(
   B.uint8_be,
+  P.chain((a) =>
+    a < 0 || a > 9
+      ? P.fail(`expected frame type id [0, 9], got ${a}`)
+      : P.succeed(a)
+  ),
   P.map(frameType_)
 );
 
@@ -137,7 +142,7 @@ export const frames: B.BufferParser<readonly Frame[]> = P.manyTill(
           () => (i) =>
             i.cursor >= i.buffer.length
               ? PR.success("eof", i, i)
-              : PR.failure("???")
+              : PR.failure("")
         )
       )
     )
