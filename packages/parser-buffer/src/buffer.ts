@@ -7,7 +7,7 @@ import { flow, pipe } from "fp-ts/lib/function";
 
 export type BufferParser<A> = P.Parser<Buffer, A>;
 
-const int_: (
+const int: (
   fa: Buffer["readIntLE" | "readUIntLE" | "readIntBE" | "readUIntBE"]
 ) => (bitLength: 8 | 16 | 24 | 32 | 40 | 48) => P.Parser<Buffer, number> =
   (fa) => (bitLength) =>
@@ -29,34 +29,21 @@ export const byteSized: <A>(
     E.chain((a) => success(a, i, stream(i.buffer, i.cursor + byteLength)))
   );
 
-export const int_le: (bitLength: BitLength) => BufferParser<number> = int_(
+export const int_le: (bitLength: BitLength) => BufferParser<number> = int(
   Buffer.prototype.readIntLE
 );
 
-export const uint_le: (bitLength: BitLength) => BufferParser<number> = int_(
+export const uint_le: (bitLength: BitLength) => BufferParser<number> = int(
   Buffer.prototype.readUIntLE
 );
 
-export const int_be: (bitLength: BitLength) => BufferParser<number> = int_(
+export const int_be: (bitLength: BitLength) => BufferParser<number> = int(
   Buffer.prototype.readIntBE
 );
 
-export const uint_be: (bitLength: BitLength) => BufferParser<number> = int_(
+export const uint_be: (bitLength: BitLength) => BufferParser<number> = int(
   Buffer.prototype.readUIntBE
 );
-
-export const char: BufferParser<string> = pipe(
-  int_le(8),
-  P.map(String.fromCharCode)
-);
-
-export const str: (byteLength: number) => BufferParser<string> = (byteLength) =>
-  flow(
-    pipe(
-      P.manyN(char, byteLength),
-      P.map((a) => a.join(""))
-    )
-  );
 
 export const int32_le: BufferParser<number> = int_le(32);
 export const int16_le: BufferParser<number> = int_le(16);
@@ -73,6 +60,40 @@ export const float32_le: BufferParser<number> = byteSized(
   (i) => i.buffer.readFloatLE(i.cursor),
   4
 );
+
+export const char: BufferParser<string> = pipe(
+  int_le(8),
+  P.map(String.fromCharCode)
+);
+
+export const str: (byteLength: number) => BufferParser<string> = (byteLength) =>
+  flow(
+    pipe(
+      P.manyN(char, byteLength),
+      P.map((a) => a.join(""))
+    )
+  );
+
+export const ztstr: BufferParser<string> = pipe(
+  P.manyTill(
+    char,
+    pipe(
+      char,
+      P.chain((a) => (a === "\x00" ? P.succeed("") : P.fail("")))
+    )
+  ),
+  P.map((a) => a.join(""))
+);
+
+export const ztstr_padded: (minLength: number) => BufferParser<string> =
+  (minLength) => (i) =>
+    pipe(
+      ztstr(i),
+      E.map((a) => ({
+        ...a,
+        next: stream(a.next.buffer, i.cursor + minLength),
+      }))
+    );
 
 export const take: (byteLength: number) => BufferParser<Buffer> = (
   byteLength
