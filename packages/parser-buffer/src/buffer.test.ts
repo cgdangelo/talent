@@ -1,6 +1,6 @@
 import { failure, success } from "@talent/parser/lib/ParseResult";
 import type { Stream } from "@talent/parser/lib/Stream";
-import { of as stream } from "@talent/parser/lib/Stream";
+import { stream } from "@talent/parser/lib/Stream";
 import { pipe } from "fp-ts/lib/function";
 import * as B from "./buffer";
 

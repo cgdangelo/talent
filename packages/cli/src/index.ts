@@ -1,6 +1,12 @@
 import { demo } from "@talent/parser-goldsrc/lib/demo";
 import type { Stream } from "@talent/parser/lib/Stream";
-import { either as E, string as S, taskEither as TE } from "fp-ts";
+import { stream } from "@talent/parser/lib/Stream";
+import {
+  either as E,
+  predicate as P,
+  string as S,
+  taskEither as TE,
+} from "fp-ts";
 import { constant, flow, pipe } from "fp-ts/lib/function";
 import { readFile } from "fs/promises";
 
@@ -12,18 +18,13 @@ const readFileContents: (
       () => readFile(path),
       flow(E.toError, (a) => a.message)
     ),
-    TE.map((buffer) => ({ buffer, cursor: 0 }))
+    TE.map(stream)
   );
 
 const validateDemoPath: (path?: string) => E.Either<string, string> = flow(
   E.fromNullable("no demo path provided"),
-  E.map((s) => s.trim()),
-  E.chain(
-    E.fromPredicate(
-      flow(S.size, (a) => a !== 0),
-      constant("demo path is empty")
-    )
-  )
+  E.map(S.trim),
+  E.chain(E.fromPredicate(P.not(S.isEmpty), constant("demo path is empty")))
 );
 
 const main = pipe(

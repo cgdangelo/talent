@@ -1,7 +1,7 @@
 import * as P from "@talent/parser/lib/Parser";
 import { success } from "@talent/parser/lib/ParseResult";
 import type { Stream } from "@talent/parser/lib/Stream";
-import { of as stream } from "@talent/parser/lib/Stream";
+import { stream } from "@talent/parser/lib/Stream";
 import { either as E } from "fp-ts";
 import { flow, pipe } from "fp-ts/lib/function";
 

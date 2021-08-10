@@ -10,14 +10,14 @@ import type { Apply2 } from "fp-ts/lib/Apply";
 import type { Chain2 } from "fp-ts/lib/Chain";
 import type { ChainRec2 } from "fp-ts/lib/ChainRec";
 import { tailRec } from "fp-ts/lib/ChainRec";
-import type { Lazy } from "fp-ts/lib/function";
-import { flow, pipe } from "fp-ts/lib/function";
+import type { Lazy} from "fp-ts/lib/function";
+import { constant, flow, pipe } from "fp-ts/lib/function";
 import type { Functor2 } from "fp-ts/lib/Functor";
 import type { Monad2 } from "fp-ts/lib/Monad";
 import type { ParseResult, ParseSuccess } from "./ParseResult";
 import { failure, success } from "./ParseResult";
 import type { Stream } from "./Stream";
-import { of as stream } from "./Stream";
+import { stream } from "./Stream";
 
 export type Parser<I, A> = (stream: Stream<I>) => ParseResult<I, A>;
 
@@ -59,25 +59,25 @@ const chainRec_: ChainRec2<URI>["chainRec"] = <I, A, B>(
     (
       result: ParseSuccess<I, E.Either<A, B>>
     ): E.Either<Next<I, A>, ParseResult<I, B>> =>
-      E.isLeft(result.value)
-        ? E.left({ value: result.value.left, stream: result.next })
-        : E.right(success(result.value.right, result.next, start));
+      pipe(
+        result.value,
+        E.match(
+          (e) => E.left({ value: e, stream: result.next }),
+          (a) => E.right(success(a, result.next, start))
+        )
+      );
 
   return (start) =>
-    tailRec({ value: a, stream: start }, (state) => {
-      const result = f(state.value)(state.stream);
-
-      if (E.isLeft(result)) {
-        return E.right(failure(result.left));
-      }
-
-      return split(start)(result.right);
-    });
+    tailRec({ value: a, stream: start }, (state) =>
+      pipe(f(state.value)(state.stream), (a) =>
+        E.isLeft(a) ? E.right(failure(a.left)) : split(start)(a.right)
+      )
+    );
 };
 
-const map_: Functor2<URI>["map"] = (fa, f) => (i) =>
-  pipe(
-    fa(i),
+const map_: Functor2<URI>["map"] = (fa, f) =>
+  flow(
+    fa,
     E.map((a) => ({ ...a, value: f(a.value) }))
   );
 
@@ -171,11 +171,11 @@ export const many1Till = <I, A, B>(
       chainRec_(RNEA.of(x), (acc) =>
         pipe(
           terminator,
-          map(() => E.right(acc)),
+          map(constant(E.right(acc))),
           alt(() =>
             pipe(
               parser,
-              map((a) => E.left(RNEA.snoc(acc, a)))
+              map((a) => E.left(RA.append(a)(acc)))
             )
           )
         )
@@ -193,12 +193,21 @@ export const manyTill = <I, A, B>(
     alt<I, ReadonlyArray<A>>(() => many1Till(parser, terminator))
   );
 
-export const withLog = <I, A>(fa: Parser<I, A>): Parser<I, A> =>
-  pipe(
-    fa,
-    chain((a) => {
-      console.dir(a, { depth: Infinity });
+export const logPositions: <I, A>(fa: Parser<I, A>) => Parser<I, A> =
+  (fa) => (i) =>
+    pipe(
+      fa(i),
+      E.map((a) => {
+        console.log(`before: ${i.cursor}, after: ${a.next.cursor}`);
 
-      return succeed(a);
-    })
-  );
+        return a;
+      })
+    );
+
+export const logResult: <I, A>(fa: Parser<I, A>) => Parser<I, A> = flow(
+  chain((a) => {
+    console.dir(a, { depth: Infinity });
+
+    return succeed(a);
+  })
+);

@@ -2,7 +2,7 @@ import { pipe } from "fp-ts/lib/function";
 import * as P from "./Parser";
 import * as PR from "./ParseResult";
 import type { Stream } from "./Stream";
-import { of as stream } from "./Stream";
+import { stream } from "./Stream";
 
 const empty: Stream<never[]> = { buffer: [], cursor: 0 };
 

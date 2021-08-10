@@ -1,5 +1,5 @@
 import { success } from "@talent/parser/lib/ParseResult";
-import { of as stream } from "@talent/parser/lib/Stream";
+import { stream } from "@talent/parser/lib/Stream";
 import { pipe } from "fp-ts/lib/function";
 import { point } from "./Point";
 
