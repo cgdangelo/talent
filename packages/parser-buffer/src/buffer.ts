@@ -7,48 +7,56 @@ import { flow, pipe } from "fp-ts/lib/function";
 
 export type BufferParser<A> = P.Parser<Buffer, A>;
 
-const pluckErrorMsg: (e: unknown) => string = flow(E.toError, (e) => e.message);
+const int_: (
+  fa: Buffer["readIntLE" | "readUIntLE" | "readIntBE" | "readUIntBE"]
+) => (bitLength: 8 | 16 | 24 | 32 | 40 | 48) => P.Parser<Buffer, number> =
+  (fa) => (bitLength) =>
+    pipe(bitLength / 8, (byteLength) =>
+      byteSized((i) => fa.call(i.buffer, i.cursor, byteLength), byteLength)
+    );
+
+type BitLength = 8 | 16 | 24 | 32 | 40 | 48;
 
 export const byteSized: <A>(
   f: (a: Stream<Buffer>) => A,
   byteLength: number
 ) => BufferParser<A> = (f, byteLength) => (i) =>
   pipe(
-    E.tryCatch(() => f(i), pluckErrorMsg),
+    E.tryCatch(
+      () => f(i),
+      (e) => `${e}`
+    ),
     E.chain((a) => success(a, i, stream(i.buffer, i.cursor + byteLength)))
   );
 
-export const int_le: (
-  bitLength: 8 | 16 | 24 | 32 | 40 | 48
-) => BufferParser<number> = (bitLength) =>
-  byteSized((i) => i.buffer.readIntLE(i.cursor, bitLength / 8), bitLength / 8);
+export const int_le: (bitLength: BitLength) => BufferParser<number> = int_(
+  Buffer.prototype.readIntLE
+);
 
-export const uint_le: (
-  bitLength: 8 | 16 | 24 | 32 | 40 | 48
-) => BufferParser<number> = (bitLength) =>
-  byteSized((i) => i.buffer.readUIntLE(i.cursor, bitLength / 8), bitLength / 8);
+export const uint_le: (bitLength: BitLength) => BufferParser<number> = int_(
+  Buffer.prototype.readUIntLE
+);
 
-export const int_be: (
-  bitLength: 8 | 16 | 24 | 32 | 40 | 48
-) => BufferParser<number> = (bitLength) =>
-  byteSized((i) => i.buffer.readIntBE(i.cursor, bitLength / 8), bitLength / 8);
+export const int_be: (bitLength: BitLength) => BufferParser<number> = int_(
+  Buffer.prototype.readIntBE
+);
 
-export const uint_be: (
-  bitLength: 8 | 16 | 24 | 32 | 40 | 48
-) => BufferParser<number> = (bitLength) =>
-  byteSized((i) => i.buffer.readUIntBE(i.cursor, bitLength / 8), bitLength / 8);
+export const uint_be: (bitLength: BitLength) => BufferParser<number> = int_(
+  Buffer.prototype.readUIntBE
+);
 
 export const char: BufferParser<string> = pipe(
   int_le(8),
   P.map(String.fromCharCode)
 );
 
-export const str: (byteLength: number) => BufferParser<string> =
-  (byteLength) => (i) =>
+export const str: (byteLength: number) => BufferParser<string> = (byteLength) =>
+  flow(
     pipe(
-      P.manyN(char, byteLength)(i),
-      E.map((a) => ({ ...a, input: i, value: a.value.join("") }))
-    );
+      P.manyN(char, byteLength),
+      P.map((a) => a.join(""))
+    )
+  );
 
 export const int32_le: BufferParser<number> = int_le(32);
 export const int16_le: BufferParser<number> = int_le(16);
