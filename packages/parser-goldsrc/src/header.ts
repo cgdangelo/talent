@@ -13,19 +13,17 @@ export type Header = {
 };
 
 const magic: B.BufferParser<"HLDEMO"> = pipe(
-  B.str(8),
-  P.chain((a) =>
-    a === "HLDEMO\x00\x00"
-      ? P.succeed("HLDEMO")
-      : P.fail(`unsupported magic: ${a}`)
+  P.sat(
+    B.str(8),
+    (a): a is "HLDEMO" => a === "HLDEMO\x00\x00",
+    (a) => `unsupported magic: ${a}`
   )
 );
 
-const protocol: B.BufferParser<5> = pipe(
+const protocol: B.BufferParser<5> = P.sat(
   B.int32_le,
-  P.chain((a) =>
-    a === 5 ? P.succeed(a) : P.fail(`unsupported protocol: ${a}`)
-  )
+  (a): a is 5 => a === 5,
+  (a) => `unsupported protocol: ${a}`
 );
 
 export const header: B.BufferParser<Header> = sequenceS(P.Applicative)({

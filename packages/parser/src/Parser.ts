@@ -10,10 +10,12 @@ import type { Apply2 } from "fp-ts/lib/Apply";
 import type { Chain2 } from "fp-ts/lib/Chain";
 import type { ChainRec2 } from "fp-ts/lib/ChainRec";
 import { tailRec } from "fp-ts/lib/ChainRec";
-import type { Lazy} from "fp-ts/lib/function";
+import type { Lazy } from "fp-ts/lib/function";
 import { constant, flow, pipe } from "fp-ts/lib/function";
 import type { Functor2 } from "fp-ts/lib/Functor";
 import type { Monad2 } from "fp-ts/lib/Monad";
+import type { Predicate } from "fp-ts/lib/Predicate";
+import type { Refinement } from "fp-ts/lib/Refinement";
 import type { ParseResult, ParseSuccess } from "./ParseResult";
 import { failure, success } from "./ParseResult";
 import type { Stream } from "./Stream";
@@ -211,3 +213,25 @@ export const logResult: <I, A>(fa: Parser<I, A>) => Parser<I, A> = flow(
     return succeed(a);
   })
 );
+
+export const sat: {
+  <I, A, B extends A>(
+    fa: Parser<I, A>,
+    predicate: Refinement<A, B>,
+    onPredicateFail: (a: A) => string
+  ): Parser<I, B>;
+
+  <I, A>(
+    fa: Parser<I, A>,
+    predicate: Predicate<A>,
+    onPredicateFail: (a: A) => string
+  ): Parser<I, A>;
+} = <I, A>(
+  fa: Parser<I, A>,
+  predicate: Predicate<A>,
+  onPredicateFail: (a: A) => string
+) =>
+  pipe(
+    fa,
+    chain((a) => (predicate(a) ? succeed(a) : fail(onPredicateFail(a))))
+  );

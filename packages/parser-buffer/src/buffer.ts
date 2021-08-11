@@ -3,7 +3,7 @@ import { success } from "@talent/parser/lib/ParseResult";
 import type { Stream } from "@talent/parser/lib/Stream";
 import { stream } from "@talent/parser/lib/Stream";
 import { either as E } from "fp-ts";
-import { flow, pipe } from "fp-ts/lib/function";
+import { flow, identity, pipe } from "fp-ts/lib/function";
 
 export type BufferParser<A> = P.Parser<Buffer, A>;
 
@@ -77,10 +77,7 @@ export const str: (byteLength: number) => BufferParser<string> = (byteLength) =>
 export const ztstr: BufferParser<string> = pipe(
   P.manyTill(
     char,
-    pipe(
-      char,
-      P.chain((a) => (a === "\x00" ? P.succeed("") : P.fail("")))
-    )
+    P.sat(char, (a) => a === "\x00", identity)
   ),
   P.map((a) => a.join(""))
 );
