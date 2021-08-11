@@ -32,14 +32,17 @@ export const directoryEntry: B.BufferParser<DirectoryEntry> = pipe(
   P.chain((a) =>
     pipe(
       P.seek(a.offset),
-      P.chain(() =>
-        P.sat(
-          frames,
-          (b) => b.length === a.frameCount,
-          (b) => `expected ${a.frameCount} frames, got ${b.length}`
-        )
-      ),
 
+      // TODO Apparently this is not true?
+      // P.chain(() =>
+      //   P.sat(
+      //     frames,
+      //     (b) => b.length === a.frameCount,
+      //     (b) => `expected ${a.frameCount} frames, got ${b.length}`
+      //   )
+      // ),
+
+      P.chain(() => frames),
       P.map((frames) => ({ ...a, frames }))
     )
   )

@@ -154,11 +154,6 @@ export const succeed: <I, A>(a: A) => Parser<I, A> = of;
 export const fail: <I, A = never>(e: string) => Parser<I, A> = (e) => () =>
   failure(e);
 
-export const manyN: <I, A>(fa: Parser<I, A>, n: number) => Parser<I, A[]> = (
-  fa,
-  n
-) => pipe(A.replicate(n, fa), A.sequence(Applicative));
-
 export const skip =
   (length: number) =>
   <I>(i: Stream<I>): ParseResult<I, undefined> =>
@@ -168,6 +163,11 @@ export const seek =
   (offset: number) =>
   <I>(i: Stream<I>): ParseResult<I, undefined> =>
     success(undefined, i, stream(i.buffer, offset));
+
+export const manyN: <I, A>(fa: Parser<I, A>, n: number) => Parser<I, A[]> = (
+  fa,
+  n
+) => pipe(A.replicate(n, fa), A.sequence(Applicative));
 
 export const many1Till = <I, A, B>(
   parser: Parser<I, A>,
