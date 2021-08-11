@@ -14,6 +14,7 @@ import type { Lazy } from "fp-ts/lib/function";
 import { constant, flow, pipe } from "fp-ts/lib/function";
 import type { Functor2 } from "fp-ts/lib/Functor";
 import type { Monad2 } from "fp-ts/lib/Monad";
+import type { Pointed2 } from "fp-ts/lib/Pointed";
 import type { Predicate } from "fp-ts/lib/Predicate";
 import type { Refinement } from "fp-ts/lib/Refinement";
 import type { ParseResult, ParseSuccess } from "./ParseResult";
@@ -100,7 +101,7 @@ export const map: <A, B>(
   f: (a: A) => B
 ) => <I>(fa: Parser<I, A>) => Parser<I, B> = (f) => (fa) => map_(fa, f);
 
-export const of: <I, A>(a: A) => Parser<I, A> = (a) => (i) => success(a, i, i);
+export const of: Pointed2<URI>["of"] = (a) => (i) => success(a, i, i);
 
 export const Alt: Alt2<URI> = {
   URI,
@@ -140,6 +141,11 @@ export const Monad: Monad2<URI> = {
   ap: ap_,
   chain: chain_,
   map: map_,
+  of,
+};
+
+export const Pointed: Pointed2<URI> = {
+  URI,
   of,
 };
 
