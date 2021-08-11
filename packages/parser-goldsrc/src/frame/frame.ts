@@ -71,7 +71,7 @@ const netMsgFrameType_ = (a: number): NetMsgFrameType => {
 const frameType: B.BufferParser<FrameType> = pipe(
   P.sat(
     B.uint8_be,
-    (a) => a > 0 && a < 9,
+    (a) => a >= 0 && a <= 9,
     (a) => `expected frame type id [0, 9], got ${a}`
   ),
   P.map(frameType_)

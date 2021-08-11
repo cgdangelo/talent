@@ -15,7 +15,7 @@ describe("buffer", () => {
           throw new Error("a");
         }, 4)
       )
-    ).toStrictEqual(failure("a"));
+    ).toStrictEqual(failure("Error: a"));
 
     expect(
       pipe(
