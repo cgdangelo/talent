@@ -130,4 +130,39 @@ describe("Parser", () => {
       PR.success(undefined, stream(empty.buffer, 100), stream(empty.buffer, 1))
     );
   });
+
+  test("sat", () => {
+    expect(
+      pipe(
+        empty,
+        P.sat(
+          P.of("a"),
+          (a) => a === "a",
+          (a) => a
+        )
+      )
+    ).toStrictEqual(PR.success("a", empty, empty));
+
+    expect(
+      pipe(
+        empty,
+        P.sat(
+          P.of("a"),
+          (a) => a === "b",
+          (a) => a
+        )
+      )
+    ).toStrictEqual(PR.failure("a"));
+
+    expect(
+      pipe(
+        empty,
+        P.sat(
+          P.fail("a"),
+          (a) => a === "a",
+          () => "unused"
+        )
+      )
+    ).toStrictEqual(PR.failure("a"));
+  });
 });
