@@ -11,13 +11,16 @@ import type { Chain2 } from "fp-ts/lib/Chain";
 import type { ChainRec2 } from "fp-ts/lib/ChainRec";
 import { tailRec } from "fp-ts/lib/ChainRec";
 import type { Lazy } from "fp-ts/lib/function";
-import { flow, pipe } from "fp-ts/lib/function";
+import { constant, flow, pipe } from "fp-ts/lib/function";
 import type { Functor2 } from "fp-ts/lib/Functor";
 import type { Monad2 } from "fp-ts/lib/Monad";
+import type { Pointed2 } from "fp-ts/lib/Pointed";
+import type { Predicate } from "fp-ts/lib/Predicate";
+import type { Refinement } from "fp-ts/lib/Refinement";
 import type { ParseResult, ParseSuccess } from "./ParseResult";
 import { failure, success } from "./ParseResult";
 import type { Stream } from "./Stream";
-import { of as stream } from "./Stream";
+import { stream } from "./Stream";
 
 export type Parser<I, A> = (stream: Stream<I>) => ParseResult<I, A>;
 
@@ -59,25 +62,25 @@ const chainRec_: ChainRec2<URI>["chainRec"] = <I, A, B>(
     (
       result: ParseSuccess<I, E.Either<A, B>>
     ): E.Either<Next<I, A>, ParseResult<I, B>> =>
-      E.isLeft(result.value)
-        ? E.left({ value: result.value.left, stream: result.next })
-        : E.right(success(result.value.right, result.next, start));
+      pipe(
+        result.value,
+        E.match(
+          (e) => E.left({ value: e, stream: result.next }),
+          (a) => E.right(success(a, result.next, start))
+        )
+      );
 
   return (start) =>
-    tailRec({ value: a, stream: start }, (state) => {
-      const result = f(state.value)(state.stream);
-
-      if (E.isLeft(result)) {
-        return E.right(failure(result.left));
-      }
-
-      return split(start)(result.right);
-    });
+    tailRec({ value: a, stream: start }, (state) =>
+      pipe(f(state.value)(state.stream), (a) =>
+        E.isLeft(a) ? E.right(failure(a.left)) : split(start)(a.right)
+      )
+    );
 };
 
-const map_: Functor2<URI>["map"] = (fa, f) => (i) =>
-  pipe(
-    fa(i),
+const map_: Functor2<URI>["map"] = (fa, f) =>
+  flow(
+    fa,
     E.map((a) => ({ ...a, value: f(a.value) }))
   );
 
@@ -98,7 +101,7 @@ export const map: <A, B>(
   f: (a: A) => B
 ) => <I>(fa: Parser<I, A>) => Parser<I, B> = (f) => (fa) => map_(fa, f);
 
-export const of: <I, A>(a: A) => Parser<I, A> = (a) => (i) => success(a, i, i);
+export const of: Pointed2<URI>["of"] = (a) => (i) => success(a, i, i);
 
 export const Alt: Alt2<URI> = {
   URI,
@@ -141,15 +144,15 @@ export const Monad: Monad2<URI> = {
   of,
 };
 
+export const Pointed: Pointed2<URI> = {
+  URI,
+  of,
+};
+
 export const succeed: <I, A>(a: A) => Parser<I, A> = of;
 
 export const fail: <I, A = never>(e: string) => Parser<I, A> = (e) => () =>
   failure(e);
-
-export const manyN: <I, A>(fa: Parser<I, A>, n: number) => Parser<I, A[]> = (
-  fa,
-  n
-) => pipe(A.replicate(n, fa), A.sequence(Applicative));
 
 export const skip =
   (length: number) =>
@@ -161,6 +164,11 @@ export const seek =
   <I>(i: Stream<I>): ParseResult<I, undefined> =>
     success(undefined, i, stream(i.buffer, offset));
 
+export const manyN: <I, A>(fa: Parser<I, A>, n: number) => Parser<I, A[]> = (
+  fa,
+  n
+) => pipe(A.replicate(n, fa), A.sequence(Applicative));
+
 export const many1Till = <I, A, B>(
   parser: Parser<I, A>,
   terminator: Parser<I, B>
@@ -171,11 +179,11 @@ export const many1Till = <I, A, B>(
       chainRec_(RNEA.of(x), (acc) =>
         pipe(
           terminator,
-          map(() => E.right(acc)),
+          map(constant(E.right(acc))),
           alt(() =>
             pipe(
               parser,
-              map((a) => E.left(RNEA.snoc(acc, a)))
+              map((a) => E.left(RA.append(a)(acc)))
             )
           )
         )
@@ -193,12 +201,43 @@ export const manyTill = <I, A, B>(
     alt<I, ReadonlyArray<A>>(() => many1Till(parser, terminator))
   );
 
-export const withLog = <I, A>(fa: Parser<I, A>): Parser<I, A> =>
+export const logPositions: <I, A>(fa: Parser<I, A>) => Parser<I, A> =
+  (fa) => (i) =>
+    pipe(
+      fa(i),
+      E.map((a) => {
+        console.log(`before: ${i.cursor}, after: ${a.next.cursor}`);
+
+        return a;
+      })
+    );
+
+export const logResult: <I, A>(fa: Parser<I, A>) => Parser<I, A> = flow(
+  chain((a) => {
+    console.dir(a, { depth: Infinity });
+
+    return succeed(a);
+  })
+);
+
+export const sat: {
+  <I, A, B extends A>(
+    fa: Parser<I, A>,
+    predicate: Refinement<A, B>,
+    onPredicateFail: (a: A) => string
+  ): Parser<I, B>;
+
+  <I, A>(
+    fa: Parser<I, A>,
+    predicate: Predicate<A>,
+    onPredicateFail: (a: A) => string
+  ): Parser<I, A>;
+} = <I, A>(
+  fa: Parser<I, A>,
+  predicate: Predicate<A>,
+  onPredicateFail: (a: A) => string
+) =>
   pipe(
     fa,
-    chain((a) => {
-      console.dir(a, { depth: Infinity });
-
-      return succeed(a);
-    })
+    chain((a) => (predicate(a) ? succeed(a) : fail(onPredicateFail(a))))
   );

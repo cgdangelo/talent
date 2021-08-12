@@ -32,16 +32,18 @@ export const directoryEntry: B.BufferParser<DirectoryEntry> = pipe(
   P.chain((a) =>
     pipe(
       P.seek(a.offset),
+
+      // TODO Apparently this is not true?
+      // P.chain(() =>
+      //   P.sat(
+      //     frames,
+      //     (b) => b.length === a.frameCount,
+      //     (b) => `expected ${a.frameCount} frames, got ${b.length}`
+      //   )
+      // ),
+
       P.chain(() => frames),
-
-      P.map((frames) => ({ ...a, frames })),
-
-      // TODO Should really be able to validate this before evaluating the entire frame list.
-      P.chain((a) =>
-        a.frames.length === a.frameCount
-          ? P.succeed(a)
-          : P.fail(`expected ${a.frameCount}, got ${frames.length}`)
-      )
+      P.map((frames) => ({ ...a, frames }))
     )
   )
 );

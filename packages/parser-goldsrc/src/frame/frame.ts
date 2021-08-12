@@ -1,7 +1,7 @@
-import { parser as P, parseResult as PR } from "@talent/parser";
+import { parser as P } from "@talent/parser";
 import { buffer as B } from "@talent/parser-buffer";
 import { sequenceS } from "fp-ts/lib/Apply";
-import { pipe } from "fp-ts/lib/function";
+import { constant, pipe } from "fp-ts/lib/function";
 import { clientData } from "./clientData";
 import { consoleCommand } from "./consoleCommand";
 import { demoBuffer } from "./demoBuffer";
@@ -69,11 +69,10 @@ const netMsgFrameType_ = (a: number): NetMsgFrameType => {
 };
 
 const frameType: B.BufferParser<FrameType> = pipe(
-  B.uint8_be,
-  P.chain((a) =>
-    a < 0 || a > 9
-      ? P.fail(`expected frame type id [0, 9], got ${a}`)
-      : P.succeed(a)
+  P.sat(
+    B.uint8_be,
+    (a) => a >= 0 && a <= 9,
+    (a) => `expected frame type id [0, 9], got ${a}`
   ),
   P.map(frameType_)
 );
@@ -133,18 +132,8 @@ export const frames: B.BufferParser<readonly Frame[]> = P.manyTill(
   frame,
 
   pipe(
-    frameHeader,
-    P.chain((a) => (a.frameType === "next" ? P.succeed("") : P.fail(""))),
-    P.alt(() =>
-      pipe(
-        B.take(0),
-        P.chain(
-          () => (i) =>
-            i.cursor >= i.buffer.length
-              ? PR.success("eof", i, i)
-              : PR.failure("")
-        )
-      )
-    )
+    P.sat(frameHeader, (a) => a.frameType === "NextSection", constant(""))
+
+    // TODO Restore the eof check.
   )
 );

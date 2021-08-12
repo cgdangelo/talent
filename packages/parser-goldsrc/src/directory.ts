@@ -11,26 +11,21 @@ export type Directory = {
 
 const directoryOffset: B.BufferParser<number> = (i) =>
   pipe(
-    B.uint32_le,
-    P.chain((a) =>
-      a === i.buffer.byteLength - 4 - 92 * 2
-        ? P.succeed(a)
-        : P.fail(
-            `directory entries offset did not match expected ${
-              i.buffer.byteLength - 4 - 92 * 2
-            }`
-          )
+    P.sat(
+      B.uint32_le,
+      (a) => a === i.buffer.byteLength - 4 - 92 * 2,
+      (a) =>
+        `expected ${
+          i.buffer.byteLength - 4 - 92 * 2
+        } for directory offset, got ${a}`
     ),
     (x) => x(i)
   );
 
-const validateDirectoryEntries: B.BufferParser<number> = pipe(
+const validateDirectoryEntries: B.BufferParser<2> = P.sat(
   B.int32_le,
-  P.chain((a) =>
-    a === 2
-      ? P.succeed(a)
-      : P.fail(`unexpected number of directory entries: ${a}`)
-  )
+  (a): a is 2 => a === 2,
+  (a) => `expected 2 directory entries, got ${a}`
 );
 
 const directoryEntries: B.BufferParser<readonly DirectoryEntry[]> = pipe(
