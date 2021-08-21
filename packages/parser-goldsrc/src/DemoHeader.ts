@@ -4,33 +4,33 @@ import { sequenceS } from "fp-ts/lib/Apply";
 import { pipe } from "fp-ts/lib/function";
 
 export type DemoHeader = {
-  readonly gameDirectory: string;
   readonly magic: "HLDEMO";
-  readonly mapChecksum: number;
-  readonly mapName: string;
+  readonly demoProtocol: 5;
   readonly networkProtocol: number;
-  readonly protocol: 5;
+  readonly mapName: string;
+  readonly gameDirectory: string;
+  readonly mapChecksum: number;
 };
 
 const magic: B.BufferParser<"HLDEMO"> = pipe(
   P.sat(
-    B.str(8),
-    (a): a is "HLDEMO" => a === "HLDEMO\x00\x00",
-    (a) => `unsupported magic: ${a}`
+    B.ztstr_padded(8),
+    (a): a is "HLDEMO" => a === "HLDEMO",
+    (a) => `unsupported magic: got ${a}, wanted HLDEMO`
   )
 );
 
-const protocol: B.BufferParser<5> = P.sat(
+const demoProtocol: B.BufferParser<5> = P.sat(
   B.int32_le,
   (a): a is 5 => a === 5,
-  (a) => `unsupported protocol: ${a}`
+  (a) => `unsupported protocol: got ${a}, wanted 5`
 );
 
 export const header: B.BufferParser<DemoHeader> = sequenceS(P.Applicative)({
   magic,
-  protocol,
+  demoProtocol,
   networkProtocol: B.int32_le,
-  mapName: B.str(260),
-  gameDirectory: B.str(260),
+  mapName: B.ztstr_padded(260),
+  gameDirectory: B.ztstr_padded(260),
   mapChecksum: B.uint32_le,
 });
