@@ -2,26 +2,19 @@ import { parser as P } from "@talent/parser";
 import { buffer as B } from "@talent/parser-buffer";
 import { sequenceS } from "fp-ts/lib/Apply";
 import { constant, pipe } from "fp-ts/lib/function";
-import { clientData } from "./clientData";
-import { consoleCommand } from "./consoleCommand";
-import { demoBuffer } from "./demoBuffer";
-import { event } from "./event";
-import { netMsg } from "./netMsg";
-import { sound } from "./sound";
-import { weaponAnimation } from "./weaponAnimation";
+import { clientData } from "./ClientData";
+import { consoleCommand } from "./ConsoleCommand";
+import { demoBuffer } from "./DemoBuffer";
+import { event } from "./Event";
+import type { NetMsgFrameType } from "./NetMsg";
+import { netMsg, netMsgFrameType } from "./NetMsg";
+import { sound } from "./Sound";
+import { weaponAnimation } from "./WeaponAnimation";
 
-export type FrameType =
-  | `NetMsg-${NetMsgFrameType}`
-  | "DemoStart"
-  | "ConsoleCommand"
-  | "ClientData"
-  | "NextSection"
-  | "Event"
-  | "WeaponAnimation"
-  | "Sound"
-  | "DemoBuffer";
-
-type NetMsgFrameType = "Start" | "Normal" | number;
+export type Frame = {
+  readonly header: FrameHeader;
+  readonly frameData: unknown;
+};
 
 export type FrameHeader = {
   readonly frameType: FrameType;
@@ -29,12 +22,18 @@ export type FrameHeader = {
   readonly frame: number;
 };
 
-export type Frame = {
-  readonly frameHeader: FrameHeader;
-  readonly frameData: unknown;
-};
+export type FrameType =
+  | "ClientData"
+  | "ConsoleCommand"
+  | "DemoBuffer"
+  | "DemoStart"
+  | "Event"
+  | "NextSection"
+  | "Sound"
+  | "WeaponAnimation"
+  | `NetMsg-${NetMsgFrameType}`;
 
-const frameType_ = (a: number): FrameType => {
+const frameTypeIdToName = (a: number): FrameType => {
   switch (a) {
     case 2:
       return "DemoStart";
@@ -53,18 +52,7 @@ const frameType_ = (a: number): FrameType => {
     case 9:
       return "DemoBuffer";
     default:
-      return `NetMsg-${netMsgFrameType_(a)}`;
-  }
-};
-
-const netMsgFrameType_ = (a: number): NetMsgFrameType => {
-  switch (a) {
-    case 0:
-      return "Start";
-    case 1:
-      return "Normal";
-    default:
-      return a;
+      return `NetMsg-${netMsgFrameType(a)}`;
   }
 };
 
@@ -74,7 +62,7 @@ const frameType: B.BufferParser<FrameType> = pipe(
     (a) => a >= 0 && a <= 9,
     (a) => `expected frame type id [0, 9], got ${a}`
   ),
-  P.map(frameType_)
+  P.map(frameTypeIdToName)
 );
 
 const frameHeader: B.BufferParser<FrameHeader> = sequenceS(P.Applicative)({
@@ -83,20 +71,10 @@ const frameHeader: B.BufferParser<FrameHeader> = sequenceS(P.Applicative)({
   frame: B.int32_le,
 });
 
-const frame: B.BufferParser<Frame> = pipe(
-  frameHeader,
-  P.chain((frameHeader) =>
-    pipe(
-      frameData(frameHeader.frameType),
-      P.map((frameData) => ({ frameHeader, frameData }))
-    )
-  )
-);
-
 const frameData: (frameType: FrameType) => B.BufferParser<unknown> = (
   frameType
 ) => {
-  const noFields = P.succeed<Buffer, Record<never, never>>({});
+  const noFields: B.BufferParser<Record<never, never>> = P.of({});
 
   switch (frameType) {
     case "ClientData":
@@ -128,12 +106,17 @@ const frameData: (frameType: FrameType) => B.BufferParser<unknown> = (
   }
 };
 
+const frame: B.BufferParser<Frame> = pipe(
+  frameHeader,
+  P.chain((header) =>
+    pipe(
+      frameData(header.frameType),
+      P.map((frameData) => ({ header, frameData }))
+    )
+  )
+);
+
 export const frames: B.BufferParser<readonly Frame[]> = P.manyTill(
   frame,
-
-  pipe(
-    P.sat(frameHeader, (a) => a.frameType === "NextSection", constant(""))
-
-    // TODO Restore the eof check.
-  )
+  P.sat(frameType, (a) => a === "NextSection", constant(""))
 );

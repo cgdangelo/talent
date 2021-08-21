@@ -3,12 +3,12 @@ import { buffer as B } from "@talent/parser-buffer";
 import { sequenceS } from "fp-ts/lib/Apply";
 import type { Point } from "../Point";
 import { point } from "../Point";
-import type { MoveVars } from "./moveVars";
-import { moveVars } from "./moveVars";
-import type { RefParams } from "./refParams";
-import { refParams } from "./refParams";
-import type { UserCmd } from "./userCmd";
-import { userCmd } from "./userCmd";
+import type { MoveVars } from "./MoveVars";
+import { moveVars } from "./MoveVars";
+import type { RefParams } from "./RefParams";
+import { refParams } from "./RefParams";
+import type { UserCmd } from "./UserCmd";
+import { userCmd } from "./UserCmd";
 
 export type NetMsgInfo = {
   readonly timestamp: number;

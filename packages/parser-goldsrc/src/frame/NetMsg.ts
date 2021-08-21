@@ -2,8 +2,8 @@ import { parser as P } from "@talent/parser";
 import { buffer as B } from "@talent/parser-buffer";
 import { sequenceS } from "fp-ts/lib/Apply";
 import { pipe } from "fp-ts/lib/function";
-import type { NetMsgInfo } from "./netMsgInfo";
-import { netMsgInfo } from "./netMsgInfo";
+import type { NetMsgInfo } from "./NetMsgInfo";
+import { netMsgInfo } from "./NetMsgInfo";
 
 export type NetMsg = {
   readonly info: NetMsgInfo;
@@ -16,6 +16,19 @@ export type NetMsg = {
   readonly lastReliableSequence: number;
   readonly msgLength: number;
   readonly msg: unknown;
+};
+
+export type NetMsgFrameType = "Start" | "Normal" | number;
+
+export const netMsgFrameType = (a: number): NetMsgFrameType => {
+  switch (a) {
+    case 0:
+      return "Start";
+    case 1:
+      return "Normal";
+    default:
+      return a;
+  }
 };
 
 const msgLength: B.BufferParser<number> = pipe(
