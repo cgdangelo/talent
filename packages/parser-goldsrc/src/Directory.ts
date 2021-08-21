@@ -2,8 +2,8 @@ import { parser as P } from "@talent/parser";
 import { buffer as B } from "@talent/parser-buffer";
 import { sequenceT } from "fp-ts/lib/Apply";
 import { pipe } from "fp-ts/lib/function";
-import type { DirectoryEntry } from "./directoryEntry";
-import { directoryEntry } from "./directoryEntry";
+import type { DirectoryEntry } from "./DirectoryEntry";
+import { directoryEntry } from "./DirectoryEntry";
 
 export type Directory = {
   readonly entries: readonly DirectoryEntry[];

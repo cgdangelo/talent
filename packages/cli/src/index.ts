@@ -1,4 +1,4 @@
-import { demo } from "@talent/parser-goldsrc/lib/demo";
+import { demo } from "@talent/parser-goldsrc/lib/Demo";
 import type { Stream } from "@talent/parser/lib/Stream";
 import { stream } from "@talent/parser/lib/Stream";
 import {

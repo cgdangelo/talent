@@ -3,7 +3,7 @@ import { buffer as B } from "@talent/parser-buffer";
 import { sequenceS } from "fp-ts/lib/Apply";
 import { pipe } from "fp-ts/lib/function";
 
-export type Header = {
+export type DemoHeader = {
   readonly gameDirectory: string;
   readonly magic: "HLDEMO";
   readonly mapChecksum: number;
@@ -26,7 +26,7 @@ const protocol: B.BufferParser<5> = P.sat(
   (a) => `unsupported protocol: ${a}`
 );
 
-export const header: B.BufferParser<Header> = sequenceS(P.Applicative)({
+export const header: B.BufferParser<DemoHeader> = sequenceS(P.Applicative)({
   magic,
   protocol,
   networkProtocol: B.int32_le,

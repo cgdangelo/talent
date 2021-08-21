@@ -2,13 +2,13 @@ import { parser as P } from "@talent/parser";
 import { buffer as B } from "@talent/parser-buffer";
 import { sequenceS } from "fp-ts/lib/Apply";
 import { constant, pipe } from "fp-ts/lib/function";
-import { clientData } from "./clientData";
-import { consoleCommand } from "./consoleCommand";
-import { demoBuffer } from "./demoBuffer";
-import { event } from "./event";
-import { netMsg } from "./netMsg";
-import { sound } from "./sound";
-import { weaponAnimation } from "./weaponAnimation";
+import { clientData } from "./ClientData";
+import { consoleCommand } from "./ConsoleCommand";
+import { demoBuffer } from "./DemoBuffer";
+import { event } from "./Event";
+import { netMsg } from "./NetMsg";
+import { sound } from "./Sound";
+import { weaponAnimation } from "./WeaponAnimation";
 
 export type FrameType =
   | `NetMsg-${NetMsgFrameType}`
