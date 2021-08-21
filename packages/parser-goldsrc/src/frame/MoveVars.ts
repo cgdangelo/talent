@@ -52,7 +52,7 @@ export const moveVars: B.BufferParser<MoveVars> = sequenceS(P.Applicative)({
   zMax: B.float32_le,
   waveHeight: B.float32_le,
   footsteps: B.int32_le,
-  skyName: B.str(32),
+  skyName: B.ztstr_padded(32),
   rollAngle: B.float32_le,
   rollSpeed: B.float32_le,
   skyColor: pipe(

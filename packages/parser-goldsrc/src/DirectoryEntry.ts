@@ -19,7 +19,7 @@ export type DirectoryEntry = {
 export const directoryEntry: B.BufferParser<DirectoryEntry> = pipe(
   sequenceS(P.Applicative)({
     type: B.int32_le,
-    description: B.str(64),
+    description: B.ztstr_padded(64),
     flags: B.int32_le,
     cdTrack: B.int32_le,
     trackTime: B.float32_le,
