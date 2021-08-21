@@ -18,6 +18,19 @@ export type NetMsg = {
   readonly msg: unknown;
 };
 
+export type NetMsgFrameType = "Start" | "Normal" | number;
+
+export const netMsgFrameType = (a: number): NetMsgFrameType => {
+  switch (a) {
+    case 0:
+      return "Start";
+    case 1:
+      return "Normal";
+    default:
+      return a;
+  }
+};
+
 const msgLength: B.BufferParser<number> = pipe(
   B.int32_le,
   P.chain((a) =>
