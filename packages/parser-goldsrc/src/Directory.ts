@@ -1,48 +1,54 @@
 import { parser as P } from "@talent/parser";
 import { buffer as B } from "@talent/parser-buffer";
-import { sequenceT } from "fp-ts/lib/Apply";
+import { array as A } from "fp-ts";
 import { pipe } from "fp-ts/lib/function";
 import type { DirectoryEntry } from "./DirectoryEntry";
 import { directoryEntry } from "./DirectoryEntry";
+import { frames } from "./frame/Frame";
 
-export type Directory = {
-  readonly entries: readonly DirectoryEntry[];
-};
+export type Directory = readonly DirectoryEntry[];
 
 const directoryOffset: B.BufferParser<number> = (i) =>
   pipe(
+    i,
     P.sat(
       B.uint32_le,
       (a) => a === i.buffer.byteLength - 4 - 92 * 2,
       (a) =>
         `expected ${
           i.buffer.byteLength - 4 - 92 * 2
-        } for directory offset, got ${a}`
-    ),
-    (x) => x(i)
+        } for entries offset, got ${a}`
+    )
   );
 
-const validateDirectoryEntries: B.BufferParser<2> = P.sat(
+const totalEntries: B.BufferParser<number> = P.sat(
   B.int32_le,
-  (a): a is 2 => a === 2,
-  (a) => `expected 2 directory entries, got ${a}`
-);
-
-const directoryEntries: B.BufferParser<readonly DirectoryEntry[]> = pipe(
-  directoryOffset,
-  P.chain((a) =>
-    pipe(
-      P.seek(a),
-      P.chain(() => validateDirectoryEntries),
-      P.chain(() =>
-        sequenceT(P.Applicative)(directoryEntry, P.seek(a + 96), directoryEntry)
-      ),
-      P.map(([a, _, b]) => [a, b])
-    )
-  )
+  (a) => a >= 1 && a <= 1024,
+  (a) => `expected 1 - 1024 directory entries, got ${a}`
 );
 
 export const directory: B.BufferParser<Directory> = pipe(
-  directoryEntries,
-  P.map((entries) => ({ entries }))
+  directoryOffset,
+
+  // Read entries without frames.
+  P.chain((directoryOffset) =>
+    pipe(
+      P.seek(directoryOffset),
+      P.chain(() => totalEntries),
+      P.chain((totalEntries) => P.manyN(directoryEntry, totalEntries))
+    )
+  ),
+
+  // Read frames and add to entries.
+  P.chain((directoryEntries) =>
+    A.sequence(P.Applicative)(
+      directoryEntries.map((directoryEntry) =>
+        pipe(
+          P.seek(directoryEntry.offset),
+          P.chain(() => frames),
+          P.map((frames) => ({ ...directoryEntry, frames }))
+        )
+      )
+    )
+  )
 );

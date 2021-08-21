@@ -3,18 +3,17 @@ import { buffer as B } from "@talent/parser-buffer";
 import { sequenceS } from "fp-ts/lib/Apply";
 import { pipe } from "fp-ts/lib/function";
 import type { Frame } from "./frame/Frame";
-import { frames } from "./frame/Frame";
 
 export type DirectoryEntry = {
-  readonly cdTrack: number;
+  readonly type: number;
   readonly description: string;
-  readonly fileLength: number;
   readonly flags: number;
-  readonly frames: readonly Frame[];
+  readonly cdTrack: number;
+  readonly trackTime: number;
   readonly frameCount: number;
   readonly offset: number;
-  readonly trackTime: number;
-  readonly type: number;
+  readonly fileLength: number;
+  readonly frames: readonly Frame[];
 };
 
 export const directoryEntry: B.BufferParser<DirectoryEntry> = pipe(
@@ -27,23 +26,6 @@ export const directoryEntry: B.BufferParser<DirectoryEntry> = pipe(
     frameCount: B.int32_le,
     offset: B.int32_le,
     fileLength: B.int32_le,
-  }),
-
-  P.chain((a) =>
-    pipe(
-      P.seek(a.offset),
-
-      // TODO Apparently this is not true?
-      // P.chain(() =>
-      //   P.sat(
-      //     frames,
-      //     (b) => b.length === a.frameCount,
-      //     (b) => `expected ${a.frameCount} frames, got ${b.length}`
-      //   )
-      // ),
-
-      P.chain(() => frames),
-      P.map((frames) => ({ ...a, frames }))
-    )
-  )
+    frames: P.of([]),
+  })
 );
