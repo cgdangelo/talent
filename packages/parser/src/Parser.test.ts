@@ -6,11 +6,10 @@ import { stream } from "./Stream";
 
 const empty: Stream<never[]> = { buffer: [], cursor: 0 };
 
-const resultS = <A>(a: A): PR.ParseResult<never[], A> =>
+const resultS: <A>(a: A) => PR.ParseResult<never[], A> = (a) =>
   PR.success(a, empty, empty);
 
-const resultF: <I, A = never>(e: string) => PR.ParseResult<I, A> = (e) =>
-  PR.failure(e);
+const resultF: <I, A = never>(e: string) => PR.ParseResult<I, A> = PR.failure;
 
 describe("Parser", () => {
   test("alt", () => {
@@ -87,6 +86,22 @@ describe("Parser", () => {
         P.chain((a) => P.fail(a.repeat(3)))
       )(empty)
     ).toStrictEqual(resultF("a"));
+  });
+
+  test("chainFirst", () => {
+    expect(
+      pipe(
+        P.of("a"),
+        P.chainFirst(() => P.succeed("b"))
+      )(empty)
+    ).toStrictEqual(resultS("a"));
+
+    expect(
+      pipe(
+        P.of("a"),
+        P.chainFirst(() => P.fail("b"))
+      )(empty)
+    ).toStrictEqual(resultF("b"));
   });
 
   test("map", () => {

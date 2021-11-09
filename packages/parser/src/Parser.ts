@@ -97,6 +97,14 @@ export const chain: <I, A, B>(
   f: (a: A) => Parser<I, B>
 ) => (fa: Parser<I, A>) => Parser<I, B> = (f) => (fa) => chain_(fa, f);
 
+export const chainFirst: <I, A, B>(
+  f: (a: A) => Parser<I, B>
+) => (fa: Parser<I, A>) => Parser<I, A> = (f) => (fa) => (i) =>
+  pipe(
+    fa(i),
+    E.chainFirst((a) => f(a.value)(a.next))
+  );
+
 export const map: <A, B>(
   f: (a: A) => B
 ) => <I>(fa: Parser<I, A>) => Parser<I, B> = (f) => (fa) => map_(fa, f);
@@ -156,12 +164,12 @@ export const fail: <I, A = never>(e: string) => Parser<I, A> = (e) => () =>
 
 export const skip =
   (length: number) =>
-  <I>(i: Stream<I>): ParseResult<I, undefined> =>
+  <I>(i: Stream<I>): ParseResult<I, void> =>
     success(undefined, i, stream(i.buffer, i.cursor + length));
 
 export const seek =
   (offset: number) =>
-  <I>(i: Stream<I>): ParseResult<I, undefined> =>
+  <I>(i: Stream<I>): ParseResult<I, void> =>
     success(undefined, i, stream(i.buffer, offset));
 
 export const manyN: <I, A>(fa: Parser<I, A>, n: number) => Parser<I, A[]> = (
@@ -206,7 +214,7 @@ export const logPositions: <I, A>(fa: Parser<I, A>) => Parser<I, A> =
     pipe(
       fa(i),
       E.map((a) => {
-        console.log(`before: ${i.cursor}, after: ${a.next.cursor}`);
+        console.log(`before: ${a.input.cursor}, after: ${a.next.cursor}`);
 
         return a;
       })
