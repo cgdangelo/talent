@@ -1771,6 +1771,7 @@ __metadata:
   resolution: "@talent/parser@workspace:packages/parser"
   dependencies:
     fp-ts: ^2.11.1
+    parser-ts: ^0.6.16
   languageName: unknown
   linkType: soft
 
@@ -7007,14 +7008,14 @@ fsevents@^2.3.2:
   languageName: node
   linkType: hard
 
-"parser-ts@npm:^0.6.15":
-  version: 0.6.15
-  resolution: "parser-ts@npm:0.6.15"
+"parser-ts@npm:^0.6.16":
+  version: 0.6.16
+  resolution: "parser-ts@npm:0.6.16"
   dependencies:
     "@babel/code-frame": ^7.0.0
   peerDependencies:
     fp-ts: ^2.0.0
-  checksum: 59450693a6c4509f3b411fb0dc4d0ebcd6f147188241b592a3862a8996fff8a75884f81a32fa29b4acf5726f066578c11e297271eeb1e0e51391dc57f3f1150f
+  checksum: 208d83e15da7bd695b8a8576b8075842fd8cc48d82b11ab93a96de54a28371dcaf3559d81c29a85fcf2229d39100ca833da9026bc80454d1088a97d67dbf85b4
   languageName: node
   linkType: hard
 
@@ -8358,7 +8359,6 @@ fsevents@^2.3.2:
     jest: ^27.0.6
     lerna: ^4.0.0
     lint-staged: ">=10"
-    parser-ts: ^0.6.15
     prettier: ^2.3.1
     ts-jest: ^27.0.3
     typescript: ^4.3.4

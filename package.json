@@ -34,7 +34,6 @@
   },
   "packageManager": "yarn@3.0.0",
   "dependencies": {
-    "fp-ts": "^2.11.1",
-    "parser-ts": "^0.6.15"
+    "fp-ts": "^2.11.1"
   }
 }
