@@ -1,8 +1,3 @@
-const base = require("../../jest.config.base");
-const packageJson = require("./package");
+const { createJestProjectConfig } = require("../../createJestProjectConfig");
 
-module.exports = {
-  ...base,
-  name: packageJson.name,
-  displayName: packageJson.name,
-};
+module.exports = createJestProjectConfig(require("./package.json").name);
