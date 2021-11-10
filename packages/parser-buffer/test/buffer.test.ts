@@ -2,7 +2,7 @@ import * as P from "@talent/parser/lib/Parser";
 import { success } from "@talent/parser/lib/ParseResult";
 import { stream } from "@talent/parser/lib/Stream";
 import { pipe } from "fp-ts/lib/function";
-import * as B from "./buffer";
+import * as B from "../src/buffer";
 
 // HACK
 const b: (buffer: Buffer) => number[] = (b) => b as unknown as number[];

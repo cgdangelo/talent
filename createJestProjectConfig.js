@@ -2,5 +2,5 @@
 module.exports.createJestProjectConfig = (displayName = "") => ({
   displayName,
   preset: "ts-jest",
-  rootDir: "src",
+  roots: ["test"],
 });

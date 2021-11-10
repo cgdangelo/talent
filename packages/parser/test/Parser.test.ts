@@ -1,8 +1,8 @@
 import { pipe } from "fp-ts/lib/function";
-import * as P from "./Parser";
-import * as PR from "./ParseResult";
-import type { Stream } from "./Stream";
-import { stream } from "./Stream";
+import * as P from "../src/Parser";
+import * as PR from "../src/ParseResult";
+import type { Stream } from "../src/Stream";
+import { stream } from "../src/Stream";
 
 const empty: Stream<never> = { buffer: [], cursor: 0 };
 
