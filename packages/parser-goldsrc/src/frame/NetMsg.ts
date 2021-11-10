@@ -74,15 +74,30 @@ const messages: (messageBuffer: Buffer) => B.BufferParser<unknown> =
     pipe(
       stream(messageBuffer as unknown as number[]),
 
-      P.manyTill(logPositions(message), P.eof())
+      P.manyTill(
+        pipe(
+          logPositions(message),
+
+          // HACK For debugging
+          P.map((a) => {
+            console.log();
+            console.log();
+            console.log();
+
+            return a;
+          })
+        ),
+        P.eof()
+      )
     );
 
+// TODO This needs to be moved to its own module.
 const message: B.BufferParser<unknown> = pipe(
   B.uint8_le,
 
   P.chain((messageId): B.BufferParser<unknown> => {
     console.log(
-      `Message: ${
+      `Message (${messageId}): ${
         Message[messageId] ??
         (messageId >= 64 ? "Custom message" : "Unknown message")
       }`
@@ -93,13 +108,38 @@ const message: B.BufferParser<unknown> = pipe(
         return P.fail();
 
       case Message.SVC_PRINT:
+        return B.ztstr;
+
+      case Message.SVC_SERVERINFO:
         return pipe(
-          B.ztstr,
+          sequenceS(P.Applicative)({
+            protocol: B.int32_le,
+            spawnCount: B.int32_le,
+            mapChecksum: B.int32_le,
+            clientDllHash: take(16),
+            maxPlayers: B.uint8_le,
+            playerIndex: B.uint8_le,
+            isDeathmatch: B.uint8_le,
+            gameDir: B.ztstr,
+            hostname: B.ztstr,
+            mapFileName: B.ztstr,
+            mapCycle: B.ztstr,
+          }),
+
           P.chainFirst(() => skip(1))
         );
 
+      case Message.SVC_FILETXFERFAILED:
+        return B.ztstr;
+
+      case Message.SVC_SENDEXTRAINFO:
+        return sequenceS(P.Applicative)({
+          fallbackDir: B.ztstr,
+          canCheat: B.int32_le,
+        });
+
       default:
-        return P.succeed(null);
+        return messageId >= 64 ? skip(1) : P.fail();
     }
   })
 );

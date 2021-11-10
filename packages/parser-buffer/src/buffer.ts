@@ -1,4 +1,4 @@
-import { manyN, take } from "@talent/parser/lib/Parser";
+import { manyN, skip, take } from "@talent/parser/lib/Parser";
 import { either as E } from "fp-ts";
 import { flow, pipe } from "fp-ts/lib/function";
 import { success } from "parser-ts/lib/ParseResult";
@@ -74,6 +74,7 @@ export const str: (byteLength: number) => BufferParser<string> = (byteLength) =>
 
 export const ztstr: BufferParser<string> = pipe(
   P.takeUntil<number>((a) => a === 0),
+  P.chainFirst(() => skip(1)),
   P.map((as) => String.fromCharCode(...as))
 );
 

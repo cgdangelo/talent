@@ -1,5 +1,4 @@
 import { buffer as B } from "@talent/parser-buffer";
-import { logPositions } from "@talent/parser/lib/Parser";
 import { sequenceS } from "fp-ts/lib/Apply";
 import { pipe } from "fp-ts/lib/function";
 import { parser as P } from "parser-ts";
@@ -118,7 +117,7 @@ const frame: B.BufferParser<Frame> = pipe(
 );
 
 export const frames: B.BufferParser<readonly Frame[]> = P.manyTill(
-  logPositions(frame),
+  frame,
   pipe(
     frameType,
     P.filter((a) => a === "NextSection")
