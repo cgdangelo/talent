@@ -1,6 +1,6 @@
-import { parser as P } from "parser-ts";
 import type { buffer as B } from "@talent/parser-buffer";
 import { sequenceS } from "fp-ts/lib/Apply";
+import { parser as P } from "parser-ts";
 import type { DemoHeader } from "./DemoHeader";
 import { header } from "./DemoHeader";
 import type { Directory } from "./Directory";

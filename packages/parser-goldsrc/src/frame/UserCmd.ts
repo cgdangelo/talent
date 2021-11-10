@@ -1,8 +1,7 @@
 import { buffer as B } from "@talent/parser-buffer";
-import { skip } from "@talent/parser/lib/Parser";
+import * as P from "@talent/parser/lib/Parser";
 import { sequenceS } from "fp-ts/lib/Apply";
 import { pipe } from "fp-ts/lib/function";
-import { parser as P } from "parser-ts";
 import type { Point } from "../Point";
 import { point } from "../Point";
 
@@ -25,7 +24,7 @@ export const userCmd: B.BufferParser<UserCmd> = sequenceS(P.Applicative)({
   lerpMs: B.int16_le,
   ms: B.uint8_be,
   viewAngles: pipe(
-    skip<number>(1),
+    P.skip<number>(1),
     P.chain(() => point)
   ),
   forwardMove: B.float32_le,
@@ -33,13 +32,13 @@ export const userCmd: B.BufferParser<UserCmd> = sequenceS(P.Applicative)({
   upMove: B.float32_le,
   lightLevel: B.int8_be,
   buttons: pipe(
-    skip<number>(1),
+    P.skip<number>(1),
     P.chain(() => B.uint16_le)
   ),
   impulse: B.int8_be,
   weaponSelect: B.int8_be,
   impactIndex: pipe(
-    skip<number>(2),
+    P.skip<number>(2),
     P.chain(() => B.int32_le)
   ),
   impactPosition: point,

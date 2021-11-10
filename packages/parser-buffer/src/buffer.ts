@@ -1,9 +1,9 @@
+import * as P from "@talent/parser/lib/Parser";
 import { manyN, skip, take } from "@talent/parser/lib/Parser";
+import { success } from "@talent/parser/lib/ParseResult";
+import { stream } from "@talent/parser/lib/Stream";
 import { either as E } from "fp-ts";
 import { flow, pipe } from "fp-ts/lib/function";
-import { success } from "parser-ts/lib/ParseResult";
-import { stream } from "parser-ts/lib/Stream";
-import * as P from "parser-ts/Parser";
 
 export type BufferParser<A> = P.Parser<number, A>;
 

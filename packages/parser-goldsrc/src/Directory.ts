@@ -1,8 +1,7 @@
 import { buffer as B } from "@talent/parser-buffer";
-import { manyN, seek } from "@talent/parser/lib/Parser";
+import * as P from "@talent/parser/lib/Parser";
 import { array as A } from "fp-ts";
 import { pipe } from "fp-ts/lib/function";
-import { parser as P } from "parser-ts";
 import type { DirectoryEntry } from "./DirectoryEntry";
 import { directoryEntry } from "./DirectoryEntry";
 import { frames } from "./frame/Frame";
@@ -29,9 +28,9 @@ export const directory: B.BufferParser<Directory> = pipe(
   // Read entries without frames.
   P.chain((directoryOffset) =>
     pipe(
-      seek<number>(directoryOffset),
+      P.seek<number>(directoryOffset),
       P.chain(() => totalEntries),
-      P.chain((totalEntries) => manyN(directoryEntry, totalEntries))
+      P.chain((totalEntries) => P.manyN(directoryEntry, totalEntries))
     )
   ),
 
@@ -40,7 +39,7 @@ export const directory: B.BufferParser<Directory> = pipe(
     A.sequence(P.Applicative)(
       directoryEntries.map((directoryEntry) =>
         pipe(
-          seek<number>(directoryEntry.offset),
+          P.seek<number>(directoryEntry.offset),
           P.chain(() => frames),
           // P.chain(() => (Math.random() < -1 ? frames : P.succeed([]))),
           P.map((frames) => ({ ...directoryEntry, frames }))

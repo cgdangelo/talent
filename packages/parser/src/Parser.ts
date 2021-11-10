@@ -1,9 +1,9 @@
 import * as A from "fp-ts/Array";
 import * as E from "fp-ts/Either";
 import { pipe } from "fp-ts/lib/function";
-import { success } from "parser-ts/lib/ParseResult";
-import { stream } from "parser-ts/lib/Stream";
-import * as P from "parser-ts/Parser";
+import * as P from "parser-ts/lib/Parser";
+import { success } from "./ParseResult";
+import { stream } from "./Stream";
 
 export const skip: <I>(offset: number) => P.Parser<I, void> = (offset) => (i) =>
   success(undefined, stream(i.buffer, i.cursor + offset), i);
@@ -44,3 +44,5 @@ export const logPositions: <I, A>(fa: P.Parser<I, A>) => P.Parser<I, A> =
         return a;
       })
     );
+
+export * from "parser-ts/lib/Parser";

@@ -1,8 +1,7 @@
 import { buffer as B } from "@talent/parser-buffer";
-import { logPositions, skip, take } from "@talent/parser/lib/Parser";
+import * as P from "@talent/parser/lib/Parser";
 import { sequenceS } from "fp-ts/lib/Apply";
 import { pipe } from "fp-ts/lib/function";
-import { parser as P } from "parser-ts";
 import { stream } from "parser-ts/lib/Stream";
 import type { NetMsgInfo } from "./NetMsgInfo";
 import { netMsgInfo } from "./NetMsgInfo";
@@ -43,7 +42,7 @@ const msgLength: B.BufferParser<number> = P.expected(
 
 const msg: (msgLength: number) => B.BufferParser<unknown> = (msgLength) =>
   pipe(
-    take<number>(msgLength),
+    P.take<number>(msgLength),
     P.map((a) => a as unknown as Buffer),
     P.chain(messages)
   );
@@ -76,7 +75,7 @@ const messages: (messageBuffer: Buffer) => B.BufferParser<unknown> =
 
       P.manyTill(
         pipe(
-          logPositions(message),
+          P.logPositions(message),
 
           // HACK For debugging
           P.map((a) => {
@@ -116,7 +115,7 @@ const message: B.BufferParser<unknown> = pipe(
             protocol: B.int32_le,
             spawnCount: B.int32_le,
             mapChecksum: B.int32_le,
-            clientDllHash: take(16),
+            clientDllHash: P.take(16),
             maxPlayers: B.uint8_le,
             playerIndex: B.uint8_le,
             isDeathmatch: B.uint8_le,
@@ -126,7 +125,7 @@ const message: B.BufferParser<unknown> = pipe(
             mapCycle: B.ztstr,
           }),
 
-          P.chainFirst(() => skip(1))
+          P.chainFirst(() => P.skip(1))
         );
 
       case Message.SVC_FILETXFERFAILED:
@@ -139,7 +138,7 @@ const message: B.BufferParser<unknown> = pipe(
         });
 
       default:
-        return messageId >= 64 ? skip(1) : P.fail();
+        return messageId >= 64 ? P.skip(1) : P.fail();
     }
   })
 );

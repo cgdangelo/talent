@@ -1,30 +1,12 @@
-import { failure, success } from "@talent/parser/lib/ParseResult";
-import type { Stream } from "@talent/parser/lib/Stream";
+import * as P from "@talent/parser/lib/Parser";
+import { success } from "@talent/parser/lib/ParseResult";
 import { stream } from "@talent/parser/lib/Stream";
 import { pipe } from "fp-ts/lib/function";
 import * as B from "./buffer";
 
-const empty: Stream<Buffer> = { buffer: Buffer.alloc(0), cursor: 0 };
+const b: (buffer: Buffer) => number[] = (b) => b as unknown as number[];
 
 describe("buffer", () => {
-  test("byteSized", () => {
-    expect(
-      pipe(
-        empty,
-        B.byteSized(() => {
-          throw new Error("a");
-        }, 4)
-      )
-    ).toStrictEqual(failure("Error: a"));
-
-    expect(
-      pipe(
-        empty,
-        B.byteSized(() => "a", 1)
-      )
-    ).toStrictEqual(success("a", empty, { ...empty, cursor: 1 }));
-  });
-
   test.each([
     [8, -1],
     [16, -257],
@@ -35,8 +17,8 @@ describe("buffer", () => {
   ] as const)("int_le %d", (bitLength, expected) => {
     const buffer = Buffer.of(-1, -2, -3, -4, -5, -6);
 
-    expect(pipe(stream(buffer), B.int_le(bitLength))).toStrictEqual(
-      success(expected, stream(buffer), stream(buffer, bitLength / 8))
+    expect(pipe(stream(b(buffer)), B.int_le(bitLength))).toStrictEqual(
+      success(expected, stream(b(buffer)), stream(b(buffer), bitLength / 8))
     );
   });
 
@@ -50,8 +32,8 @@ describe("buffer", () => {
   ] as const)("uint_le %d", (bitLength, expected) => {
     const buffer = Buffer.of(1, 2, 3, 4, 5, 6);
 
-    expect(pipe(stream(buffer), B.uint_le(bitLength))).toStrictEqual(
-      success(expected, stream(buffer), stream(buffer, bitLength / 8))
+    expect(pipe(stream(b(buffer)), B.uint_le(bitLength))).toStrictEqual(
+      success(expected, stream(b(buffer)), stream(b(buffer), bitLength / 8))
     );
   });
 
@@ -65,8 +47,8 @@ describe("buffer", () => {
   ] as const)("int_be %d", (bitLength, expected) => {
     const buffer = Buffer.of(-1, -2, -3, -4, -5, -6);
 
-    expect(pipe(stream(buffer), B.int_be(bitLength))).toStrictEqual(
-      success(expected, stream(buffer), stream(buffer, bitLength / 8))
+    expect(pipe(stream(b(buffer)), B.int_be(bitLength))).toStrictEqual(
+      success(expected, stream(b(buffer)), stream(b(buffer), bitLength / 8))
     );
   });
 
@@ -80,58 +62,58 @@ describe("buffer", () => {
   ] as const)("uint_be %d", (bitLength, expected) => {
     const buffer = Buffer.of(1, 2, 3, 4, 5, 6);
 
-    expect(pipe(stream(buffer), B.uint_be(bitLength))).toStrictEqual(
-      success(expected, stream(buffer), stream(buffer, bitLength / 8))
+    expect(pipe(stream(b(buffer)), B.uint_be(bitLength))).toStrictEqual(
+      success(expected, stream(b(buffer)), stream(b(buffer), bitLength / 8))
     );
   });
 
   test("char", () => {
     const buffer = Buffer.from("foo");
 
-    expect(pipe(stream(buffer), B.char)).toStrictEqual(
-      success("f", stream(buffer), stream(buffer, 1))
+    expect(pipe(stream(b(buffer)), B.char)).toStrictEqual(
+      success("f", stream(b(buffer)), stream(b(buffer), 1))
     );
 
-    expect(pipe(stream(buffer, 1), B.char)).toStrictEqual(
-      success("o", stream(buffer, 1), stream(buffer, 2))
+    expect(pipe(stream(b(buffer), 1), B.char)).toStrictEqual(
+      success("o", stream(b(buffer), 1), stream(b(buffer), 2))
     );
 
-    expect(pipe(stream(buffer, 2), B.char)).toStrictEqual(
-      success("o", stream(buffer, 2), stream(buffer, 3))
+    expect(pipe(stream(b(buffer), 2), B.char)).toStrictEqual(
+      success("o", stream(b(buffer), 2), stream(b(buffer), 3))
     );
   });
 
   test("str", () => {
     const buffer = Buffer.from("foo");
 
-    expect(pipe(stream(buffer), B.str(1))).toStrictEqual(
-      success("f", stream(buffer), stream(buffer, 1))
+    expect(pipe(stream(b(buffer)), B.str(1))).toStrictEqual(
+      success("f", stream(b(buffer)), stream(b(buffer), 1))
     );
 
-    expect(pipe(stream(buffer), B.str(3))).toStrictEqual(
-      success("foo", stream(buffer), stream(buffer, 3))
+    expect(pipe(stream(b(buffer)), B.str(3))).toStrictEqual(
+      success("foo", stream(b(buffer)), stream(b(buffer), 3))
     );
 
     const longerBuffer = Buffer.from("foo bar baz");
 
-    expect(pipe(stream(longerBuffer, 4), B.str(3))).toStrictEqual(
-      success("bar", stream(longerBuffer, 4), stream(longerBuffer, 7))
+    expect(pipe(stream(b(longerBuffer), 4), B.str(3))).toStrictEqual(
+      success("bar", stream(b(longerBuffer), 4), stream(b(longerBuffer), 7))
     );
   });
 
   test("float32_le", () => {
     const buffer = Buffer.of(1, 2, 3, 4);
 
-    expect(pipe(stream(buffer), B.float32_le)).toStrictEqual(
-      success(1.539989614439558e-36, stream(buffer), stream(buffer, 4))
+    expect(pipe(stream(b(buffer)), B.float32_le)).toStrictEqual(
+      success(1.539989614439558e-36, stream(b(buffer)), stream(b(buffer), 4))
     );
   });
 
   test("take", () => {
     const buffer = Buffer.alloc(100);
 
-    expect(pipe(stream(buffer), B.take(50))).toStrictEqual(
-      success(Buffer.alloc(50), stream(buffer), stream(buffer, 50))
+    expect(pipe(stream(b(buffer)), P.take(50))).toStrictEqual(
+      success(Buffer.alloc(50), stream(b(buffer)), stream(b(buffer), 50))
     );
   });
 });
