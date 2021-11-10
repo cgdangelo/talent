@@ -1,9 +1,8 @@
 import * as P from "@talent/parser/lib/Parser";
-import { manyN, skip, take } from "@talent/parser/lib/Parser";
 import { success } from "@talent/parser/lib/ParseResult";
 import { stream } from "@talent/parser/lib/Stream";
 import { either as E } from "fp-ts";
-import { flow, pipe } from "fp-ts/lib/function";
+import { pipe } from "fp-ts/lib/function";
 
 export type BufferParser<A> = P.Parser<number, A>;
 
@@ -11,14 +10,14 @@ const int: (
   fa: Buffer["readIntLE" | "readUIntLE" | "readIntBE" | "readUIntBE"]
 ) => (bitLength: BitLength) => BufferParser<number> = (fa) => (bitLength) =>
   pipe(
-    take<number>(bitLength / 8),
+    P.take<number>(bitLength / 8),
     P.map((as) => Buffer.from(as)),
     P.chain((buffer) =>
       pipe(
         E.tryCatch(() => fa.call(buffer, 0, buffer.length), E.toError),
         E.match(
           () => P.fail(),
-          (a) => P.of(a)
+          (a) => P.succeed(a)
         )
       )
     )
@@ -54,7 +53,7 @@ export const uint8_le: BufferParser<number> = int_le(8);
 export const uint8_be: BufferParser<number> = uint_be(8);
 
 export const float32_le: BufferParser<number> = pipe(
-  take<number>(4),
+  P.take<number>(4),
   P.map((as) => Buffer.from(as)),
   P.map((buffer) => buffer.readFloatLE())
 );
@@ -65,16 +64,14 @@ export const char: BufferParser<string> = pipe(
 );
 
 export const str: (byteLength: number) => BufferParser<string> = (byteLength) =>
-  flow(
-    pipe(
-      manyN(char, byteLength),
-      P.map((a) => a.join(""))
-    )
+  pipe(
+    P.manyN(char, byteLength),
+    P.map((a) => a.join(""))
   );
 
 export const ztstr: BufferParser<string> = pipe(
   P.takeUntil<number>((a) => a === 0),
-  P.chainFirst(() => skip(1)),
+  P.chainFirst(() => P.skip(1)),
   P.map((as) => String.fromCharCode(...as))
 );
 
@@ -85,8 +82,8 @@ export const ztstr_padded: (minLength: number) => BufferParser<string> =
       E.chain((a) =>
         success(
           a.value,
-          stream(a.next.buffer, a.start.cursor + minLength),
-          a.start
+          a.start,
+          stream(a.next.buffer, a.start.cursor + minLength)
         )
       )
     );

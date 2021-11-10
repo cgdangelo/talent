@@ -4,6 +4,7 @@ import { stream } from "@talent/parser/lib/Stream";
 import { pipe } from "fp-ts/lib/function";
 import * as B from "./buffer";
 
+// HACK
 const b: (buffer: Buffer) => number[] = (b) => b as unknown as number[];
 
 describe("buffer", () => {

@@ -6,12 +6,12 @@ import { success } from "./ParseResult";
 import { stream } from "./Stream";
 
 export const skip: <I>(offset: number) => P.Parser<I, void> = (offset) => (i) =>
-  success(undefined, stream(i.buffer, i.cursor + offset), i);
+  success(undefined, i, stream(i.buffer, i.cursor + offset));
 
 export const seek =
   <I>(cursor: number): P.Parser<I, void> =>
   (i) =>
-    success(undefined, stream(i.buffer, cursor), i);
+    success(undefined, i, stream(i.buffer, cursor));
 
 // HACK Not stack safe, not even a little
 export const manyN: <I, A>(fa: P.Parser<I, A>, n: number) => P.Parser<I, A[]> =
@@ -24,8 +24,8 @@ export const manyN: <I, A>(fa: P.Parser<I, A>, n: number) => P.Parser<I, A[]> =
 export const take: <I>(n: number) => P.Parser<I, I[]> = (n) => (i) =>
   success(
     i.buffer.slice(i.cursor, i.cursor + n),
-    stream(i.buffer, i.cursor + n),
-    i
+    i,
+    stream(i.buffer, i.cursor + n)
   );
 
 export const logPositions: <I, A>(fa: P.Parser<I, A>) => P.Parser<I, A> =

@@ -41,7 +41,6 @@ export const directory: B.BufferParser<Directory> = pipe(
         pipe(
           P.seek<number>(directoryEntry.offset),
           P.chain(() => frames),
-          // P.chain(() => (Math.random() < -1 ? frames : P.succeed([]))),
           P.map((frames) => ({ ...directoryEntry, frames }))
         )
       )
