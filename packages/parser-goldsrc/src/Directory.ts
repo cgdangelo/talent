@@ -1,7 +1,8 @@
-import { parser as P } from "@talent/parser";
 import { buffer as B } from "@talent/parser-buffer";
+import { manyN, seek } from "@talent/parser/lib/Parser";
 import { array as A } from "fp-ts";
 import { pipe } from "fp-ts/lib/function";
+import { parser as P } from "parser-ts";
 import type { DirectoryEntry } from "./DirectoryEntry";
 import { directoryEntry } from "./DirectoryEntry";
 import { frames } from "./frame/Frame";
@@ -10,21 +11,16 @@ export type Directory = readonly DirectoryEntry[];
 
 const directoryOffset: B.BufferParser<number> = (i) =>
   pipe(
-    i,
-    P.sat(
-      B.uint32_le,
-      (a) => a === i.buffer.byteLength - 4 - 92 * 2,
-      (a) =>
-        `expected ${
-          i.buffer.byteLength - 4 - 92 * 2
-        } for entries offset, got ${a}`
-    )
-  );
+    B.uint32_le,
+    P.filter((a) => a === i.buffer.length - 4 - 92 * 2)
+  )(i);
 
-const totalEntries: B.BufferParser<number> = P.sat(
-  B.int32_le,
-  (a) => a >= 1 && a <= 1024,
-  (a) => `expected 1 - 1024 directory entries, got ${a}`
+const totalEntries: B.BufferParser<number> = P.expected(
+  pipe(
+    B.int32_le,
+    P.filter((a) => a >= 1 && a <= 1024)
+  ),
+  `1 - 1024 directory entries`
 );
 
 export const directory: B.BufferParser<Directory> = pipe(
@@ -33,9 +29,9 @@ export const directory: B.BufferParser<Directory> = pipe(
   // Read entries without frames.
   P.chain((directoryOffset) =>
     pipe(
-      P.seek(directoryOffset),
+      seek<number>(directoryOffset),
       P.chain(() => totalEntries),
-      P.chain((totalEntries) => P.manyN(directoryEntry, totalEntries))
+      P.chain((totalEntries) => manyN(directoryEntry, totalEntries))
     )
   ),
 
@@ -44,8 +40,9 @@ export const directory: B.BufferParser<Directory> = pipe(
     A.sequence(P.Applicative)(
       directoryEntries.map((directoryEntry) =>
         pipe(
-          P.seek(directoryEntry.offset),
+          seek<number>(directoryEntry.offset),
           P.chain(() => frames),
+          // P.chain(() => (Math.random() < -1 ? frames : P.succeed([]))),
           P.map((frames) => ({ ...directoryEntry, frames }))
         )
       )

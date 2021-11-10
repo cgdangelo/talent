@@ -1,6 +1,6 @@
 import type { BufferParser } from "@talent/parser-buffer/lib/buffer";
 import { float32_le } from "@talent/parser-buffer/lib/buffer";
-import * as P from "@talent/parser/lib/Parser";
+import * as P from "parser-ts/Parser";
 import { sequenceS } from "fp-ts/lib/Apply";
 
 export type Point = {

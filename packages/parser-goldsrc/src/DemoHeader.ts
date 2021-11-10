@@ -1,7 +1,7 @@
-import { parser as P } from "@talent/parser";
 import { buffer as B } from "@talent/parser-buffer";
 import { sequenceS } from "fp-ts/lib/Apply";
 import { pipe } from "fp-ts/lib/function";
+import { parser as P } from "parser-ts";
 
 export type DemoHeader = {
   readonly magic: "HLDEMO";
@@ -12,18 +12,20 @@ export type DemoHeader = {
   readonly mapChecksum: number;
 };
 
-const magic: B.BufferParser<"HLDEMO"> = pipe(
-  P.sat(
+const magic: B.BufferParser<"HLDEMO"> = P.expected(
+  pipe(
     B.ztstr_padded(8),
-    (a): a is "HLDEMO" => a === "HLDEMO",
-    (a) => `unsupported magic: got ${a}, wanted HLDEMO`
-  )
+    P.filter((a): a is "HLDEMO" => a === "HLDEMO")
+  ),
+  "'HLDEMO' magic value"
 );
 
-const demoProtocol: B.BufferParser<5> = P.sat(
-  B.int32_le,
-  (a): a is 5 => a === 5,
-  (a) => `unsupported protocol: got ${a}, wanted 5`
+export const demoProtocol: B.BufferParser<5> = P.expected(
+  pipe(
+    B.int32_le,
+    P.filter((a): a is 5 => a === 5)
+  ),
+  "5"
 );
 
 export const header: B.BufferParser<DemoHeader> = sequenceS(P.Applicative)({
