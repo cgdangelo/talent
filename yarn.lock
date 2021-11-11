@@ -1931,7 +1931,7 @@ __metadata:
     "@types/node": ^15.12.4
     fp-ts: ^2.11.1
   bin:
-    talent: ./bin/cli.js
+    talent: ./bin/talent
   languageName: unknown
   linkType: soft
 
