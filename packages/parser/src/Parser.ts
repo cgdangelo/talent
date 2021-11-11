@@ -5,6 +5,8 @@ import * as P from "parser-ts/lib/Parser";
 import { success } from "./ParseResult";
 import { stream } from "./Stream";
 
+export * from "parser-ts/lib/Parser";
+
 export const skip: <I>(offset: number) => P.Parser<I, void> = (offset) => (i) =>
   success(undefined, i, stream(i.buffer, i.cursor + offset));
 
@@ -44,5 +46,3 @@ export const logPositions: <I, A>(fa: P.Parser<I, A>) => P.Parser<I, A> =
         return a;
       })
     );
-
-export * from "parser-ts/lib/Parser";
