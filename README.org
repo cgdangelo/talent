@@ -44,7 +44,7 @@ The original goal of this project was to create a GoldSrc demo parser that could
 
   /Half-Life demo format parser using [[https://crates.io/crates/nom][nom]]./
 
-  This was the most comprehensive (and readable) source of demo format information that I found and was a great starting point. It also heavily inspired me to refactor the original mess I had into parser combinators ([[https://github.com/cgdangelo/talent/pull/16][Parsing cleanup (#16)]]).
+  This was the most comprehensive (and readable) source of demo format information that I found and was a great starting point. It also heavily inspired me to refactor the original mess I had into parser combinators ([[https://github.com/cgdangelo/talent/pull/1][Parser combinators (#1)]]).
 
 - https://github.com/jpcy/coldemoplayer
 
