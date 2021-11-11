@@ -1,14 +1,8 @@
-"use strict";
-
-const base = require("./jest.config.base");
-
+/** @type {import('ts-jest/dist/types').InitialOptionsTsJest} */
 module.exports = {
-  ...base,
-  roots: ["<rootDir>"],
-  projects: [
-    "<rootDir>/packages/cli",
-    "<rootDir>/packages/parser",
-    "<rootDir>/packages/parser-buffer",
-    "<rootDir>/packages/parser-goldsrc",
-  ],
+  collectCoverage: true,
+  preset: "ts-jest",
+  projects: ["<rootDir>/packages/*/jest.config.js"],
+  testEnvironment: "node",
+  verbose: true,
 };

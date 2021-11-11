@@ -1,21 +1,9 @@
-import type { Either } from "fp-ts/lib/Either";
-import { left, right } from "fp-ts/lib/Either";
+export * from "parser-ts/lib/ParseResult";
+import * as PR from "parser-ts/lib/ParseResult";
 import type { Stream } from "./Stream";
 
-export type ParseResult<I, A> = Either<ParseFailure, ParseSuccess<I, A>>;
-
-export type ParseFailure = string;
-
-export type ParseSuccess<I, A> = {
-  readonly value: A;
-  readonly input: Stream<I>;
-  readonly next: Stream<I>;
-};
-
 export const success: <I, A>(
-  value: A,
+  a: A,
   input: Stream<I>,
   next: Stream<I>
-) => ParseResult<I, A> = (value, input, next) => right({ value, input, next });
-
-export const failure: <I, A = never>(e: string) => ParseResult<I, A> = left;
+) => PR.ParseResult<I, A> = (a, input, next) => PR.success(a, next, input);

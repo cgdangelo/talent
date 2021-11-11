@@ -1,7 +1,7 @@
-import { parser as P } from "@talent/parser";
 import { buffer as B } from "@talent/parser-buffer";
+import * as P from "@talent/parser/lib/Parser";
 import { sequenceS } from "fp-ts/lib/Apply";
-import { constant, pipe } from "fp-ts/lib/function";
+import { pipe } from "fp-ts/lib/function";
 import { clientData } from "./ClientData";
 import { consoleCommand } from "./ConsoleCommand";
 import { demoBuffer } from "./DemoBuffer";
@@ -56,13 +56,13 @@ const frameTypeIdToName = (a: number): FrameType => {
   }
 };
 
-const frameType: B.BufferParser<FrameType> = pipe(
-  P.sat(
+const frameType: B.BufferParser<FrameType> = P.expected(
+  pipe(
     B.uint8_be,
-    (a) => a >= 0 && a <= 9,
-    (a) => `expected frame type id [0, 9], got ${a}`
+    P.filter((a) => a >= 0 && a <= 9),
+    P.map(frameTypeIdToName)
   ),
-  P.map(frameTypeIdToName)
+  "frame type id [0, 9]"
 );
 
 const frameHeader: B.BufferParser<FrameHeader> = sequenceS(P.Applicative)({
@@ -102,7 +102,7 @@ const frameData: (frameType: FrameType) => B.BufferParser<unknown> = (
       return weaponAnimation;
 
     default:
-      return frameType.startsWith("NetMsg") ? netMsg : P.fail(frameType);
+      return frameType.startsWith("NetMsg") ? netMsg : P.fail();
   }
 };
 
@@ -118,5 +118,8 @@ const frame: B.BufferParser<Frame> = pipe(
 
 export const frames: B.BufferParser<readonly Frame[]> = P.manyTill(
   frame,
-  P.sat(frameType, (a) => a === "NextSection", constant(""))
+  pipe(
+    frameType,
+    P.filter((a) => a === "NextSection")
+  )
 );

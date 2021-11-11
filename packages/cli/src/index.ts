@@ -12,13 +12,13 @@ import { readFile } from "fs/promises";
 
 const readFileContents: (
   path: string
-) => TE.TaskEither<string, Stream<Buffer>> = (path) =>
+) => TE.TaskEither<string, Stream<number>> = (path) =>
   pipe(
     TE.tryCatch(
       () => readFile(path),
       flow(E.toError, (a) => a.message)
     ),
-    TE.map(stream)
+    TE.map((buffer) => stream(buffer as unknown as Array<number>))
   );
 
 const validateDemoPath: (path?: string) => E.Either<string, string> = flow(
@@ -31,7 +31,7 @@ const main = pipe(
   validateDemoPath(process.argv[2]),
   TE.fromEither,
   TE.chain(readFileContents),
-  TE.chainEitherK(demo)
+  TE.chainEitherKW(demo)
 );
 
 main()

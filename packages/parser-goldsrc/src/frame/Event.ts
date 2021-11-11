@@ -1,8 +1,8 @@
 import { buffer as B } from "@talent/parser-buffer";
-import { parser as P } from "@talent/parser";
+import * as P from "@talent/parser/lib/Parser";
+import { sequenceS } from "fp-ts/lib/Apply";
 import type { Point } from "../Point";
 import { point } from "../Point";
-import { sequenceS } from "fp-ts/lib/Apply";
 
 export type Event = {
   readonly flags: number;

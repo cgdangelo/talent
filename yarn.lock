@@ -1771,6 +1771,7 @@ __metadata:
   resolution: "@talent/parser@workspace:packages/parser"
   dependencies:
     fp-ts: ^2.11.1
+    parser-ts: ^0.6.16
   languageName: unknown
   linkType: soft
 
@@ -7004,6 +7005,17 @@ fsevents@^2.3.2:
   version: 6.0.1
   resolution: "parse5@npm:6.0.1"
   checksum: 7d569a176c5460897f7c8f3377eff640d54132b9be51ae8a8fa4979af940830b2b0c296ce75e5bd8f4041520aadde13170dbdec44889975f906098ea0002f4bd
+  languageName: node
+  linkType: hard
+
+"parser-ts@npm:^0.6.16":
+  version: 0.6.16
+  resolution: "parser-ts@npm:0.6.16"
+  dependencies:
+    "@babel/code-frame": ^7.0.0
+  peerDependencies:
+    fp-ts: ^2.0.0
+  checksum: 208d83e15da7bd695b8a8576b8075842fd8cc48d82b11ab93a96de54a28371dcaf3559d81c29a85fcf2229d39100ca833da9026bc80454d1088a97d67dbf85b4
   languageName: node
   linkType: hard
 
