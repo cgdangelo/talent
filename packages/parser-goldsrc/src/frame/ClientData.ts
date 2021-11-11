@@ -1,6 +1,5 @@
 import { buffer as B } from "@talent/parser-buffer";
 import * as P from "@talent/parser/lib/Parser";
-import { sequenceS } from "fp-ts/lib/Apply";
 import type { Point } from "../Point";
 import { point } from "../Point";
 
@@ -11,7 +10,7 @@ export type ClientData = {
   readonly fov: number;
 };
 
-export const clientData: B.BufferParser<ClientData> = sequenceS(P.Applicative)({
+export const clientData: B.BufferParser<ClientData> = P.struct({
   origin: point,
   viewAngles: point,
   weaponBits: B.int32_le,

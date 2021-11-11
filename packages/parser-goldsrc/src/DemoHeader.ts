@@ -1,6 +1,5 @@
 import { buffer as B } from "@talent/parser-buffer";
 import * as P from "@talent/parser/lib/Parser";
-import { sequenceS } from "fp-ts/lib/Apply";
 import { pipe } from "fp-ts/lib/function";
 
 export type DemoHeader = {
@@ -28,7 +27,7 @@ export const demoProtocol: B.BufferParser<5> = P.expected(
   "5"
 );
 
-export const header: B.BufferParser<DemoHeader> = sequenceS(P.Applicative)({
+export const header: B.BufferParser<DemoHeader> = P.struct({
   magic,
   demoProtocol,
   networkProtocol: B.int32_le,

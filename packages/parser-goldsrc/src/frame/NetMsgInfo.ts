@@ -1,6 +1,5 @@
 import { buffer as B } from "@talent/parser-buffer";
 import * as P from "@talent/parser/lib/Parser";
-import { sequenceS } from "fp-ts/lib/Apply";
 import type { Point } from "../Point";
 import { point } from "../Point";
 import type { MoveVars } from "./MoveVars";
@@ -19,7 +18,7 @@ export type NetMsgInfo = {
   readonly viewModel: number;
 };
 
-export const netMsgInfo: B.BufferParser<NetMsgInfo> = sequenceS(P.Applicative)({
+export const netMsgInfo: B.BufferParser<NetMsgInfo> = P.struct({
   timestamp: B.float32_le,
   refParams,
   userCmd,

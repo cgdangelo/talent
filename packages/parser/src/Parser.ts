@@ -1,5 +1,6 @@
 import * as A from "fp-ts/Array";
 import * as E from "fp-ts/Either";
+import { sequenceS } from "fp-ts/lib/Apply";
 import { pipe } from "fp-ts/lib/function";
 import * as P from "parser-ts/lib/Parser";
 import { success } from "./ParseResult";
@@ -46,3 +47,5 @@ export const logPositions: <I, A>(fa: P.Parser<I, A>) => P.Parser<I, A> =
         return a;
       })
     );
+
+export const struct = sequenceS(P.Applicative);
