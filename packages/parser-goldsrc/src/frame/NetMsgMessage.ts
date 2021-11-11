@@ -78,7 +78,12 @@ const message: B.BufferParser<unknown> = pipe(
 
         return pipe(
           messageId,
+
+          // Messages above 64 are custom messages
           O.fromPredicate((a) => a >= 64),
+
+          // Custom message should have been stored previously,
+          // potentially with bit length
           O.chain(
             flow(
               // TODO No idea where this is going to live
@@ -88,10 +93,14 @@ const message: B.BufferParser<unknown> = pipe(
           ),
           O.chain(flow((a) => a.size, O.fromNullable)),
           O.chain(O.fromPredicate((a) => a > -1)),
+
+          // Use the known bit length
           O.map((a) => P.of<number, number>(a)),
+          // or read it from the next byte
           O.alt(() => O.some(B.uint8_le)),
-          O.map(P.chain((a) => P.skip<number>(a))),
-          O.getOrElse(() => P.fail())
+
+          // Skip whatever length we have or fail
+          O.fold(P.fail, P.chain<number, number, void>(P.skip))
         );
     }
   })
