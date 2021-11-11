@@ -1,6 +1,5 @@
 import { buffer as B } from "@talent/parser-buffer";
 import * as P from "@talent/parser/lib/Parser";
-import { sequenceS } from "fp-ts/lib/Apply";
 import { pipe } from "fp-ts/lib/function";
 import type { Frame } from "./frame/Frame";
 
@@ -17,7 +16,7 @@ export type DirectoryEntry = {
 };
 
 export const directoryEntry: B.BufferParser<DirectoryEntry> = pipe(
-  sequenceS(P.Applicative)({
+  P.struct({
     type: B.int32_le,
     description: B.ztstr_padded(64),
     flags: B.int32_le,

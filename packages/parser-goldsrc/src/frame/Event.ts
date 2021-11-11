@@ -1,6 +1,5 @@
 import { buffer as B } from "@talent/parser-buffer";
 import * as P from "@talent/parser/lib/Parser";
-import { sequenceS } from "fp-ts/lib/Apply";
 import type { Point } from "../Point";
 import { point } from "../Point";
 
@@ -26,7 +25,7 @@ export type EventArgs = {
   readonly bparam2: number;
 };
 
-export const args: B.BufferParser<EventArgs> = sequenceS(P.Applicative)({
+export const args: B.BufferParser<EventArgs> = P.struct({
   flags: B.int32_le,
   entityIndex: B.int32_le,
   origin: point,
@@ -41,7 +40,7 @@ export const args: B.BufferParser<EventArgs> = sequenceS(P.Applicative)({
   bparam2: B.int32_le,
 });
 
-export const event: B.BufferParser<Event> = sequenceS(P.Applicative)({
+export const event: B.BufferParser<Event> = P.struct({
   flags: B.int32_le,
   index: B.int32_le,
   delay: B.float32_le,

@@ -1,6 +1,5 @@
 import { buffer as B } from "@talent/parser-buffer";
 import * as P from "@talent/parser/lib/Parser";
-import { sequenceS } from "fp-ts/lib/Apply";
 import { pipe } from "fp-ts/lib/function";
 import { clientData } from "./ClientData";
 import { consoleCommand } from "./ConsoleCommand";
@@ -65,7 +64,7 @@ const frameType: B.BufferParser<FrameType> = P.expected(
   "frame type id [0, 9]"
 );
 
-const frameHeader: B.BufferParser<FrameHeader> = sequenceS(P.Applicative)({
+const frameHeader: B.BufferParser<FrameHeader> = P.struct({
   frameType,
   time: B.float32_le,
   frame: B.int32_le,
