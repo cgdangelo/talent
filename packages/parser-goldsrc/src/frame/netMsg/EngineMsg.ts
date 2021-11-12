@@ -10,25 +10,25 @@ import { stream } from "parser-ts/lib/Stream";
 
 type MessageData = unknown;
 
-export const messages: (messageBuffer: Buffer) => B.BufferParser<MessageData> =
-  (messageBuffer) => (i) =>
+export const engineMsgs: (
+  messageBuffer: Buffer
+) => B.BufferParser<MessageData> = (messageBuffer) => (i) =>
+  pipe(
+    stream(messageBuffer as unknown as number[]),
+
     pipe(
-      stream(messageBuffer as unknown as number[]),
+      P.many(engineMsg),
 
-      pipe(
-        P.many(message),
+      P.chain((parsedMessages) => () => success(parsedMessages, i, i))
+    )
+  );
 
-        P.chain((parsedMessages) => () => success(parsedMessages, i, i))
-      )
-    );
-
-// TODO This needs to be moved to its own module.
-const message: B.BufferParser<unknown> = pipe(
+const engineMsg: B.BufferParser<unknown> = pipe(
   B.uint8_le,
 
   P.chain((messageId) =>
     pipe(
-      parseMessage(messageId),
+      engineMsg_(messageId),
 
       // Removes SVC_NOP
       P.filter((a) => a !== null),
@@ -38,7 +38,7 @@ const message: B.BufferParser<unknown> = pipe(
   )
 );
 
-const parseMessage: (messageId: Message) => B.BufferParser<unknown> = (
+const engineMsg_: (messageId: Message) => B.BufferParser<unknown> = (
   messageId
 ) => {
   switch (messageId) {

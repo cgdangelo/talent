@@ -5,8 +5,8 @@ import { clientData } from "./ClientData";
 import { consoleCommand } from "./ConsoleCommand";
 import { demoBuffer } from "./DemoBuffer";
 import { event } from "./Event";
-import type { NetMsgFrameType } from "./NetMsg";
-import { netMsg, netMsgFrameType } from "./NetMsg";
+import type { NetMsgFrameType } from "./netMsg/NetMsg";
+import { netMsg, netMsgFrameType } from "./netMsg/NetMsg";
 import { sound } from "./Sound";
 import { weaponAnimation } from "./WeaponAnimation";
 

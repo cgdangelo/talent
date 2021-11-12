@@ -1,13 +1,13 @@
 import { buffer as B } from "@talent/parser-buffer";
 import * as P from "@talent/parser/lib/Parser";
-import type { Point } from "../Point";
-import { point } from "../Point";
-import type { MoveVars } from "./MoveVars";
-import { moveVars } from "./MoveVars";
-import type { RefParams } from "./RefParams";
-import { refParams } from "./RefParams";
-import type { UserCmd } from "./UserCmd";
-import { userCmd } from "./UserCmd";
+import type { Point } from "../../Point";
+import { point } from "../../Point";
+import type { MoveVars } from "../MoveVars";
+import { moveVars } from "../MoveVars";
+import type { RefParams } from "../RefParams";
+import { refParams } from "../RefParams";
+import type { UserCmd } from "../UserCmd";
+import { userCmd } from "../UserCmd";
 
 export type NetMsgInfo = {
   readonly timestamp: number;
