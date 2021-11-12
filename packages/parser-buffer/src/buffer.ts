@@ -6,7 +6,7 @@ import { pipe } from "fp-ts/lib/function";
 
 export type BufferParser<A> = P.Parser<number, A>;
 
-const int: (
+const int_: (
   fa: Buffer["readIntLE" | "readUIntLE" | "readIntBE" | "readUIntBE"]
 ) => (bitLength: BitLength) => BufferParser<number> = (fa) => (bitLength) =>
   pipe(
@@ -25,32 +25,33 @@ const int: (
 
 type BitLength = 8 | 16 | 24 | 32 | 40 | 48;
 
-export const int_le: (bitLength: BitLength) => BufferParser<number> = int(
+export const int_le: (bitLength: BitLength) => BufferParser<number> = int_(
   Buffer.prototype.readIntLE
 );
 
-export const uint_le: (bitLength: BitLength) => BufferParser<number> = int(
+export const uint_le: (bitLength: BitLength) => BufferParser<number> = int_(
   Buffer.prototype.readUIntLE
 );
 
-export const int_be: (bitLength: BitLength) => BufferParser<number> = int(
+export const int_be: (bitLength: BitLength) => BufferParser<number> = int_(
   Buffer.prototype.readIntBE
 );
 
-export const uint_be: (bitLength: BitLength) => BufferParser<number> = int(
+export const uint_be: (bitLength: BitLength) => BufferParser<number> = int_(
   Buffer.prototype.readUIntBE
 );
 
 export const int32_le: BufferParser<number> = int_le(32);
-export const int16_le: BufferParser<number> = int_le(16);
-
-export const int8_be: BufferParser<number> = int_be(8);
-
 export const uint32_le: BufferParser<number> = uint_le(32);
+
+export const int16_le: BufferParser<number> = int_le(16);
 export const uint16_le: BufferParser<number> = uint_le(16);
+
 export const uint8_le: BufferParser<number> = int_le(8);
+export const int8_le: BufferParser<number> = int_le(8);
 
 export const uint8_be: BufferParser<number> = uint_be(8);
+export const int8_be: BufferParser<number> = int_be(8);
 
 export const float32_le: BufferParser<number> = pipe(
   P.take<number>(4),

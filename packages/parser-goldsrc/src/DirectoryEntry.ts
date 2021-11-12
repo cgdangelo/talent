@@ -17,14 +17,14 @@ export type DirectoryEntry = {
 
 export const directoryEntry: B.BufferParser<DirectoryEntry> = pipe(
   P.struct({
-    type: B.int32_le,
+    type: B.uint32_le,
     description: B.ztstr_padded(64),
-    flags: B.int32_le,
+    flags: B.uint32_le,
     cdTrack: B.int32_le,
     trackTime: B.float32_le,
-    frameCount: B.int32_le,
-    offset: B.int32_le,
-    fileLength: B.int32_le,
+    frameCount: B.uint32_le,
+    offset: B.uint32_le,
+    fileLength: B.uint32_le,
     frames: P.of([]),
   })
 );

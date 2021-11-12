@@ -34,7 +34,7 @@ export const netMsgFrameType = (a: number): NetMsgFrameType => {
 
 const engineMsgsLength: B.BufferParser<number> = P.expected(
   pipe(
-    B.int32_le,
+    B.uint32_le,
     P.filter((a) => a > 0 && a < 65_536)
   ),
   "[0, 65_536]"

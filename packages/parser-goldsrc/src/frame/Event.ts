@@ -25,13 +25,13 @@ export type EventArgs = {
   readonly bparam2: number;
 };
 
-export const args: B.BufferParser<EventArgs> = P.struct({
-  flags: B.int32_le,
-  entityIndex: B.int32_le,
+const args: B.BufferParser<EventArgs> = P.struct({
+  flags: B.uint32_le,
+  entityIndex: B.uint32_le,
   origin: point,
   angles: point,
   velocity: point,
-  ducking: B.int32_le,
+  ducking: B.uint32_le,
   fparam1: B.float32_le,
   fparam2: B.float32_le,
   iparam1: B.int32_le,

@@ -21,7 +21,7 @@ const magic: B.BufferParser<"HLDEMO"> = P.expected(
 
 export const demoProtocol: B.BufferParser<5> = P.expected(
   pipe(
-    B.int32_le,
+    B.uint32_le,
     P.filter((a): a is 5 => a === 5)
   ),
   "5"
@@ -30,8 +30,8 @@ export const demoProtocol: B.BufferParser<5> = P.expected(
 export const header: B.BufferParser<DemoHeader> = P.struct({
   magic,
   demoProtocol,
-  networkProtocol: B.int32_le,
+  networkProtocol: B.uint32_le,
   mapName: B.ztstr_padded(260),
   gameDirectory: B.ztstr_padded(260),
-  mapChecksum: B.uint32_le,
+  mapChecksum: B.int32_le,
 });

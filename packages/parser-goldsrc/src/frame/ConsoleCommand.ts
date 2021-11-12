@@ -1,10 +1,6 @@
-import type { buffer as B } from "@talent/parser-buffer";
-import { pipe } from "fp-ts/lib/function";
-import * as P from "@talent/parser/lib/Parser";
+import { buffer as B } from "@talent/parser-buffer";
 
-export type ConsoleCommand = Buffer;
+export type ConsoleCommand = string;
 
-export const consoleCommand: B.BufferParser<ConsoleCommand> = pipe(
-  P.take<number>(64),
-  P.map((as) => Buffer.from(as))
-);
+export const consoleCommand: B.BufferParser<ConsoleCommand> =
+  B.ztstr_padded(64);

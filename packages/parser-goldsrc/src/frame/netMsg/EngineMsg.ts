@@ -53,7 +53,7 @@ const engineMsg_: (messageId: Message) => B.BufferParser<unknown> = (
       return P.struct({ time: B.float32_le });
 
     case Message.SVC_PRINT: // 8
-      return P.struct({ printText: B.ztstr });
+      return P.struct({ message: B.ztstr });
 
     case Message.SVC_STUFFTEXT: // 9
       return P.struct({ command: B.ztstr });
@@ -80,21 +80,21 @@ const engineMsg_: (messageId: Message) => B.BufferParser<unknown> = (
     case Message.SVC_UPDATEUSERINFO: // 13
       return P.struct({
         clientIndex: B.uint8_le,
-        clientUserId: B.int32_le,
+        clientUserId: B.uint32_le,
         clientUserInfo: B.ztstr,
         clientCdKeyHash: P.take(16),
       });
 
     case Message.SVC_WEAPONANIM: // 35
       return P.struct({
-        sequenceNumber: B.uint8_le,
-        weaponModelBodyGroup: B.uint8_le,
+        sequenceNumber: B.int8_le,
+        weaponModelBodyGroup: B.int8_le,
       });
 
     case Message.SVC_RESOURCEREQUEST: // 45
       return pipe(
-        P.struct({ spawnCount: B.uint32_le }),
-        P.chainFirst(() => B.uint32_le)
+        P.struct({ spawnCount: B.int32_le }),
+        P.chainFirst(() => P.skip(4))
       );
 
     case Message.SVC_CUSTOMIZATION: // 46
@@ -103,8 +103,8 @@ const engineMsg_: (messageId: Message) => B.BufferParser<unknown> = (
           playerIndex: B.uint8_le,
           type: B.uint8_le,
           name: B.ztstr,
-          index: B.int_le(8),
-          downloadSize: B.int32_le,
+          index: B.uint16_le,
+          downloadSize: B.uint32_le,
           flags: B.uint8_le,
         }),
 
@@ -112,7 +112,8 @@ const engineMsg_: (messageId: Message) => B.BufferParser<unknown> = (
           pipe(
             a.flags,
             O.fromPredicate((flags) => (flags & 4) !== 0), // RES_CUSTOM
-            O.map(() => P.take<number>(4)),
+            // O.map(() => P.take<number>(4)),
+            O.map(() => P.manyN(B.int8_le, 4)),
             O.getOrElse(() => P.fail()),
             P.map((md5Hash) => ({ ...a, md5Hash })),
             P.alt(() => P.of(a))

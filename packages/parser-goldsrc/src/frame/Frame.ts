@@ -22,15 +22,15 @@ export type FrameHeader = {
 };
 
 export type FrameType =
-  | "ClientData"
-  | "ConsoleCommand"
-  | "DemoBuffer"
+  | `NetMsg-${NetMsgFrameType}`
   | "DemoStart"
-  | "Event"
+  | "ConsoleCommand"
+  | "ClientData"
   | "NextSection"
-  | "Sound"
+  | "Event"
   | "WeaponAnimation"
-  | `NetMsg-${NetMsgFrameType}`;
+  | "Sound"
+  | "DemoBuffer";
 
 const frameTypeIdToName = (a: number): FrameType => {
   switch (a) {
@@ -57,7 +57,7 @@ const frameTypeIdToName = (a: number): FrameType => {
 
 const frameType: B.BufferParser<FrameType> = P.expected(
   pipe(
-    B.uint8_be,
+    B.uint8_le,
     P.filter((a) => a >= 0 && a <= 9),
     P.map(frameTypeIdToName)
   ),
@@ -67,7 +67,7 @@ const frameType: B.BufferParser<FrameType> = P.expected(
 const frameHeader: B.BufferParser<FrameHeader> = P.struct({
   frameType,
   time: B.float32_le,
-  frame: B.int32_le,
+  frame: B.uint32_le,
 });
 
 const frameData: (frameType: FrameType) => B.BufferParser<unknown> = (
@@ -76,29 +76,29 @@ const frameData: (frameType: FrameType) => B.BufferParser<unknown> = (
   const noFields: B.BufferParser<Record<never, never>> = P.of({});
 
   switch (frameType) {
-    case "ClientData":
-      return clientData;
+    case "DemoStart":
+      return noFields;
 
     case "ConsoleCommand":
       return consoleCommand;
 
-    case "DemoBuffer":
-      return demoBuffer;
+    case "ClientData":
+      return clientData;
 
-    case "DemoStart":
+    case "NextSection":
       return noFields;
 
     case "Event":
       return event;
 
-    case "NextSection":
-      return noFields;
+    case "WeaponAnimation":
+      return weaponAnimation;
 
     case "Sound":
       return sound;
 
-    case "WeaponAnimation":
-      return weaponAnimation;
+    case "DemoBuffer":
+      return demoBuffer;
 
     default:
       return frameType.startsWith("NetMsg") ? netMsg : P.fail();

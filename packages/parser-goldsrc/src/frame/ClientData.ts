@@ -13,6 +13,6 @@ export type ClientData = {
 export const clientData: B.BufferParser<ClientData> = P.struct({
   origin: point,
   viewAngles: point,
-  weaponBits: B.int32_le,
+  weaponBits: B.uint32_le,
   fov: B.float32_le,
 });
