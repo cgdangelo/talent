@@ -2,26 +2,23 @@ import { buffer as B } from "@talent/parser-buffer";
 import * as P from "@talent/parser/lib/Parser";
 import { success } from "@talent/parser/lib/ParseResult";
 import { option as O } from "fp-ts";
-import { flow, pipe } from "fp-ts/lib/function";
+import { pipe } from "fp-ts/lib/function";
 import { stream } from "parser-ts/lib/Stream";
 
-// TODO Seriously need to figure out better names for these things. There's too
-// many "messages".
+// TODO Engine messages should be typed
+type EngineMsg = unknown;
 
-type MessageData = unknown;
-
-export const engineMsgs: (
-  messageBuffer: Buffer
-) => B.BufferParser<MessageData> = (messageBuffer) => (i) =>
-  pipe(
-    stream(messageBuffer as unknown as number[]),
-
+export const engineMsgs: (messageBuffer: Buffer) => B.BufferParser<EngineMsg> =
+  (messageBuffer) => (i) =>
     pipe(
-      P.many(engineMsg),
+      stream(messageBuffer as unknown as number[]),
 
-      P.chain((parsedMessages) => () => success(parsedMessages, i, i))
-    )
-  );
+      pipe(
+        P.many(engineMsg),
+
+        P.chain((parsedMessages) => () => success(parsedMessages, i, i))
+      )
+    );
 
 const engineMsg: B.BufferParser<unknown> = pipe(
   B.uint8_le,
@@ -41,7 +38,14 @@ const engineMsg: B.BufferParser<unknown> = pipe(
 const engineMsg_: (messageId: Message) => B.BufferParser<unknown> = (
   messageId
 ) => {
+  // TODO Replace with Option?
   switch (messageId) {
+    case Message.SVC_BAD:
+      // Should never see this message, so we can treat it as an exceptional
+      // case?
+      return P.cut(P.fail());
+
+    // TODO Excise these into separate modules, or functions at least
     case Message.SVC_NOP: // 1
       return P.succeed(null);
 
@@ -126,39 +130,40 @@ const engineMsg_: (messageId: Message) => B.BufferParser<unknown> = (
       return P.struct({ sv_downloadurl: B.ztstr });
 
     default:
-      // Fail by default for now so we can see more messages
+      // TODO Can keep for when custom message parsing works
+      // return pipe(
+      //   messageId,
+
+      //   // Messages above 64 are custom messages
+      //   O.fromPredicate((a) => a >= 64),
+
+      //   // Custom message should have been stored previously,
+      //   // potentially with bit length
+      //   O.chain(
+      //     flow(
+      //       // TODO No idea where this is going to live
+      //       (a) => new Map<Message, { size?: number }>().get(a),
+      //       O.fromNullable
+      //     )
+      //   ),
+      //   O.chain(flow((a) => a.size, O.fromNullable)),
+      //   O.chain(O.fromPredicate((a) => a > -1)),
+
+      //   // Use the known bit length
+      //   O.map((a) => P.of<number, number>(a)),
+      //   // or read it from the next byte
+      //   O.alt(() => O.some(B.uint8_le)),
+
+      //   // Skip whatever length we have or fail
+      //   O.fold(P.fail, P.chain<number, number, void>(P.skip))
+      // );
+
+      // HACK For now, fail by default for now so we can see more messages
       return P.fail();
-
-      return pipe(
-        messageId,
-
-        // Messages above 64 are custom messages
-        O.fromPredicate((a) => a >= 64),
-
-        // Custom message should have been stored previously,
-        // potentially with bit length
-        O.chain(
-          flow(
-            // TODO No idea where this is going to live
-            (a) => new Map<Message, { size?: number }>().get(a),
-            O.fromNullable
-          )
-        ),
-        O.chain(flow((a) => a.size, O.fromNullable)),
-        O.chain(O.fromPredicate((a) => a > -1)),
-
-        // Use the known bit length
-        O.map((a) => P.of<number, number>(a)),
-        // or read it from the next byte
-        O.alt(() => O.some(B.uint8_le)),
-
-        // Skip whatever length we have or fail
-        O.fold(P.fail, P.chain<number, number, void>(P.skip))
-      );
   }
 };
 
-enum Message {
+export enum Message {
   SVC_BAD = 0,
   SVC_NOP = 1,
   SVC_DISCONNECT = 2,
