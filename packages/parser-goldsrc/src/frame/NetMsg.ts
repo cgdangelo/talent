@@ -3,6 +3,7 @@ import * as P from "@talent/parser/lib/Parser";
 import { pipe } from "fp-ts/lib/function";
 import type { NetMsgInfo } from "./NetMsgInfo";
 import { netMsgInfo } from "./NetMsgInfo";
+import { messages } from "./NetMsgMessage";
 
 export type NetMsg = {
   readonly info: NetMsgInfo;
@@ -41,8 +42,8 @@ const msgLength: B.BufferParser<number> = P.expected(
 const msg: (msgLength: number) => B.BufferParser<unknown> = (msgLength) =>
   pipe(
     P.take<number>(msgLength),
-    P.map((a) => a as unknown as Buffer)
-    // P.chain(messages)
+    P.map((a) => a as unknown as Buffer),
+    P.chain(messages)
   );
 
 export const netMsg: B.BufferParser<NetMsg> = pipe(
