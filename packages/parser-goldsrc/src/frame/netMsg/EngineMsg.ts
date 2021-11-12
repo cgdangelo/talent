@@ -2,7 +2,6 @@ import { buffer as B } from "@talent/parser-buffer";
 import * as P from "@talent/parser/lib/Parser";
 import { success } from "@talent/parser/lib/ParseResult";
 import { option as O } from "fp-ts";
-import { sequenceT } from "fp-ts/lib/Apply";
 import { pipe } from "fp-ts/lib/function";
 import { stream } from "parser-ts/lib/Stream";
 import { point } from "../../Point";
@@ -177,14 +176,7 @@ const engineMsg_: (messageId: Message) => B.BufferParser<unknown> = (
             ] as const,
 
             ([origin, angle]) =>
-              sequenceT(P.Applicative)(
-                origin,
-                angle,
-                origin,
-                angle,
-                origin,
-                angle
-              ),
+              P.tuple(origin, angle, origin, angle, origin, angle),
 
             P.map(([originX, angleX, originY, angleY, originZ, angleZ]) => ({
               ...a,
@@ -209,11 +201,7 @@ const engineMsg_: (messageId: Message) => B.BufferParser<unknown> = (
               pipe(
                 P.struct({
                   renderColor: pipe(
-                    sequenceT(P.Applicative)(
-                      B.uint8_le,
-                      B.uint8_le,
-                      B.uint8_le
-                    ),
+                    P.tuple(B.uint8_le, B.uint8_le, B.uint8_le),
                     P.map(([r, g, b]) => ({ r, g, b }))
                   ),
                   renderFx: B.uint8_le,
@@ -470,7 +458,7 @@ const engineMsg_: (messageId: Message) => B.BufferParser<unknown> = (
       // TODO hlviewer does not scale these. Find out what "engine call" means
       // here: https://wiki.alliedmods.net/Half-Life_1_Engine_Messages#SVC_CROSSHAIRANGLE
       return pipe(
-        sequenceT(P.Applicative)(
+        P.tuple(
           pipe(
             B.int16_le
             // P.map((a) => a / 5)

@@ -1,6 +1,5 @@
 import { buffer as B } from "@talent/parser-buffer";
 import * as P from "@talent/parser/lib/Parser";
-import { sequenceT } from "fp-ts/lib/Apply";
 import type { Point } from "../Point";
 import { point } from "../Point";
 
@@ -45,9 +44,12 @@ export type RefParams = {
   readonly onlyClientDraw: number;
 };
 
-const viewPort: B.BufferParser<RefParams["viewPort"]> = sequenceT(
-  P.Applicative
-)(B.int32_le, B.int32_le, B.int32_le, B.int32_le);
+const viewPort: B.BufferParser<RefParams["viewPort"]> = P.tuple(
+  B.int32_le,
+  B.int32_le,
+  B.int32_le,
+  B.int32_le
+);
 
 export const refParams: B.BufferParser<RefParams> = P.struct({
   viewOrigin: point,
