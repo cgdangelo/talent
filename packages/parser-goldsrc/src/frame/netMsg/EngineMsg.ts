@@ -2,8 +2,10 @@ import { buffer as B } from "@talent/parser-buffer";
 import * as P from "@talent/parser/lib/Parser";
 import { success } from "@talent/parser/lib/ParseResult";
 import { option as O } from "fp-ts";
+import { sequenceT } from "fp-ts/lib/Apply";
 import { pipe } from "fp-ts/lib/function";
 import { stream } from "parser-ts/lib/Stream";
+import { point } from "../../Point";
 
 // TODO Engine messages should be typed
 type EngineMsg = unknown;
@@ -49,6 +51,21 @@ const engineMsg_: (messageId: Message) => B.BufferParser<unknown> = (
     case Message.SVC_NOP: // 1
       return P.succeed(null);
 
+    case Message.SVC_DISCONNECT: // 2
+      return P.struct({ reason: B.ztstr });
+
+    case Message.SVC_EVENT: // 3
+      return P.fail();
+
+    case Message.SVC_VERSION: // 4
+      return P.struct({ protocolVersion: B.uint32_le });
+
+    case Message.SVC_SETVIEW: // 5
+      return P.struct({ entityIndex: B.int16_le });
+
+    case Message.SVC_SOUND: // 6
+      return P.fail();
+
     case Message.SVC_TIME: // 7
       return P.struct({ time: B.float32_le });
 
@@ -57,6 +74,13 @@ const engineMsg_: (messageId: Message) => B.BufferParser<unknown> = (
 
     case Message.SVC_STUFFTEXT: // 9
       return P.struct({ command: B.ztstr });
+
+    case Message.SVC_SETANGLE: // 10
+      // TODO The provided angles need to be scaled by (65536 / 360).
+      return pipe(
+        P.manyN(B.int16_le, 3),
+        P.map(([pitch, yaw, roll]) => ({ pitch, yaw, roll }))
+      );
 
     case Message.SVC_SERVERINFO: // 11
       return pipe(
@@ -77,6 +101,9 @@ const engineMsg_: (messageId: Message) => B.BufferParser<unknown> = (
         P.chainFirst(() => P.skip(1))
       );
 
+    case Message.SVC_LIGHTSTYLE: // 12
+      return P.struct({ index: B.uint8_le, lightInfo: B.ztstr }); // TODO Parse light info?
+
     case Message.SVC_UPDATEUSERINFO: // 13
       return P.struct({
         clientIndex: B.uint8_le,
@@ -85,12 +112,140 @@ const engineMsg_: (messageId: Message) => B.BufferParser<unknown> = (
         clientCdKeyHash: P.take(16),
       });
 
+    case Message.SVC_DELTADESCRIPTION: // 14
+      return P.fail();
+
+    case Message.SVC_CLIENTDATA: // 15
+      return P.fail();
+
+    case Message.SVC_STOPSOUND: // 16
+      return P.struct({ entityIndex: B.int16_le });
+
+    case Message.SVC_PINGS: // 17
+      return P.fail();
+
+    case Message.SVC_PARTICLE: // 18
+      return P.struct({
+        origin: point,
+
+        // TODO AlliedMods says 1/16, hlviewer has 1/8?
+        direction: point,
+
+        count: B.uint8_le,
+        color: B.uint8_le,
+      });
+
+    // Deprecated
+    case Message.SVC_DAMAGE: // 19
+      return P.of(null);
+
+    case Message.SVC_SPAWNSTATIC: // 20
+      return pipe(
+        P.struct({
+          modelIndex: B.int16_le,
+          sequence: B.int8_le,
+          frame: B.int8_le,
+          colorMap: B.int16_le,
+          skin: B.int8_le,
+          origin: point,
+        }),
+
+        // valve who did this i just wanna talk
+        P.chain((a) =>
+          pipe(
+            // Origin and angle x-, y-, and z-coordinates alternate, and need
+            // to be scaled.
+            [
+              pipe(
+                B.int16_le,
+                P.map((a) => a / 8)
+              ),
+
+              pipe(
+                B.int8_le,
+                P.map((a) => a * (360 / 256))
+              ),
+            ] as const,
+
+            ([origin, angle]) =>
+              sequenceT(P.Applicative)(
+                origin,
+                angle,
+                origin,
+                angle,
+                origin,
+                angle
+              ),
+
+            P.map(([originX, angleX, originY, angleY, originZ, angleZ]) => ({
+              ...a,
+              origin: { x: originX, y: originY, z: originZ },
+              angle: { x: angleX, y: angleY, z: angleZ },
+            }))
+          )
+        ),
+
+        P.chain((a) =>
+          pipe(
+            P.struct({ renderMode: B.int8_le }),
+            P.map((b) => ({ ...a, ...b }))
+          )
+        ),
+
+        P.chain((a) =>
+          pipe(
+            a.renderMode,
+            O.fromPredicate((a) => a !== 0),
+            O.map(() =>
+              pipe(
+                P.struct({
+                  renderColor: pipe(
+                    sequenceT(P.Applicative)(
+                      B.uint8_le,
+                      B.uint8_le,
+                      B.uint8_le
+                    ),
+                    P.map(([r, g, b]) => ({ r, g, b }))
+                  ),
+                  renderFx: B.uint8_le,
+                }),
+                P.map((b) => ({ ...a, ...b }))
+              )
+            ),
+            O.getOrElse(() => P.fail()),
+            P.alt(() => P.of(a))
+          )
+        )
+      );
+
+    case Message.SVC_EVENT_RELIABLE: // 21
+    case Message.SVC_SPAWNBASELINE: // 22
+    case Message.SVC_TEMPENTITY: // 23
+    case Message.SVC_SETPAUSE: // 24
+    case Message.SVC_SIGNONNUM: // 25
+    case Message.SVC_CENTERPRINT: // 26
+    case Message.SVC_KILLEDMONSTER: // 27
+    case Message.SVC_FOUNDSECRET: // 28
+    case Message.SVC_SPAWNSTATICSOUND: // 29
+    case Message.SVC_INTERMISSION: // 30
+    case Message.SVC_FINALE: // 31
+    case Message.SVC_CDTRACK: // 32
+    case Message.SVC_RESTORE: // 33
+    case Message.SVC_CUTSCENE: // 34
     case Message.SVC_WEAPONANIM: // 35
       return P.struct({
         sequenceNumber: B.int8_le,
         weaponModelBodyGroup: B.int8_le,
       });
-
+    case Message.SVC_DECALNAME: // 36
+    case Message.SVC_ROOMTYPE: // 37
+    case Message.SVC_ADDANGLE: // 38
+    case Message.SVC_NEWUSERMSG: // 39
+    case Message.SVC_PACKETENTITIES: // 40
+    case Message.SVC_DELTAPACKETENTITIES: // 41
+    case Message.SVC_CHOKE: // 42
+    case Message.SVC_RESOURCELIST: // 43
+    case Message.SVC_NEWMOVEVARS: // 44
     case Message.SVC_RESOURCEREQUEST: // 45
       return pipe(
         P.struct({ spawnCount: B.int32_le }),
@@ -112,7 +267,6 @@ const engineMsg_: (messageId: Message) => B.BufferParser<unknown> = (
           pipe(
             a.flags,
             O.fromPredicate((flags) => (flags & 4) !== 0), // RES_CUSTOM
-            // O.map(() => P.take<number>(4)),
             O.map(() => P.manyN(B.int8_le, 4)),
             O.getOrElse(() => P.fail()),
             P.map((md5Hash) => ({ ...a, md5Hash })),
@@ -121,14 +275,26 @@ const engineMsg_: (messageId: Message) => B.BufferParser<unknown> = (
         )
       );
 
+    case Message.SVC_CROSSHAIRANGLE: // 47
+    case Message.SVC_SOUNDFADE: // 48
     case Message.SVC_FILETXFERFAILED: // 49
       return P.struct({ filename: B.ztstr });
+
+    case Message.SVC_HLTV: // 50
+    case Message.SVC_DIRECTOR: // 51
+    case Message.SVC_VOICEINIT: // 52
+    case Message.SVC_VOICEDATA: // 53
 
     case Message.SVC_SENDEXTRAINFO: // 54
       return P.struct({ fallbackDir: B.ztstr, canCheat: B.uint8_le });
 
+    case Message.SVC_TIMESCALE: // 55
+
     case Message.SVC_RESOURCELOCATION: // 56
       return P.struct({ sv_downloadurl: B.ztstr });
+
+    case Message.SVC_SENDCVARVALUE: // 57
+    case Message.SVC_SENDCVARVALUE2: // 58
 
     default:
       // TODO Can keep for when custom message parsing works
