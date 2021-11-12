@@ -13,7 +13,7 @@ For now: yet another GoldSrc parser, built with [[https://github.com/gcanti/fp-t
 
 ** What's working?
 
-Demos can be parsed in their entirety, with the exception of the messages contained within the [[https://github.com/cgdangelo/talent/tree/main/packages/parser-goldsrc#netmessage][NetMsg bitstream field]].
+Demos can be parsed in their entirety, with the exception of most engine messages contained within the [[https://github.com/cgdangelo/talent/tree/main/packages/parser-goldsrc#netmessage][NetMsg bitstream field]].
 
 ** +What's coming?+ What's maybe coming?
 
