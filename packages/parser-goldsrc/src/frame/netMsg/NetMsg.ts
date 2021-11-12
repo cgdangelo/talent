@@ -1,6 +1,7 @@
 import { buffer as B } from "@talent/parser-buffer";
 import * as P from "@talent/parser/lib/Parser";
 import { pipe } from "fp-ts/lib/function";
+import { engineMsgs } from "./EngineMsg";
 import type { NetMsgInfo } from "./NetMsgInfo";
 import { netMsgInfo } from "./NetMsgInfo";
 
@@ -13,8 +14,9 @@ export type NetMsg = {
   readonly outgoingSequence: number;
   readonly reliableSequence: number;
   readonly lastReliableSequence: number;
-  readonly msgLength: number;
-  readonly msg: unknown;
+
+  readonly engineMsgsLength: number;
+  readonly engineMsgs: unknown;
 };
 
 export type NetMsgFrameType = "Start" | "Normal" | number;
@@ -30,20 +32,13 @@ export const netMsgFrameType = (a: number): NetMsgFrameType => {
   }
 };
 
-const msgLength: B.BufferParser<number> = P.expected(
+const engineMsgsLength: B.BufferParser<number> = P.expected(
   pipe(
     B.int32_le,
     P.filter((a) => a > 0 && a < 65_536)
   ),
   "[0, 65_536]"
 );
-
-const msg: (msgLength: number) => B.BufferParser<unknown> = (msgLength) =>
-  pipe(
-    P.take<number>(msgLength),
-    P.map((a) => a as unknown as Buffer)
-    // P.chain(messages)
-  );
 
 export const netMsg: B.BufferParser<NetMsg> = pipe(
   P.struct({
@@ -55,13 +50,15 @@ export const netMsg: B.BufferParser<NetMsg> = pipe(
     outgoingSequence: B.int32_le,
     reliableSequence: B.int32_le,
     lastReliableSequence: B.int32_le,
-    msgLength,
+    engineMsgsLength,
   }),
 
   P.chain((a) =>
     pipe(
-      msg(a.msgLength),
-      P.map((msg) => ({ ...a, msg }))
+      P.take<number>(a.engineMsgsLength),
+      P.map((a) => a as unknown as Buffer),
+      P.chain(engineMsgs),
+      P.map((engineMsgs) => ({ ...a, engineMsgs }))
     )
   )
 );
