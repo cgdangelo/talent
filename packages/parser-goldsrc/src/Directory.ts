@@ -1,9 +1,10 @@
 import { buffer as B } from "@talent/parser-buffer";
 import * as P from "@talent/parser/lib/Parser";
-import { array as A } from "fp-ts";
+import { array as A, readonlyArray as RA } from "fp-ts";
 import { pipe } from "fp-ts/lib/function";
 import type { DirectoryEntry } from "./DirectoryEntry";
 import { directoryEntry } from "./DirectoryEntry";
+import type { Frame } from "./frame/Frame";
 import { frames } from "./frame/Frame";
 
 export type Directory = readonly DirectoryEntry[];
@@ -40,7 +41,7 @@ export const directory: B.BufferParser<Directory> = pipe(
       directoryEntries.map((directoryEntry) =>
         pipe(
           P.seek<number>(directoryEntry.offset),
-          P.chain(() => frames),
+          P.chain(() => P.maybe(RA.getMonoid<Frame>())(frames)),
           P.map((frames) => ({ ...directoryEntry, frames }))
         )
       )
