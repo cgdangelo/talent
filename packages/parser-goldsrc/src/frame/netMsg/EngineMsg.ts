@@ -83,7 +83,7 @@ const engineMsg_: (messageId: Message) => B.BufferParser<unknown> = (
         P.manyN(
           pipe(
             B.int16_le,
-            P.map((a) => a * (65536 / 360))
+            P.map((a) => a / (65536 / 360))
           ),
           3
         ),
@@ -134,10 +134,16 @@ const engineMsg_: (messageId: Message) => B.BufferParser<unknown> = (
 
     case Message.SVC_PARTICLE: // 18
       return P.struct({
-        origin: point,
+        // TODO AlliedMods does not scaling, hlviewer says 1/8
+        origin: pipe(
+          B.int16_le,
+          P.map((a) => a / 8),
+          (fa) => P.tuple(fa, fa, fa)
+        ),
 
-        // TODO AlliedMods says 1/16, hlviewer has 1/8?
-        direction: point,
+        // TODO AlliedMods says 1/16, hlviewer does not scale
+        // TODO Value must be [-128, 127]
+        direction: P.tuple(B.int8_le, B.int8_le, B.int8_le),
 
         count: B.uint8_le,
         color: B.uint8_le,
@@ -245,7 +251,12 @@ const engineMsg_: (messageId: Message) => B.BufferParser<unknown> = (
     case Message.SVC_SPAWNSTATICSOUND: // 29
       return P.struct({
         // TODO hlviewer scales by 8 here?
-        origin: point,
+        origin: pipe(
+          B.int16_le,
+          P.map((a) => a / 8),
+          (fa) => P.tuple(fa, fa, fa),
+          P.map(([x, y, z]) => ({ x, y, z }))
+        ),
 
         soundIndex: B.uint16_le,
         volume: pipe(
