@@ -9,7 +9,7 @@ import { stream } from "./Stream";
 export * from "parser-ts/lib/Parser";
 
 export const skip: <I>(offset: number) => P.Parser<I, void> = (offset) => (i) =>
-  success(undefined, i, stream(i.buffer, i.cursor + offset));
+  pipe(i, seek(i.cursor + offset));
 
 export const seek =
   <I = any>(cursor: number): P.Parser<I, void> =>
