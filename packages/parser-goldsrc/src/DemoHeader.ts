@@ -16,7 +16,7 @@ const magic: B.BufferParser<"HLDEMO"> = P.expected(
     B.ztstr_padded(8),
     P.filter((a): a is "HLDEMO" => a === "HLDEMO")
   ),
-  "'HLDEMO' magic value"
+  "magic 'HLDEMO'"
 );
 
 export const demoProtocol: B.BufferParser<5> = P.expected(
@@ -24,7 +24,7 @@ export const demoProtocol: B.BufferParser<5> = P.expected(
     B.uint32_le,
     P.filter((a): a is 5 => a === 5)
   ),
-  "5"
+  "demo protocol 5"
 );
 
 export const header: B.BufferParser<DemoHeader> = P.struct({

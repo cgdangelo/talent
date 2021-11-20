@@ -1,50 +1,61 @@
 import { buffer as B } from "@talent/parser-buffer";
 import * as P from "@talent/parser/lib/Parser";
-import { array as A, readonlyArray as RA } from "fp-ts";
-import { pipe } from "fp-ts/lib/function";
+import { readonlyArray as RA } from "fp-ts";
+import { flow, pipe } from "fp-ts/lib/function";
+import { fst } from "fp-ts/lib/ReadonlyTuple";
 import type { DirectoryEntry } from "./DirectoryEntry";
 import { directoryEntry } from "./DirectoryEntry";
-import type { Frame } from "./frame/Frame";
 import { frames } from "./frame/Frame";
 
 export type Directory = readonly DirectoryEntry[];
 
-const directoryOffset: B.BufferParser<number> = (i) =>
-  pipe(
-    B.uint32_le,
-    P.filter((a) => a === i.buffer.length - 4 - 92 * 2)
-  )(i);
+const directoryOffset: B.BufferParser<number> = pipe(
+  P.withStart(B.uint32_le),
+  P.filter(([a, i]) => a === i.buffer.length - 188),
+  P.map(fst)
+);
 
 const totalEntries: B.BufferParser<number> = P.expected(
   pipe(
     B.int32_le,
     P.filter((a) => a >= 1 && a <= 1024)
   ),
-  `1 - 1024 directory entries`
+  "directory entries [1, 1024]"
+);
+
+const directoryEntries: (
+  totalEntries: number
+) => B.BufferParser<DirectoryEntry[]> = (totalEntries) =>
+  P.manyN(directoryEntry, totalEntries);
+
+const directoryEntriesWithoutFrames: (
+  directoryOffset: number
+) => B.BufferParser<Directory> = (directoryOffset) =>
+  pipe(
+    P.seek(directoryOffset),
+    P.apSecond(totalEntries),
+    P.chain(directoryEntries)
+  );
+
+const addFramesToDirectoryEntry: (
+  directoryEntry: DirectoryEntry
+) => B.BufferParser<DirectoryEntry> = (directoryEntry) =>
+  pipe(
+    P.seek(directoryEntry.offset),
+    P.apSecond(frames),
+    P.maybe(RA.getMonoid()),
+    P.map((frames) => ({ ...directoryEntry, frames }))
+  );
+
+const addFramesToDirectoryEntries: (
+  directoryEntries: Directory
+) => B.BufferParser<Directory> = flow(
+  RA.map(addFramesToDirectoryEntry),
+  RA.sequence(P.Applicative)
 );
 
 export const directory: B.BufferParser<Directory> = pipe(
   directoryOffset,
-
-  // Read entries without frames.
-  P.chain((directoryOffset) =>
-    pipe(
-      P.seek<number>(directoryOffset),
-      P.chain(() => totalEntries),
-      P.chain((totalEntries) => P.manyN(directoryEntry, totalEntries))
-    )
-  ),
-
-  // Read frames and add to entries.
-  P.chain((directoryEntries) =>
-    A.sequence(P.Applicative)(
-      directoryEntries.map((directoryEntry) =>
-        pipe(
-          P.seek<number>(directoryEntry.offset),
-          P.chain(() => P.maybe(RA.getMonoid<Frame>())(frames)),
-          P.map((frames) => ({ ...directoryEntry, frames }))
-        )
-      )
-    )
-  )
+  P.chain(directoryEntriesWithoutFrames),
+  P.chain(addFramesToDirectoryEntries)
 );
