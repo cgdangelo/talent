@@ -8,11 +8,14 @@ import { stream } from "./Stream";
 
 export * from "parser-ts/lib/Parser";
 
-export const skip: <I>(offset: number) => P.Parser<I, void> = (offset) => (i) =>
-  success(undefined, i, stream(i.buffer, i.cursor + offset));
+export const skip = <I>(offset: number): P.Parser<I, void> =>
+  pipe(
+    P.withStart(P.of<I, number>(offset)),
+    P.chain(([offset, i]) => seek(i.cursor + offset))
+  );
 
 export const seek =
-  <I>(cursor: number): P.Parser<I, void> =>
+  <I = any>(cursor: number): P.Parser<I, void> =>
   (i) =>
     success(undefined, i, stream(i.buffer, cursor));
 
@@ -24,11 +27,11 @@ export const manyN: <I, A>(fa: P.Parser<I, A>, n: number) => P.Parser<I, A[]> =
 // export const take: <I>(n: number) => P.Parser<I, I[]> = (n) =>
 //   manyN(P.item(), n);
 
-export const take: <I>(n: number) => P.Parser<I, I[]> = (n) => (i) =>
-  success(
-    i.buffer.slice(i.cursor, i.cursor + n),
-    i,
-    stream(i.buffer, i.cursor + n)
+export const take = <I>(length: number): P.Parser<I, I[]> =>
+  pipe(
+    P.withStart(P.of<I, number>(length)),
+    P.map(([length, i]) => i.buffer.slice(i.cursor, i.cursor + length)),
+    P.apFirst(skip(length))
   );
 
 export const logPositions: <I, A>(fa: P.Parser<I, A>) => P.Parser<I, A> =
