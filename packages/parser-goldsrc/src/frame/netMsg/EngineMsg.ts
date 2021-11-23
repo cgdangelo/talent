@@ -8,6 +8,7 @@ import {
 } from "fp-ts";
 import { flow, pipe } from "fp-ts/lib/function";
 import { stream } from "parser-ts/lib/Stream";
+import * as BB from "../../bitbuffer";
 import { point } from "../../Point";
 import { moveVars } from "../MoveVars";
 
@@ -21,7 +22,6 @@ export const engineMsgs: (messageBuffer: Buffer) => B.BufferParser<EngineMsg> =
 
       pipe(
         P.many(engineMsg),
-
         P.chain((parsedMessages) => () => success(parsedMessages, i, i))
       )
     );
@@ -138,8 +138,27 @@ const engineMsg_: (messageId: Message) => B.BufferParser<unknown> = (
     case Message.SVC_STOPSOUND: // 16
       return P.struct({ entityIndex: B.int16_le });
 
-    case Message.SVC_PINGS: // 17
-      return P.fail();
+    // 17
+    case Message.SVC_PINGS: {
+      return pipe(
+        P.skip<number>(1),
+        P.apSecond(
+          P.manyTill(
+            P.struct({
+              playerId: BB.bits(5),
+              ping: BB.bits(12),
+              loss: BB.bits(7),
+            }),
+
+            pipe(
+              BB.bits(1),
+              P.filter((a) => !!a)
+            )
+          )
+        ),
+        P.apFirst(BB.nextByte)
+      );
+    }
 
     case Message.SVC_PARTICLE: // 18
       return P.struct({
@@ -429,8 +448,51 @@ const engineMsg_: (messageId: Message) => B.BufferParser<unknown> = (
     case Message.SVC_CHOKE: // 42
       return P.of(null);
 
-    case Message.SVC_RESOURCELIST: // 43
-      return P.fail();
+    // 43
+    case Message.SVC_RESOURCELIST: {
+      const resource = pipe(
+        P.struct({
+          type: BB.bits(4),
+          name: BB.ztstr,
+          index: BB.bits(12),
+          size: BB.bits(24),
+          flags: BB.bits(3),
+        }),
+
+        P.chain((resource) =>
+          pipe(
+            P.of<number, number>(resource.flags),
+            P.filter((flags) => (flags & 4) !== 0),
+            P.apSecond(BB.bits(128)),
+            P.map((md5Hash) => ({ ...resource, md5Hash })),
+            P.alt(() => P.of(resource))
+          )
+        ),
+
+        P.chain((resource) =>
+          pipe(
+            BB.bits(1),
+            P.filter((hasExtraInfo) => hasExtraInfo === 1),
+            P.apSecond(BB.bits(255)), // TODO Isn't this supposed to be 256?
+            P.map((extraInfo) => ({ ...resource, extraInfo })),
+            P.alt(() => P.of(resource))
+          )
+        ),
+
+        P.apFirst(P.skip(1))
+      );
+
+      return (i) =>
+        pipe(
+          // same netmsg buffer, in bits
+          stream(i.buffer, i.cursor * 8),
+
+          pipe(
+            BB.bits(12),
+            P.chain((entryCount) => P.manyN(resource, entryCount))
+          )
+        );
+    }
 
     case Message.SVC_NEWMOVEVARS: // 44
       return pipe(
