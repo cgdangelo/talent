@@ -57,4 +57,11 @@ export const ztstr: P.Parser<number, string> = pipe(
 );
 
 export const nextByte: P.Parser<number, void> = (i) =>
-  success(undefined, i, stream(i.buffer, (Math.floor(i.cursor / 8) + 1) * 8));
+  success(
+    undefined,
+    i,
+    stream(
+      i.buffer,
+      i.cursor % 8 === 0 ? i.cursor : i.cursor + (8 - (i.cursor % 8))
+    )
+  );

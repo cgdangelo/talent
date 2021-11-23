@@ -646,6 +646,7 @@ const engineMsg_: (messageId: Message) => B.BufferParser<unknown> = (
           )
         ),
 
+        // TODO this still feels wrong; what if no md5hash?
         P.chain((resource) =>
           pipe(
             BB.ubits(1),
@@ -669,7 +670,31 @@ const engineMsg_: (messageId: Message) => B.BufferParser<unknown> = (
 
           pipe(
             BB.ubits(12),
-            P.chain((entryCount) => P.manyN(resource, entryCount))
+            P.chain((entryCount) => P.manyN(resource, entryCount)),
+            P.chain((resources) =>
+              pipe(
+                BB.bits(1),
+                P.filter((hasConsistency) => hasConsistency !== 0),
+                P.apSecond(
+                  P.manyTill(
+                    pipe(
+                      P.skip<number>(1),
+                      P.apSecond(BB.bits(1)),
+                      P.chain((isShortIndex) => BB.bits(isShortIndex ? 5 : 10))
+                    ),
+
+                    pipe(
+                      BB.bits(1),
+                      P.filter((a) => a === 0)
+                    )
+                  )
+                ),
+                P.map((consistency) => ({ resources, consistency })),
+                P.alt(() => P.of({ resources }))
+              )
+            ),
+            P.apFirst(BB.nextByte),
+            P.chain((a) => (o) => success(a, o, stream(o.buffer, o.cursor / 8)))
           )
         );
     }
