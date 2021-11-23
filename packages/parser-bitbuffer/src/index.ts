@@ -47,11 +47,11 @@ export const ubits: (n: number) => P.Parser<number, number> = bits_(false);
 
 export const ztstr: P.Parser<number, string> = pipe(
   P.manyTill(
-    bits(8),
+    ubits(8),
 
     pipe(
-      bits(8),
-      P.filter((a) => a === 0x00)
+      ubits(8),
+      P.filter((a) => a === 0)
     )
   ),
 

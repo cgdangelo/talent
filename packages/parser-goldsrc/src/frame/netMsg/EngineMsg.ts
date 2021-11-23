@@ -629,18 +629,18 @@ const engineMsg_: (messageId: Message) => B.BufferParser<unknown> = (
     case Message.SVC_RESOURCELIST: {
       const resource = pipe(
         P.struct({
-          type: BB.bits(4),
+          type: BB.ubits(4),
           name: BB.ztstr,
-          index: BB.bits(12),
-          size: BB.bits(24),
-          flags: BB.bits(3),
+          index: BB.ubits(12),
+          size: BB.ubits(24),
+          flags: BB.ubits(3),
         }),
 
         P.chain((resource) =>
           pipe(
             P.of<number, number>(resource.flags),
             P.filter((flags) => (flags & 4) !== 0),
-            P.apSecond(BB.bits(128)),
+            P.apSecond(BB.ubits(128)),
             P.map((md5Hash) => ({ ...resource, md5Hash })),
             P.alt(() => P.of(resource))
           )
@@ -648,15 +648,13 @@ const engineMsg_: (messageId: Message) => B.BufferParser<unknown> = (
 
         P.chain((resource) =>
           pipe(
-            BB.bits(1),
+            BB.ubits(1),
             P.filter((hasExtraInfo) => hasExtraInfo === 1),
-            P.apSecond(BB.bits(255)), // TODO Isn't this supposed to be 256?
+            P.apSecond(BB.ubits(256)),
             P.map((extraInfo) => ({ ...resource, extraInfo })),
             P.alt(() => P.of(resource))
           )
-        ),
-
-        P.apFirst(P.skip(1))
+        )
       );
 
       return (i) =>
@@ -665,7 +663,7 @@ const engineMsg_: (messageId: Message) => B.BufferParser<unknown> = (
           stream(i.buffer, i.cursor * 8),
 
           pipe(
-            BB.bits(12),
+            BB.ubits(12),
             P.chain((entryCount) => P.manyN(resource, entryCount))
           )
         );
