@@ -32,13 +32,11 @@ const bits_: (signed: boolean) => (n: number) => P.Parser<number, number> =
       bitIndex += read;
     }
 
-    if (signed) {
-      if (n !== 32 && value & (1 << (n - 1))) {
-        value |= -1 ^ ((1 << n) - 1);
-      }
+    if (signed && n !== 32 && value & (1 << (n - 1))) {
+      value |= -1 ^ ((1 << n) - 1);
     }
 
-    return success(value >>> 0, i, stream(i.buffer, offset));
+    return success(signed ? value : value >>> 0, i, stream(i.buffer, offset));
   };
 
 export const bits: (n: number) => P.Parser<number, number> = bits_(true);
