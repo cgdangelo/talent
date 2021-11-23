@@ -221,10 +221,10 @@ const engineMsg_: (messageId: Message) => B.BufferParser<unknown> = (
             return pipe(
               P.struct({
                 sign: pipe(
-                  BB.bits(1),
+                  BB.ubits(1),
                   P.map((a) => (a ? -1 : 1))
                 ),
-                value: BB.bits(deltaDecoder[index]!.bits - 1),
+                value: BB.ubits(deltaDecoder[index]!.bits - 1),
                 divisor: P.of(deltaDecoder[index]!.divisor),
               }),
 
@@ -234,7 +234,7 @@ const engineMsg_: (messageId: Message) => B.BufferParser<unknown> = (
             );
           } else {
             return pipe(
-              BB.bits(deltaDecoder[index]!.bits),
+              BB.ubits(deltaDecoder[index]!.bits),
               P.map((value) => ({
                 [deltaDecoder[index]!.name]:
                   value / deltaDecoder[index]!.divisor,
@@ -243,7 +243,7 @@ const engineMsg_: (messageId: Message) => B.BufferParser<unknown> = (
           }
         } else if (deltaDecoder[index]!.flags & DeltaType.DT_ANGLE) {
           return pipe(
-            BB.bits(deltaDecoder[index]!.bits),
+            BB.ubits(deltaDecoder[index]!.bits),
             P.map((value) => ({
               [deltaDecoder[index]!.name]:
                 value * (360 / (1 << deltaDecoder[index]!.bits)),
@@ -258,9 +258,9 @@ const engineMsg_: (messageId: Message) => B.BufferParser<unknown> = (
 
       const readDelta = (deltaDecoder: DeltaDecoder) =>
         pipe(
-          BB.bits(3),
+          BB.ubits(3),
 
-          P.chain((maskBitCount) => P.manyN(BB.bits(8), maskBitCount)),
+          P.chain((maskBitCount) => P.manyN(BB.ubits(8), maskBitCount)),
 
           P.chain((maskBits) => {
             const fieldParsers: ReturnType<typeof readField>[] = [];
@@ -328,13 +328,13 @@ const engineMsg_: (messageId: Message) => B.BufferParser<unknown> = (
         P.apSecond(
           P.manyTill(
             P.struct({
-              playerId: BB.bits(5),
-              ping: BB.bits(12),
-              loss: BB.bits(7),
+              playerId: BB.ubits(5),
+              ping: BB.ubits(12),
+              loss: BB.ubits(7),
             }),
 
             pipe(
-              BB.bits(1),
+              BB.ubits(1),
               P.filter((a) => !!a)
             )
           )
@@ -649,10 +649,15 @@ const engineMsg_: (messageId: Message) => B.BufferParser<unknown> = (
         P.chain((resource) =>
           pipe(
             BB.ubits(1),
-            P.filter((hasExtraInfo) => hasExtraInfo === 1),
+            P.filter((hasExtraInfo) => hasExtraInfo !== 0),
             P.apSecond(BB.ubits(256)),
             P.map((extraInfo) => ({ ...resource, extraInfo })),
-            P.alt(() => P.of(resource))
+            P.alt(() =>
+              pipe(
+                P.of<number, typeof resource>(resource),
+                P.apFirst(P.skip(1))
+              )
+            )
           )
         )
       );
