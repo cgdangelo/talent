@@ -35,7 +35,7 @@ const engineMsg: B.BufferParser<unknown> = pipe(
 
       // TODO Can remove SVC_NOP, deprecated messages, but NOT messages that
       // have no arguments.
-      // P.filter((a) => a !== null),
+      // P.filter(() => messageId !== Message.SVC_NOP),
 
       P.map((fields) => ({ type: Message[messageId], fields }))
     )
@@ -139,10 +139,7 @@ const engineMsg_: (messageId: Message) => B.BufferParser<unknown> = (
             pipe(
               stream(i.buffer, i.cursor * 8),
               pipe(
-                P.manyN(
-                  readDelta(deltaDecoders.get("delta_description_t")!),
-                  delta.fieldCount
-                ),
+                P.manyN(readDelta("delta_description_t"), delta.fieldCount),
                 P.map((fields) => ({ ...delta, fields })),
                 P.map((a) => {
                   // TODO how to handle storing delta decoders?
@@ -279,8 +276,56 @@ const engineMsg_: (messageId: Message) => B.BufferParser<unknown> = (
     case Message.SVC_EVENT_RELIABLE: // 21
       return P.fail();
 
+    // FIXME no shot this is accurate
     case Message.SVC_SPAWNBASELINE: // 22
-      return P.fail();
+      return (i) =>
+        pipe(
+          stream(i.buffer, i.cursor * 8),
+
+          pipe(
+            P.manyTill(
+              pipe(
+                P.struct({ index: BB.ubits(11), type: BB.ubits(2) }),
+
+                P.chain((entity) =>
+                  readDelta(
+                    (entity.type & 1) !== 0
+                      ? entity.index > 0 && entity.index < 33
+                        ? "entity_state_player_t"
+                        : "entity_state_t"
+                      : "custom_entity_state_t"
+                  )
+                )
+              ),
+
+              pipe(
+                BB.ubits(11),
+                P.filter((entityIndex) => entityIndex === (1 << 11) - 1)
+              )
+            ),
+
+            P.apFirst(P.skip(5)),
+
+            P.chain((entities) =>
+              pipe(
+                BB.ubits(6),
+                P.chain((extraCount) =>
+                  P.manyN(readDelta("entity_state_t"), extraCount)
+                ),
+
+                P.map((extraData) => ({ entities, extraData })),
+                P.alt(() => P.of({ entities }))
+              )
+            ),
+
+            P.apFirst(BB.nextByte),
+
+            P.chain(
+              (entities) => (o) =>
+                success(entities, o, stream(o.buffer, o.cursor / 8))
+            )
+          )
+        );
 
     case Message.SVC_TEMPENTITY: // 23
       // TODO Doable, just takes a lot of doing
@@ -519,18 +564,18 @@ const engineMsg_: (messageId: Message) => B.BufferParser<unknown> = (
             P.chain((entryCount) => P.manyN(resource, entryCount)),
             P.chain((resources) =>
               pipe(
-                BB.bits(1),
+                BB.ubits(1),
                 P.filter((hasConsistency) => hasConsistency !== 0),
                 P.apSecond(
                   P.manyTill(
                     pipe(
                       P.skip<number>(1),
-                      P.apSecond(BB.bits(1)),
-                      P.chain((isShortIndex) => BB.bits(isShortIndex ? 5 : 10))
+                      P.apSecond(BB.ubits(1)),
+                      P.chain((isShortIndex) => BB.ubits(isShortIndex ? 5 : 10))
                     ),
 
                     pipe(
-                      BB.bits(1),
+                      BB.ubits(1),
                       P.filter((a) => a === 0)
                     )
                   )
@@ -595,7 +640,7 @@ const engineMsg_: (messageId: Message) => B.BufferParser<unknown> = (
           pipe(
             P.of<number, number>(a.flags),
             P.filter((flags) => (flags & 4) !== 0),
-            P.apSecond(P.manyN(B.int8_le, 4)),
+            P.apSecond(P.take(16)),
             P.map((md5Hash) => ({ ...a, md5Hash })),
             P.alt(() => P.of(a))
           )

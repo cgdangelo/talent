@@ -82,6 +82,8 @@ const readField = (
   index: number,
   deltaDecoder: DeltaDecoder
 ): P.Parser<number, { [fieldName: string]: string | number }> => {
+  console.assert(index <= deltaDecoder.length);
+
   if (
     deltaDecoder[index]!.flags &
     (DeltaType.DT_BYTE |
@@ -129,25 +131,33 @@ const readField = (
   return P.succeed({});
 };
 
-export const readDelta = (deltaDecoder: DeltaDecoder) =>
+export const readDelta = (deltaDecoderName: string) =>
   pipe(
     BB.ubits(3),
 
     P.chain((maskBitCount) => P.manyN(BB.ubits(8), maskBitCount)),
 
     P.chain((maskBits) => {
+      const deltaDecoder = deltaDecoders.get(deltaDecoderName)!;
       const fieldParsers: ReturnType<typeof readField>[] = [];
+
+      let b = false;
 
       for (let i = 0; i < maskBits.length; ++i) {
         for (let j = 0; j < 8; ++j) {
           const index = j + i * 8;
 
-          if (index === deltaDecoder.length) break;
+          if (index >= deltaDecoder.length) {
+            b = true;
+            break;
+          }
 
           if (maskBits[i]! & (1 << j)) {
             fieldParsers.push(readField(index, deltaDecoder));
           }
         }
+
+        if (b) break;
       }
 
       return pipe(
