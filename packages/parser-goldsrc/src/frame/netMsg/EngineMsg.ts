@@ -2,7 +2,6 @@ import { buffer as B } from "@talent/parser-buffer";
 import * as P from "@talent/parser/lib/Parser";
 import { success } from "@talent/parser/lib/ParseResult";
 import {
-  option as O,
   readonlyArray as RA,
   readonlyNonEmptyArray as RNEA,
   string as S,
@@ -111,7 +110,7 @@ const engineMsg_: (messageId: Message) => B.BufferParser<unknown> = (
           mapCycle: B.ztstr,
         }),
 
-        P.chainFirst(() => P.skip(1))
+        P.apFirst(P.skip(1))
       );
 
     case Message.SVC_LIGHTSTYLE: // 12
@@ -191,13 +190,12 @@ const engineMsg_: (messageId: Message) => B.BufferParser<unknown> = (
               ),
             ] as const,
 
-            ([origin, angle]) =>
-              P.tuple(origin, angle, origin, angle, origin, angle),
+            ([o, a]) => P.tuple(o, a, o, a, o, a),
 
-            P.map(([originX, angleX, originY, angleY, originZ, angleZ]) => ({
+            P.map(([ox, ax, oy, ay, oz, az]) => ({
               ...a,
-              origin: { x: originX, y: originY, z: originZ },
-              angle: { x: angleX, y: angleY, z: angleZ },
+              origin: { x: ox, y: oy, z: oz },
+              angle: { x: ax, y: ay, z: az },
             }))
           )
         ),
@@ -211,9 +209,9 @@ const engineMsg_: (messageId: Message) => B.BufferParser<unknown> = (
 
         P.chain((a) =>
           pipe(
-            a.renderMode,
-            O.fromPredicate((a) => a !== 0),
-            O.map(() =>
+            P.of<number, number>(a.renderMode),
+            P.filter((a) => a !== 0),
+            P.apSecond(
               pipe(
                 P.struct({
                   renderColor: pipe(
@@ -225,7 +223,6 @@ const engineMsg_: (messageId: Message) => B.BufferParser<unknown> = (
                 P.map((b) => ({ ...a, ...b }))
               )
             ),
-            O.getOrElse(() => P.fail()),
             P.alt(() => P.of(a))
           )
         )
@@ -333,10 +330,10 @@ const engineMsg_: (messageId: Message) => B.BufferParser<unknown> = (
     case Message.SVC_ROOMTYPE: // 37
       return pipe(
         B.uint16_le,
-        P.map((typeName) =>
+        P.map((type) =>
           pipe(
             () => {
-              switch (typeName) {
+              switch (type) {
                 case 0:
                   return "Normal";
                 case 1:
@@ -400,7 +397,7 @@ const engineMsg_: (messageId: Message) => B.BufferParser<unknown> = (
               }
             },
 
-            (type) => ({ type, typeName })
+            (typeName) => ({ type, typeName })
           )
         )
       );
@@ -447,10 +444,7 @@ const engineMsg_: (messageId: Message) => B.BufferParser<unknown> = (
       );
 
     case Message.SVC_RESOURCEREQUEST: // 45
-      return pipe(
-        P.struct({ spawnCount: B.int32_le }),
-        P.chainFirst(() => P.skip(4))
-      );
+      return pipe(P.struct({ spawnCount: B.int32_le }), P.apFirst(P.skip(4)));
 
     case Message.SVC_CUSTOMIZATION: // 46
       return pipe(
@@ -465,10 +459,9 @@ const engineMsg_: (messageId: Message) => B.BufferParser<unknown> = (
 
         P.chain((a) =>
           pipe(
-            a.flags,
-            O.fromPredicate((flags) => (flags & 4) !== 0), // RES_CUSTOM
-            O.map(() => P.manyN(B.int8_le, 4)),
-            O.getOrElse(() => P.fail()),
+            P.of<number, number>(a.flags),
+            P.filter((flags) => (flags & 4) !== 0),
+            P.apSecond(P.manyN(B.int8_le, 4)),
             P.map((md5Hash) => ({ ...a, md5Hash })),
             P.alt(() => P.of(a))
           )
@@ -479,18 +472,7 @@ const engineMsg_: (messageId: Message) => B.BufferParser<unknown> = (
       // TODO hlviewer does not scale these. Find out what "engine call" means
       // here: https://wiki.alliedmods.net/Half-Life_1_Engine_Messages#SVC_CROSSHAIRANGLE
       return pipe(
-        P.tuple(
-          pipe(
-            B.int16_le
-            // P.map((a) => a / 5)
-          ),
-
-          pipe(
-            B.int16_le
-            // P.map((a) => a / 5)
-          )
-        ),
-
+        P.tuple(B.int16_le, B.int16_le),
         P.map(([pitch, yaw]) => ({ pitch, yaw }))
       );
 
