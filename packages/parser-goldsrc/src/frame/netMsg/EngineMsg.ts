@@ -143,12 +143,17 @@ const engineMsg_: (messageId: Message) => B.BufferParser<unknown> = (
         DT_SIGNED = 1 << 31,
       }
 
-      type DeltaDecoder = {
-        readonly name: string;
+      type DeltaDecoderField = {
         readonly bits: number;
         readonly divisor: number;
         readonly flags: DeltaType;
-      }[];
+        readonly name: string;
+        readonly offset?: number;
+        readonly preMultiplier?: number;
+        readonly size?: number;
+      };
+
+      type DeltaDecoder = DeltaDecoderField[];
 
       const deltaDecoders: Map<string, DeltaDecoder> = new Map([
         [
@@ -275,7 +280,8 @@ const engineMsg_: (messageId: Message) => B.BufferParser<unknown> = (
 
             return pipe(
               RA.sequence(P.Applicative)(fieldParsers),
-              P.map(RA.reduce({}, (acc, cur) => ({ ...acc, ...cur })))
+              P.map(RA.reduce({}, (acc, cur) => ({ ...acc, ...cur }))),
+              P.map((a) => a as DeltaDecoderField)
             );
           })
         );
@@ -292,7 +298,18 @@ const engineMsg_: (messageId: Message) => B.BufferParser<unknown> = (
                   readDelta(deltaDecoders.get("delta_description_t")!),
                   delta.fieldCount
                 ),
-                P.map((fields) => ({ ...delta, fields }))
+                P.map((fields) => ({ ...delta, fields })),
+                P.map((a) => {
+                  // TODO how to handle storing delta decoders?
+                  deltaDecoders.set(a.name, a.fields);
+
+                  return a;
+                }),
+                P.apFirst(BB.nextByte),
+                P.chain(
+                  (delta) => (o) =>
+                    success(delta, o, stream(o.buffer, o.cursor / 8))
+                )
               )
             )
         )
