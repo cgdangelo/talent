@@ -8,7 +8,7 @@ import {
 } from "fp-ts";
 import { flow, pipe } from "fp-ts/lib/function";
 import { stream } from "parser-ts/lib/Stream";
-import * as BB from "../../bitbuffer";
+import * as BB from "@talent/parser-bitbuffer";
 import { point } from "../../Point";
 import { moveVars } from "../MoveVars";
 
