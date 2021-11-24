@@ -16,6 +16,7 @@
   },
   "dependencies": {
     "@talent/parser": "workspace:packages/parser",
+    "@talent/parser-bitbuffer": "workspace:packages/parser-bitbuffer",
     "@talent/parser-buffer": "workspace:packages/parser-buffer",
     "fp-ts": "^2.11.1"
   }

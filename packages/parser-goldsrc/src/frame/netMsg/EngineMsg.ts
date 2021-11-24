@@ -2,13 +2,13 @@ import * as BB from "@talent/parser-bitbuffer";
 import { buffer as B } from "@talent/parser-buffer";
 import * as P from "@talent/parser/lib/Parser";
 import { success } from "@talent/parser/lib/ParseResult";
+import { stream } from "@talent/parser/lib/Stream";
 import {
   readonlyArray as RA,
   readonlyNonEmptyArray as RNEA,
   string as S,
 } from "fp-ts";
 import { flow, pipe } from "fp-ts/lib/function";
-import { stream } from "parser-ts/lib/Stream";
 import { point } from "../../Point";
 import { deltaDecoders, readDelta } from "./delta";
 
@@ -84,13 +84,9 @@ const engineMsg_: (messageId: Message) => B.BufferParser<unknown> = (
       // TODO The provided angles need to be scaled by (65536 / 360), but
       // hlviewer does not?
       return pipe(
-        P.manyN(
-          pipe(
-            B.int16_le,
-            P.map((a) => a / (65536 / 360))
-          ),
-          3
-        ),
+        B.int16_le,
+        P.map((a) => a / (65536 / 360)),
+        (fa) => P.manyN(fa, 3),
         P.map(([pitch, yaw, roll]) => ({ pitch, yaw, roll }))
       );
 
