@@ -4,15 +4,15 @@ import { readonlyArray as RA } from "fp-ts";
 import { pipe } from "fp-ts/lib/function";
 
 enum DeltaType {
-  DT_BYTE = 1,
-  DT_SHORT = 1 << 1,
-  DT_FLOAT = 1 << 2,
-  DT_INTEGER = 1 << 3,
-  DT_ANGLE = 1 << 4,
-  DT_TIMEWINDOW_8 = 1 << 5,
-  DT_TIMEWINDOW_BIG = 1 << 6,
-  DT_STRING = 1 << 7,
-  DT_SIGNED = 1 << 31,
+  BYTE = 1,
+  SHORT = 1 << 1,
+  FLOAT = 1 << 2,
+  INTEGER = 1 << 3,
+  ANGLE = 1 << 4,
+  TIMEWINDOW_8 = 1 << 5,
+  TIMEWINDOW_BIG = 1 << 6,
+  STRING = 1 << 7,
+  SIGNED = 1 << 31,
 }
 
 type DeltaDecoderField = {
@@ -36,109 +36,114 @@ export const deltaDecoders: Map<string, DeltaDecoder> = new Map([
         name: "flags",
         bits: 32,
         divisor: 1,
-        flags: DeltaType.DT_INTEGER,
+        flags: DeltaType.INTEGER,
       },
       {
         name: "name",
         bits: 8,
         divisor: 1,
-        flags: DeltaType.DT_STRING,
+        flags: DeltaType.STRING,
       },
       {
         name: "offset",
         bits: 16,
         divisor: 1,
-        flags: DeltaType.DT_INTEGER,
+        flags: DeltaType.INTEGER,
       },
       {
         name: "size",
         bits: 8,
         divisor: 1,
-        flags: DeltaType.DT_INTEGER,
+        flags: DeltaType.INTEGER,
       },
       {
         name: "bits",
         bits: 8,
         divisor: 1,
-        flags: DeltaType.DT_INTEGER,
+        flags: DeltaType.INTEGER,
       },
       {
         name: "divisor",
         bits: 32,
         divisor: 4000,
-        flags: DeltaType.DT_FLOAT,
+        flags: DeltaType.FLOAT,
       },
       {
         name: "preMultiplier",
         bits: 32,
         divisor: 4000,
-        flags: DeltaType.DT_FLOAT,
+        flags: DeltaType.FLOAT,
       },
     ],
   ],
 ]);
 
 const readField = (
-  index: number,
+  fieldIndex: number,
   deltaDecoder: DeltaDecoder
 ): P.Parser<number, { [fieldName: string]: string | number }> => {
-  console.assert(index <= deltaDecoder.length);
+  const deltaDecoderField = deltaDecoder[fieldIndex];
+
+  if (deltaDecoderField == null) return P.fail();
 
   if (
-    deltaDecoder[index]!.flags &
-    (DeltaType.DT_BYTE |
-      DeltaType.DT_SHORT |
-      DeltaType.DT_INTEGER |
-      DeltaType.DT_FLOAT |
-      DeltaType.DT_TIMEWINDOW_8 |
-      DeltaType.DT_TIMEWINDOW_BIG)
+    deltaDecoderField.flags &
+    (DeltaType.BYTE |
+      DeltaType.SHORT |
+      DeltaType.INTEGER |
+      DeltaType.FLOAT |
+      DeltaType.TIMEWINDOW_8 |
+      DeltaType.TIMEWINDOW_BIG)
   ) {
-    if (deltaDecoder[index]!.flags & DeltaType.DT_SIGNED) {
+    if (deltaDecoderField.flags & DeltaType.SIGNED) {
       return pipe(
         P.struct({
           sign: pipe(
             BB.ubits(1),
-            P.map((a) => (a ? -1 : 1))
+            P.map((a) => (a !== 0 ? -1 : 1))
           ),
-          value: BB.ubits(deltaDecoder[index]!.bits - 1),
-          divisor: P.of(deltaDecoder[index]!.divisor),
+          value: BB.ubits(deltaDecoderField.bits - 1),
         }),
 
-        P.map(({ sign, value, divisor }) => ({
-          [deltaDecoder[index]!.name]: (sign * value) / divisor,
+        P.map(({ sign, value }) => ({
+          [deltaDecoderField.name]: (sign * value) / deltaDecoderField.divisor,
         }))
       );
     } else {
       return pipe(
-        BB.ubits(deltaDecoder[index]!.bits),
+        BB.ubits(deltaDecoderField.bits),
         P.map((value) => ({
-          [deltaDecoder[index]!.name]: value / deltaDecoder[index]!.divisor,
+          [deltaDecoderField.name]: value / deltaDecoderField.divisor,
         }))
       );
     }
-  } else if (deltaDecoder[index]!.flags & DeltaType.DT_ANGLE) {
+  } else if (deltaDecoderField.flags & DeltaType.ANGLE) {
     return pipe(
-      BB.ubits(deltaDecoder[index]!.bits),
+      BB.ubits(deltaDecoderField.bits),
       P.map((value) => ({
-        [deltaDecoder[index]!.name]:
-          value * (360 / (1 << deltaDecoder[index]!.bits)),
+        [deltaDecoderField.name]: value * (360 / (1 << deltaDecoderField.bits)),
       }))
     );
-  } else if (deltaDecoder[index]!.flags & DeltaType.DT_STRING) {
-    return P.struct({ [deltaDecoder[index]!.name]: BB.ztstr });
+  } else if (deltaDecoderField.flags & DeltaType.STRING) {
+    return P.struct({ [deltaDecoderField.name]: BB.ztstr });
   }
 
-  return P.succeed({});
+  return P.fail();
 };
 
-export const readDelta = (deltaDecoderName: string) =>
+export const readDelta: (
+  deltaDecoderName: string
+) => P.Parser<number, DeltaDecoderField> = (deltaDecoderName: string) =>
   pipe(
     BB.ubits(3),
 
     P.chain((maskBitCount) => P.manyN(BB.ubits(8), maskBitCount)),
 
     P.chain((maskBits) => {
-      const deltaDecoder = deltaDecoders.get(deltaDecoderName)!;
+      const deltaDecoder = deltaDecoders.get(deltaDecoderName);
+
+      if (deltaDecoder == null) return P.fail();
+
       const fieldParsers: ReturnType<typeof readField>[] = [];
 
       let b = false;
@@ -162,7 +167,12 @@ export const readDelta = (deltaDecoderName: string) =>
 
       return pipe(
         RA.sequence(P.Applicative)(fieldParsers),
-        P.map(RA.reduce({}, (acc, cur) => ({ ...acc, ...cur }))),
+        P.map(
+          RA.reduce(
+            {} as { [fieldName: string]: string | number },
+            (acc, cur) => ({ ...acc, ...cur })
+          )
+        ),
         P.map((a) => a as DeltaDecoderField)
       );
     })
