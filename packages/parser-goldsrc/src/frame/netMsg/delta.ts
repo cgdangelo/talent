@@ -3,6 +3,24 @@ import * as P from "@talent/parser/lib/Parser";
 import { map, option as O, readonlyArray as RA, string } from "fp-ts";
 import { constant, flow, pipe } from "fp-ts/lib/function";
 
+// A delta is some collection of fields, specified by a decoder.
+export type Delta = Record<string, number | string>;
+
+// A delta decoder is a collection of delta field decoders.
+type DeltaDecoder = readonly DeltaFieldDecoder[];
+
+// A delta field decoder is a set of attributes that defines how to parse a
+// delta field.
+export type DeltaFieldDecoder = {
+  readonly bits: number;
+  readonly divisor: number;
+  readonly flags: DeltaType;
+  readonly name: string;
+  readonly offset?: number;
+  readonly preMultiplier?: number;
+  readonly size?: number;
+};
+
 enum DeltaType {
   BYTE = 1,
   SHORT = 1 << 1,
@@ -14,18 +32,6 @@ enum DeltaType {
   STRING = 1 << 7,
   SIGNED = 1 << 31,
 }
-
-type DeltaFieldDecoder = {
-  readonly bits: number;
-  readonly divisor: number;
-  readonly flags: DeltaType;
-  readonly name: string;
-  readonly offset?: number;
-  readonly preMultiplier?: number;
-  readonly size?: number;
-};
-
-type DeltaDecoder = DeltaFieldDecoder[];
 
 // FIXME HACK FIXME HACK mutable shared state
 export const deltaDecoders: Map<string, DeltaDecoder> = new Map([
@@ -189,7 +195,8 @@ const readField: (
         O.map((deltaFieldParser) => deltaFieldParser(deltaFieldDecoder))
       )
     ),
-    O.getOrElseW(() => P.fail<number>())
+    O.getOrElseW((): DeltaField<never> => P.fail<number>()),
+    (a) => a
   );
 
 const lookupDecoder = map.lookup(string.Eq);
@@ -197,39 +204,51 @@ const lookupDecoder = map.lookup(string.Eq);
 const maskBits: (maskBitLength: number) => P.Parser<number, readonly number[]> =
   (maskBitLength) => P.manyN(BB.ubits(8), maskBitLength);
 
-export const readDelta: (
+const decodeDelta: (
+  maskBits: readonly number[]
+) => (deltaDecoder: DeltaDecoder) => P.Parser<number, Delta> =
+  (maskBits) => (deltaDecoder) =>
+    pipe(
+      RA.makeBy(maskBits.length, (i) =>
+        pipe(
+          RA.makeBy(8, (j) => j + i * 8),
+          RA.filterMapWithIndex((index, j) =>
+            pipe(
+              index,
+              O.fromPredicate((index) => index <= deltaDecoder.length),
+              O.chain(() =>
+                pipe(
+                  maskBits,
+                  RA.lookup(i),
+                  O.chain(
+                    O.fromPredicate((maskBit) => (maskBit & (1 << j)) !== 0)
+                  ),
+                  O.map(() => readField(index, deltaDecoder))
+                )
+              )
+            )
+          )
+        )
+      ),
+      RA.flatten,
+      RA.sequence(P.Applicative),
+      P.map((fields) => Object.fromEntries(fields))
+    );
+
+export const readDelta = <A extends Delta>(
   deltaDecoderName: string
-) => P.Parser<number, DeltaFieldDecoder> = (deltaDecoderName: string) =>
+): P.Parser<number, A> =>
   pipe(
     BB.ubits(3),
     P.chain(maskBits),
     P.chain((maskBits) =>
       pipe(
         lookupDecoder(deltaDecoderName)(deltaDecoders),
-        O.map(
-          flow(
-            (deltaDecoder) =>
-              pipe(
-                RA.makeBy(maskBits.length, (i) =>
-                  pipe(
-                    RA.makeBy(8, (j) => j + i * 8),
-                    RA.filterMapWithIndex((index, j) => {
-                      if (index >= deltaDecoder.length) return O.none;
-
-                      if ((maskBits[i] ?? 0) & (1 << j))
-                        return O.some(readField(index, deltaDecoder));
-
-                      return O.none;
-                    })
-                  )
-                )
-              ),
-            RA.flatten,
-            RA.sequence(P.Applicative),
-            P.map(Object.fromEntries)
-          )
-        ),
-        O.getOrElse(() => P.fail())
+        O.map(decodeDelta(maskBits)),
+        O.getOrElseW(() => P.fail<number>())
       )
-    )
+    ),
+
+    // TODO safe?
+    P.map((a) => a as A)
   );

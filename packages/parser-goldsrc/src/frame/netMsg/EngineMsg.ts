@@ -10,6 +10,7 @@ import {
 } from "fp-ts";
 import { flow, pipe } from "fp-ts/lib/function";
 import { point } from "../../Point";
+import type { DeltaFieldDecoder } from "./delta";
 import { deltaDecoders, readDelta } from "./delta";
 
 // TODO Engine messages should be typed
@@ -135,7 +136,10 @@ const engineMsg_: (messageId: Message) => B.BufferParser<unknown> = (
             pipe(
               stream(i.buffer, i.cursor * 8),
               pipe(
-                P.manyN(readDelta("delta_description_t"), delta.fieldCount),
+                P.manyN(
+                  readDelta<DeltaFieldDecoder>("delta_description_t"),
+                  delta.fieldCount
+                ),
                 P.map((fields) => ({ ...delta, fields })),
                 P.map((a) => {
                   // TODO how to handle storing delta decoders?
@@ -145,8 +149,7 @@ const engineMsg_: (messageId: Message) => B.BufferParser<unknown> = (
                 }),
                 P.apFirst(BB.nextByte),
                 P.chain(
-                  (delta) => (o) =>
-                    success(delta, o, stream(o.buffer, o.cursor / 8))
+                  (a) => (o) => success(a, o, stream(o.buffer, o.cursor / 8))
                 )
               )
             )
@@ -315,11 +318,7 @@ const engineMsg_: (messageId: Message) => B.BufferParser<unknown> = (
             ),
 
             P.apFirst(BB.nextByte),
-
-            P.chain(
-              (entities) => (o) =>
-                success(entities, o, stream(o.buffer, o.cursor / 8))
-            )
+            P.chain((a) => (o) => success(a, o, stream(o.buffer, o.cursor / 8)))
           )
         );
 
