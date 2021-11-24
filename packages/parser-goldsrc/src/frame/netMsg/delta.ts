@@ -1,7 +1,7 @@
 import * as BB from "@talent/parser-bitbuffer";
 import * as P from "@talent/parser/lib/Parser";
-import { option as O, readonlyArray as RA } from "fp-ts";
-import { pipe } from "fp-ts/lib/function";
+import { map, option as O, readonlyArray as RA, string } from "fp-ts";
+import { constant, flow, pipe } from "fp-ts/lib/function";
 
 enum DeltaType {
   BYTE = 1,
@@ -84,7 +84,26 @@ type DeltaFieldParser<A> = (
   deltaFieldDecoder: DeltaFieldDecoder
 ) => DeltaField<A>;
 
-const signedField: DeltaFieldParser<number> = (deltaFieldDecoder) =>
+const fieldHasFlag: (fieldFlags: DeltaType) => (flags: DeltaType) => boolean =
+  (fieldFlags) => (flags) =>
+    (fieldFlags & flags) !== 0;
+
+const isNumericField = fieldHasFlag(
+  DeltaType.BYTE |
+    DeltaType.SHORT |
+    DeltaType.INTEGER |
+    DeltaType.FLOAT |
+    DeltaType.TIMEWINDOW_8 |
+    DeltaType.TIMEWINDOW_BIG
+);
+
+const isSignedField = fieldHasFlag(DeltaType.SIGNED);
+
+const isAngleField = fieldHasFlag(DeltaType.ANGLE);
+
+const isStringField = fieldHasFlag(DeltaType.STRING);
+
+const decodeSigned: DeltaFieldParser<number> = (deltaFieldDecoder) =>
   pipe(
     P.struct({
       sign: pipe(
@@ -100,7 +119,7 @@ const signedField: DeltaFieldParser<number> = (deltaFieldDecoder) =>
     ])
   );
 
-const unsignedField: DeltaFieldParser<number> = (deltaFieldDecoder) =>
+const decodeUnsigned: DeltaFieldParser<number> = (deltaFieldDecoder) =>
   pipe(
     BB.ubits(deltaFieldDecoder.bits),
     P.map((value) => [
@@ -109,7 +128,7 @@ const unsignedField: DeltaFieldParser<number> = (deltaFieldDecoder) =>
     ])
   );
 
-const angle: DeltaFieldParser<number> = (deltaFieldDecoder) =>
+const decodeAngle: DeltaFieldParser<number> = (deltaFieldDecoder) =>
   pipe(
     BB.ubits(deltaFieldDecoder.bits),
     P.map((value) => [
@@ -118,85 +137,105 @@ const angle: DeltaFieldParser<number> = (deltaFieldDecoder) =>
     ])
   );
 
-const string: DeltaFieldParser<string> = (deltaFieldDecoder) =>
+const decodeString: DeltaFieldParser<string> = (deltaFieldDecoder) =>
   pipe(
     BB.ztstr,
     P.map((value) => [deltaFieldDecoder.name, value])
   );
 
+const numericField: (
+  fieldFlags: DeltaType
+) => O.Option<DeltaFieldParser<number>> = flow(
+  O.fromPredicate(isNumericField),
+  O.chain(
+    flow(
+      O.fromPredicate(isSignedField),
+      O.map(constant(decodeSigned)),
+      O.alt(() => O.some(decodeUnsigned))
+    )
+  )
+);
+
+const angleField: (
+  fieldFlags: DeltaType
+) => O.Option<DeltaFieldParser<number>> = flow(
+  O.fromPredicate(isAngleField),
+  O.map(constant(decodeAngle))
+);
+
+const stringField: (
+  fieldFlags: DeltaType
+) => O.Option<DeltaFieldParser<string>> = flow(
+  O.fromPredicate(isStringField),
+  O.map(constant(decodeString))
+);
+
 const readField: (
   fieldIndex: number,
   deltaDecoder: DeltaDecoder
-) => P.Parser<number, [fieldName: string, value: unknown]> = (
+) => P.Parser<number, [fieldName: string, value: number | string]> = (
   fieldIndex,
   deltaDecoder
 ) =>
   pipe(
     deltaDecoder,
     RA.lookup(fieldIndex),
-    O.map((deltaFieldDecoder) => {
-      if (
-        deltaFieldDecoder.flags &
-        (DeltaType.BYTE |
-          DeltaType.SHORT |
-          DeltaType.INTEGER |
-          DeltaType.FLOAT |
-          DeltaType.TIMEWINDOW_8 |
-          DeltaType.TIMEWINDOW_BIG)
-      ) {
-        if (deltaFieldDecoder.flags & DeltaType.SIGNED) {
-          return signedField(deltaFieldDecoder);
-        } else {
-          return unsignedField(deltaFieldDecoder);
-        }
-      } else if (deltaFieldDecoder.flags & DeltaType.ANGLE) {
-        return angle(deltaFieldDecoder);
-      } else if (deltaFieldDecoder.flags & DeltaType.STRING) {
-        return string(deltaFieldDecoder);
-      }
-
-      return P.fail<number>();
-    }),
-    O.getOrElse(() => P.fail())
+    O.chain((deltaFieldDecoder) =>
+      pipe(
+        O.some(deltaFieldDecoder.flags),
+        O.chain(numericField),
+        O.alt(() => pipe(deltaFieldDecoder.flags, angleField)),
+        O.altW(() => pipe(deltaFieldDecoder.flags, stringField)),
+        O.map((deltaFieldParser) => deltaFieldParser(deltaFieldDecoder))
+      )
+    ),
+    O.getOrElseW(() => P.fail<number>())
   );
+
+const lookupDecoder = map.lookup(string.Eq);
+
+const maskBits: (maskBitLength: number) => P.Parser<number, readonly number[]> =
+  (maskBitLength) => P.manyN(BB.ubits(8), maskBitLength);
 
 export const readDelta: (
   deltaDecoderName: string
 ) => P.Parser<number, DeltaFieldDecoder> = (deltaDecoderName: string) =>
   pipe(
     BB.ubits(3),
+    P.chain(maskBits),
+    P.chain((maskBits) =>
+      pipe(
+        lookupDecoder(deltaDecoderName)(deltaDecoders),
+        O.map(
+          flow((deltaDecoder) => {
+            const fields: DeltaField<unknown>[] = [];
 
-    P.chain((maskBitCount) => P.manyN(BB.ubits(8), maskBitCount)),
+            let b = false;
 
-    P.chain((maskBits) => {
-      const deltaDecoder = deltaDecoders.get(deltaDecoderName);
+            for (let i = 0; i < maskBits.length; ++i) {
+              for (let j = 0; j < 8; ++j) {
+                const index = j + i * 8;
 
-      if (deltaDecoder == null) return P.fail();
+                if (index >= deltaDecoder.length) {
+                  b = true;
+                  break;
+                }
 
-      const fields: DeltaField<unknown>[] = [];
+                if ((maskBits[i] ?? 0) & (1 << j)) {
+                  fields.push(readField(index, deltaDecoder));
+                }
+              }
 
-      let b = false;
+              if (b) break;
+            }
 
-      for (let i = 0; i < maskBits.length; ++i) {
-        for (let j = 0; j < 8; ++j) {
-          const index = j + i * 8;
-
-          if (index >= deltaDecoder.length) {
-            b = true;
-            break;
-          }
-
-          if (maskBits[i]! & (1 << j)) {
-            fields.push(readField(index, deltaDecoder));
-          }
-        }
-
-        if (b) break;
-      }
-
-      return pipe(
-        RA.sequence(P.Applicative)(fields),
-        P.map(Object.fromEntries)
-      );
-    })
+            return pipe(
+              RA.sequence(P.Applicative)(fields),
+              P.map(Object.fromEntries)
+            );
+          })
+        ),
+        O.getOrElse(() => P.fail())
+      )
+    )
   );
