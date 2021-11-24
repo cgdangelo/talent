@@ -6,9 +6,5 @@
     "rootDir": "src"
   },
   "include": ["src"],
-  "references": [
-    { "path": "../parser" },
-    { "path": "../parser-buffer" },
-    { "path": "../parser-bitbuffer" }
-  ]
+  "references": [{ "path": "../parser" }]
 }

@@ -1,16 +1,19 @@
+import * as BB from "@talent/parser-bitbuffer";
 import { buffer as B } from "@talent/parser-buffer";
 import * as P from "@talent/parser/lib/Parser";
 import { success } from "@talent/parser/lib/ParseResult";
+import { stream } from "@talent/parser/lib/Stream";
 import {
-  option as O,
+  number,
+  ord,
   readonlyArray as RA,
   readonlyNonEmptyArray as RNEA,
   string as S,
 } from "fp-ts";
 import { flow, pipe } from "fp-ts/lib/function";
-import { stream } from "parser-ts/lib/Stream";
 import { point } from "../../Point";
-import { moveVars } from "../MoveVars";
+import type { DeltaFieldDecoder } from "./delta";
+import { deltaDecoders, readDelta } from "./delta";
 
 // TODO Engine messages should be typed
 type EngineMsg = unknown;
@@ -21,8 +24,7 @@ export const engineMsgs: (messageBuffer: Buffer) => B.BufferParser<EngineMsg> =
       stream(messageBuffer as unknown as number[]),
 
       pipe(
-        P.many(engineMsg),
-
+        P.many(P.logPositions(engineMsg)),
         P.chain((parsedMessages) => () => success(parsedMessages, i, i))
       )
     );
@@ -36,7 +38,7 @@ const engineMsg: B.BufferParser<unknown> = pipe(
 
       // TODO Can remove SVC_NOP, deprecated messages, but NOT messages that
       // have no arguments.
-      // P.filter((a) => a !== null),
+      // P.filter(() => messageId !== Message.SVC_NOP),
 
       P.map((fields) => ({ type: Message[messageId], fields }))
     )
@@ -85,13 +87,9 @@ const engineMsg_: (messageId: Message) => B.BufferParser<unknown> = (
       // TODO The provided angles need to be scaled by (65536 / 360), but
       // hlviewer does not?
       return pipe(
-        P.manyN(
-          pipe(
-            B.int16_le,
-            P.map((a) => a / (65536 / 360))
-          ),
-          3
-        ),
+        B.int16_le,
+        P.map((a) => a / (65536 / 360)),
+        (fa) => P.manyN(fa, 3),
         P.map(([pitch, yaw, roll]) => ({ pitch, yaw, roll }))
       );
 
@@ -111,7 +109,7 @@ const engineMsg_: (messageId: Message) => B.BufferParser<unknown> = (
           mapCycle: B.ztstr,
         }),
 
-        P.chainFirst(() => P.skip(1))
+        P.apFirst(P.skip(1))
       );
 
     case Message.SVC_LIGHTSTYLE: // 12
@@ -130,8 +128,36 @@ const engineMsg_: (messageId: Message) => B.BufferParser<unknown> = (
         clientCdKeyHash: P.take(16),
       });
 
-    case Message.SVC_DELTADESCRIPTION: // 14
-      return P.fail();
+    // 14
+    case Message.SVC_DELTADESCRIPTION: {
+      return pipe(
+        P.struct({ name: B.ztstr, fieldCount: B.uint16_le, fields: P.of([]) }),
+
+        P.chain(
+          (delta) => (i) =>
+            pipe(
+              stream(i.buffer, i.cursor * 8),
+              pipe(
+                P.manyN(
+                  readDelta<DeltaFieldDecoder>("delta_description_t"),
+                  delta.fieldCount
+                ),
+                P.map((fields) => ({ ...delta, fields })),
+                P.map((a) => {
+                  // TODO how to handle storing delta decoders?
+                  deltaDecoders.set(a.name, a.fields);
+
+                  return a;
+                }),
+                P.apFirst(BB.nextByte),
+                P.chain(
+                  (a) => (o) => success(a, o, stream(o.buffer, o.cursor / 8))
+                )
+              )
+            )
+        )
+      );
+    }
 
     case Message.SVC_CLIENTDATA: // 15
       return P.fail();
@@ -139,8 +165,27 @@ const engineMsg_: (messageId: Message) => B.BufferParser<unknown> = (
     case Message.SVC_STOPSOUND: // 16
       return P.struct({ entityIndex: B.int16_le });
 
-    case Message.SVC_PINGS: // 17
-      return P.fail();
+    // 17
+    case Message.SVC_PINGS: {
+      return pipe(
+        P.skip<number>(1),
+        P.apSecond(
+          P.manyTill(
+            P.struct({
+              playerId: BB.ubits(5),
+              ping: BB.ubits(12),
+              loss: BB.ubits(7),
+            }),
+
+            pipe(
+              BB.ubits(1),
+              P.filter((a) => !!a)
+            )
+          )
+        ),
+        P.apFirst(BB.nextByte)
+      );
+    }
 
     case Message.SVC_PARTICLE: // 18
       return P.struct({
@@ -191,13 +236,12 @@ const engineMsg_: (messageId: Message) => B.BufferParser<unknown> = (
               ),
             ] as const,
 
-            ([origin, angle]) =>
-              P.tuple(origin, angle, origin, angle, origin, angle),
+            ([o, a]) => P.tuple(o, a, o, a, o, a),
 
-            P.map(([originX, angleX, originY, angleY, originZ, angleZ]) => ({
+            P.map(([ox, ax, oy, ay, oz, az]) => ({
               ...a,
-              origin: { x: originX, y: originY, z: originZ },
-              angle: { x: angleX, y: angleY, z: angleZ },
+              origin: { x: ox, y: oy, z: oz },
+              angle: { x: ax, y: ay, z: az },
             }))
           )
         ),
@@ -211,9 +255,9 @@ const engineMsg_: (messageId: Message) => B.BufferParser<unknown> = (
 
         P.chain((a) =>
           pipe(
-            a.renderMode,
-            O.fromPredicate((a) => a !== 0),
-            O.map(() =>
+            P.of<number, number>(a.renderMode),
+            P.filter((a) => a !== 0),
+            P.apSecond(
               pipe(
                 P.struct({
                   renderColor: pipe(
@@ -225,7 +269,6 @@ const engineMsg_: (messageId: Message) => B.BufferParser<unknown> = (
                 P.map((b) => ({ ...a, ...b }))
               )
             ),
-            O.getOrElse(() => P.fail()),
             P.alt(() => P.of(a))
           )
         )
@@ -234,8 +277,66 @@ const engineMsg_: (messageId: Message) => B.BufferParser<unknown> = (
     case Message.SVC_EVENT_RELIABLE: // 21
       return P.fail();
 
+    // FIXME no shot this is accurate
     case Message.SVC_SPAWNBASELINE: // 22
-      return P.fail();
+      return (i) =>
+        pipe(
+          stream(i.buffer, i.cursor * 8),
+
+          pipe(
+            P.manyTill(
+              pipe(
+                P.struct({ index: BB.ubits(11), type: BB.ubits(2) }),
+
+                P.chain((entity) =>
+                  pipe(
+                    readDelta(
+                      (entity.type & 1) !== 0
+                        ? entity.index > 0 && entity.index < 33
+                          ? "entity_state_player_t"
+                          : "entity_state_t"
+                        : "custom_entity_state_t"
+                    ),
+                    P.map((delta) => ({ ...entity, delta }))
+                  )
+                )
+              ),
+
+              pipe(
+                BB.ubits(11),
+                P.filter((entityIndex) => entityIndex === (1 << 11) - 1)
+              )
+            ),
+
+            // TODO Possibly unnecessary, check order
+            P.map(
+              pipe(
+                number.Ord,
+                ord.contramap(({ index }: { index: number }) => index),
+                RA.sort
+              )
+            ),
+
+            P.chainFirst(() =>
+              pipe(
+                BB.ubits(5),
+                P.filter((footer) => footer === (1 << 5) - 1)
+              )
+            ),
+
+            P.chain((entities) =>
+              pipe(
+                BB.ubits(6),
+                P.chain((n) => P.manyN(readDelta("entity_state_t"), n)),
+                P.map((extraData) => ({ entities, extraData })),
+                P.alt(() => P.of({ entities }))
+              )
+            ),
+
+            P.apFirst(BB.nextByte),
+            P.chain((a) => (o) => success(a, o, stream(o.buffer, o.cursor / 8)))
+          )
+        );
 
     case Message.SVC_TEMPENTITY: // 23
       // TODO Doable, just takes a lot of doing
@@ -294,13 +395,7 @@ const engineMsg_: (messageId: Message) => B.BufferParser<unknown> = (
 
     case Message.SVC_CDTRACK: // 32
       return P.struct({
-        track: pipe(
-          // TODO hlviewer has signed byte, but...
-          B.int8_le,
-          // https://wiki.alliedmods.net/Half-Life_1_Engine_Messages#SVC_CDTRACK
-          // ...this should only be [1, 30] ?
-          P.filter((a) => a > 0 && a < 31)
-        ),
+        track: B.int8_le,
         loopTrack: B.int8_le,
       });
 
@@ -333,10 +428,10 @@ const engineMsg_: (messageId: Message) => B.BufferParser<unknown> = (
     case Message.SVC_ROOMTYPE: // 37
       return pipe(
         B.uint16_le,
-        P.map((typeName) =>
+        P.map((type) =>
           pipe(
             () => {
-              switch (typeName) {
+              switch (type) {
                 case 0:
                   return "Normal";
                 case 1:
@@ -400,7 +495,7 @@ const engineMsg_: (messageId: Message) => B.BufferParser<unknown> = (
               }
             },
 
-            (type) => ({ type, typeName })
+            (typeName) => ({ type, typeName })
           )
         )
       );
@@ -432,25 +527,114 @@ const engineMsg_: (messageId: Message) => B.BufferParser<unknown> = (
     case Message.SVC_CHOKE: // 42
       return P.of(null);
 
-    case Message.SVC_RESOURCELIST: // 43
-      return P.fail();
+    // 43
+    case Message.SVC_RESOURCELIST: {
+      const resource = pipe(
+        P.struct({
+          type: BB.ubits(4),
+          name: BB.ztstr,
+          index: BB.ubits(12),
+          size: BB.ubits(24),
+          flags: BB.ubits(3),
+        }),
 
-    case Message.SVC_NEWMOVEVARS: // 44
-      return pipe(
-        moveVars,
-        P.chain((a) =>
+        P.chain((resource) =>
           pipe(
-            B.ztstr,
-            P.map((skyName) => ({ ...a, skyName }))
+            P.of<number, number>(resource.flags),
+            P.filter((flags) => (flags & 4) !== 0),
+            P.apSecond(BB.ubits(128)),
+            P.map((md5Hash) => ({ ...resource, md5Hash })),
+            P.alt(() => P.of(resource))
+          )
+        ),
+
+        // TODO this still feels wrong; what if no md5hash?
+        P.chain((resource) =>
+          pipe(
+            BB.ubits(1),
+            P.filter((hasExtraInfo) => hasExtraInfo !== 0),
+            P.apSecond(BB.ubits(256)),
+            P.map((extraInfo) => ({ ...resource, extraInfo })),
+            P.alt(() =>
+              pipe(
+                P.of<number, typeof resource>(resource),
+                P.apFirst(P.skip(1))
+              )
+            )
           )
         )
       );
 
-    case Message.SVC_RESOURCEREQUEST: // 45
+      return (i) =>
+        pipe(
+          // same netmsg buffer, in bits
+          stream(i.buffer, i.cursor * 8),
+
+          pipe(
+            BB.ubits(12),
+            P.chain((entryCount) => P.manyN(resource, entryCount)),
+            P.chain((resources) =>
+              pipe(
+                BB.ubits(1),
+                P.filter((hasConsistency) => hasConsistency !== 0),
+                P.apSecond(
+                  P.manyTill(
+                    pipe(
+                      P.skip<number>(1),
+                      P.apSecond(BB.ubits(1)),
+                      P.chain((isShortIndex) => BB.ubits(isShortIndex ? 5 : 10))
+                    ),
+
+                    pipe(
+                      BB.ubits(1),
+                      P.filter((a) => a === 0)
+                    )
+                  )
+                ),
+                P.map((consistency) => ({ resources, consistency })),
+                P.alt(() => P.of({ resources }))
+              )
+            ),
+            P.apFirst(BB.nextByte),
+            P.chain((a) => (o) => success(a, o, stream(o.buffer, o.cursor / 8)))
+          )
+        );
+    }
+
+    case Message.SVC_NEWMOVEVARS: // 44
       return pipe(
-        P.struct({ spawnCount: B.int32_le }),
-        P.chainFirst(() => P.skip(4))
+        // TODO sky stuff is at the bottom unlike moveVars parser unfortunately
+        P.struct({
+          gravity: B.float32_le,
+          stopSpeed: B.float32_le,
+          maxSpeed: B.float32_le,
+          spectatorMaxSpeed: B.float32_le,
+          accelerate: B.float32_le,
+          airAccelerate: B.float32_le,
+          waterAccelerate: B.float32_le,
+          friction: B.float32_le,
+          edgeFriction: B.float32_le,
+          waterFriction: B.float32_le,
+          entGravity: B.float32_le,
+          bounce: B.float32_le,
+          stepSize: B.float32_le,
+          maxVelocity: B.float32_le,
+          zMax: B.float32_le,
+          waveHeight: B.float32_le,
+          footsteps: B.int8_le,
+          rollAngle: B.float32_le,
+          rollSpeed: B.float32_le,
+          skyColor: pipe(
+            point,
+            P.map(({ x: r, y: g, z: b }) => ({ r, g, b }))
+          ),
+          skyVec: point,
+          skyName: B.ztstr,
+        })
       );
+
+    case Message.SVC_RESOURCEREQUEST: // 45
+      return pipe(P.struct({ spawnCount: B.int32_le }), P.apFirst(P.skip(4)));
 
     case Message.SVC_CUSTOMIZATION: // 46
       return pipe(
@@ -465,10 +649,9 @@ const engineMsg_: (messageId: Message) => B.BufferParser<unknown> = (
 
         P.chain((a) =>
           pipe(
-            a.flags,
-            O.fromPredicate((flags) => (flags & 4) !== 0), // RES_CUSTOM
-            O.map(() => P.manyN(B.int8_le, 4)),
-            O.getOrElse(() => P.fail()),
+            P.of<number, number>(a.flags),
+            P.filter((flags) => (flags & 4) !== 0),
+            P.apSecond(P.take(16)),
             P.map((md5Hash) => ({ ...a, md5Hash })),
             P.alt(() => P.of(a))
           )
@@ -479,18 +662,7 @@ const engineMsg_: (messageId: Message) => B.BufferParser<unknown> = (
       // TODO hlviewer does not scale these. Find out what "engine call" means
       // here: https://wiki.alliedmods.net/Half-Life_1_Engine_Messages#SVC_CROSSHAIRANGLE
       return pipe(
-        P.tuple(
-          pipe(
-            B.int16_le
-            // P.map((a) => a / 5)
-          ),
-
-          pipe(
-            B.int16_le
-            // P.map((a) => a / 5)
-          )
-        ),
-
+        P.tuple(B.int16_le, B.int16_le),
         P.map(([pitch, yaw]) => ({ pitch, yaw }))
       );
 

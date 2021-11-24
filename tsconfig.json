@@ -3,6 +3,7 @@
     { "path": "./packages/cli" },
     { "path": "./packages/parser" },
     { "path": "./packages/parser-buffer" },
+    { "path": "./packages/parser-bitbuffer" },
     { "path": "./packages/parser-goldsrc" }
   ],
   "files": []

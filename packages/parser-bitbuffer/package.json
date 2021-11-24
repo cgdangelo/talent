@@ -1,10 +1,11 @@
 {
-  "name": "@talent/parser-goldsrc",
+  "name": "@talent/parser-bitbuffer",
   "version": "0.0.0",
   "description": "> TODO: description",
   "author": "Charles D'Angelo <c.g.dangelo@gmail.com>",
   "homepage": "",
   "license": "MIT",
+  "main": "lib/index.js",
   "directories": {
     "lib": "lib"
   },
@@ -16,8 +17,6 @@
   },
   "dependencies": {
     "@talent/parser": "workspace:packages/parser",
-    "@talent/parser-bitbuffer": "workspace:packages/parser-bitbuffer",
-    "@talent/parser-buffer": "workspace:packages/parser-buffer",
     "fp-ts": "^2.11.1"
   }
 }
