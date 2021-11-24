@@ -211,23 +211,19 @@ export const readDelta: (
             (deltaDecoder) => {
               const fields: DeltaField<unknown>[] = [];
 
-              let b = false;
-
               for (let i = 0; i < maskBits.length; ++i) {
-                for (let j = 0; j < 8; ++j) {
-                  const index = j + i * 8;
+                pipe(
+                  RA.makeBy(8, (j) => j + i * 8),
+                  RA.filterMapWithIndex((index, j) => {
+                    if (index >= deltaDecoder.length) return O.none;
 
-                  if (index >= deltaDecoder.length) {
-                    b = true;
-                    break;
-                  }
+                    if ((maskBits[i] ?? 0) & (1 << j))
+                      return O.some(readField(index, deltaDecoder));
 
-                  if ((maskBits[i] ?? 0) & (1 << j)) {
-                    fields.push(readField(index, deltaDecoder));
-                  }
-                }
-
-                if (b) break;
+                    return O.none;
+                  }),
+                  RA.map((fieldParser) => fields.push(fieldParser))
+                );
               }
 
               return fields;
