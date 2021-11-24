@@ -1,6 +1,6 @@
 import * as BB from "@talent/parser-bitbuffer";
 import * as P from "@talent/parser/lib/Parser";
-import { readonlyArray as RA } from "fp-ts";
+import { option as O, readonlyArray as RA } from "fp-ts";
 import { pipe } from "fp-ts/lib/function";
 
 enum DeltaType {
@@ -78,58 +78,82 @@ export const deltaDecoders: Map<string, DeltaDecoder> = new Map([
   ],
 ]);
 
-const readField = (
+type DeltaDecoderFieldParser<A> = (
+  deltaDecoderField: DeltaDecoderField
+) => P.Parser<number, { [fieldName: string]: A }>;
+
+const signedField: DeltaDecoderFieldParser<number> = (deltaDecoderField) =>
+  pipe(
+    P.struct({
+      sign: pipe(
+        BB.ubits(1),
+        P.map((a) => (a !== 0 ? -1 : 1))
+      ),
+      value: BB.ubits(deltaDecoderField.bits - 1),
+    }),
+
+    P.map(({ sign, value }) => ({
+      [deltaDecoderField.name]: (sign * value) / deltaDecoderField.divisor,
+    }))
+  );
+
+const unsignedField: DeltaDecoderFieldParser<number> = (deltaDecoderField) =>
+  pipe(
+    BB.ubits(deltaDecoderField.bits),
+    P.map((value) => ({
+      [deltaDecoderField.name]: value / deltaDecoderField.divisor,
+    }))
+  );
+
+const angle: DeltaDecoderFieldParser<number> = (deltaDecoderField) =>
+  pipe(
+    BB.ubits(deltaDecoderField.bits),
+    P.map((value) => ({
+      [deltaDecoderField.name]: value * (360 / (1 << deltaDecoderField.bits)),
+    }))
+  );
+
+const string: DeltaDecoderFieldParser<string> = (deltaDecoderField) =>
+  P.struct({ [deltaDecoderField.name]: BB.ztstr });
+
+const readField: (
   fieldIndex: number,
   deltaDecoder: DeltaDecoder
-): P.Parser<number, { [fieldName: string]: string | number }> => {
-  const deltaDecoderField = deltaDecoder[fieldIndex];
+) => P.Parser<number, { [fieldName: string]: string | number }> = (
+  fieldIndex,
+  deltaDecoder
+) =>
+  pipe(
+    deltaDecoder,
+    RA.lookup(fieldIndex),
+    O.fold<DeltaDecoderField, P.Parser<number, DeltaDecoderField>>(
+      P.fail,
+      P.of
+    ),
+    P.chain((deltaDecoderField) => {
+      if (
+        deltaDecoderField.flags &
+        (DeltaType.BYTE |
+          DeltaType.SHORT |
+          DeltaType.INTEGER |
+          DeltaType.FLOAT |
+          DeltaType.TIMEWINDOW_8 |
+          DeltaType.TIMEWINDOW_BIG)
+      ) {
+        if (deltaDecoderField.flags & DeltaType.SIGNED) {
+          return signedField(deltaDecoderField);
+        } else {
+          return unsignedField(deltaDecoderField);
+        }
+      } else if (deltaDecoderField.flags & DeltaType.ANGLE) {
+        return angle(deltaDecoderField);
+      } else if (deltaDecoderField.flags & DeltaType.STRING) {
+        return string(deltaDecoderField);
+      }
 
-  if (deltaDecoderField == null) return P.fail();
-
-  if (
-    deltaDecoderField.flags &
-    (DeltaType.BYTE |
-      DeltaType.SHORT |
-      DeltaType.INTEGER |
-      DeltaType.FLOAT |
-      DeltaType.TIMEWINDOW_8 |
-      DeltaType.TIMEWINDOW_BIG)
-  ) {
-    if (deltaDecoderField.flags & DeltaType.SIGNED) {
-      return pipe(
-        P.struct({
-          sign: pipe(
-            BB.ubits(1),
-            P.map((a) => (a !== 0 ? -1 : 1))
-          ),
-          value: BB.ubits(deltaDecoderField.bits - 1),
-        }),
-
-        P.map(({ sign, value }) => ({
-          [deltaDecoderField.name]: (sign * value) / deltaDecoderField.divisor,
-        }))
-      );
-    } else {
-      return pipe(
-        BB.ubits(deltaDecoderField.bits),
-        P.map((value) => ({
-          [deltaDecoderField.name]: value / deltaDecoderField.divisor,
-        }))
-      );
-    }
-  } else if (deltaDecoderField.flags & DeltaType.ANGLE) {
-    return pipe(
-      BB.ubits(deltaDecoderField.bits),
-      P.map((value) => ({
-        [deltaDecoderField.name]: value * (360 / (1 << deltaDecoderField.bits)),
-      }))
-    );
-  } else if (deltaDecoderField.flags & DeltaType.STRING) {
-    return P.struct({ [deltaDecoderField.name]: BB.ztstr });
-  }
-
-  return P.fail();
-};
+      return P.fail();
+    })
+  );
 
 export const readDelta: (
   deltaDecoderName: string
@@ -168,10 +192,10 @@ export const readDelta: (
       return pipe(
         RA.sequence(P.Applicative)(fieldParsers),
         P.map(
-          RA.reduce(
-            {} as { [fieldName: string]: string | number },
-            (acc, cur) => ({ ...acc, ...cur })
-          )
+          RA.reduce({} as Record<string, string | number>, (acc, cur) => ({
+            ...acc,
+            ...cur,
+          }))
         ),
         P.map((a) => a as DeltaDecoderField)
       );
