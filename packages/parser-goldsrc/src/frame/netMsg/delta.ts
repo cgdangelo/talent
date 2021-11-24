@@ -207,33 +207,34 @@ export const readDelta: (
       pipe(
         lookupDecoder(deltaDecoderName)(deltaDecoders),
         O.map(
-          flow((deltaDecoder) => {
-            const fields: DeltaField<unknown>[] = [];
+          flow(
+            (deltaDecoder) => {
+              const fields: DeltaField<unknown>[] = [];
 
-            let b = false;
+              let b = false;
 
-            for (let i = 0; i < maskBits.length; ++i) {
-              for (let j = 0; j < 8; ++j) {
-                const index = j + i * 8;
+              for (let i = 0; i < maskBits.length; ++i) {
+                for (let j = 0; j < 8; ++j) {
+                  const index = j + i * 8;
 
-                if (index >= deltaDecoder.length) {
-                  b = true;
-                  break;
+                  if (index >= deltaDecoder.length) {
+                    b = true;
+                    break;
+                  }
+
+                  if ((maskBits[i] ?? 0) & (1 << j)) {
+                    fields.push(readField(index, deltaDecoder));
+                  }
                 }
 
-                if ((maskBits[i] ?? 0) & (1 << j)) {
-                  fields.push(readField(index, deltaDecoder));
-                }
+                if (b) break;
               }
 
-              if (b) break;
-            }
-
-            return pipe(
-              RA.sequence(P.Applicative)(fields),
-              P.map(Object.fromEntries)
-            );
-          })
+              return fields;
+            },
+            RA.sequence(P.Applicative),
+            P.map(Object.fromEntries)
+          )
         ),
         O.getOrElse(() => P.fail())
       )
