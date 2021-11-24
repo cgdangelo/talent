@@ -195,8 +195,7 @@ const readField: (
         O.map((deltaFieldParser) => deltaFieldParser(deltaFieldDecoder))
       )
     ),
-    O.getOrElseW((): DeltaField<never> => P.fail<number>()),
-    (a) => a
+    O.getOrElseW((): DeltaField<never> => P.fail<number>())
   );
 
 const lookupDecoder = map.lookup(string.Eq);

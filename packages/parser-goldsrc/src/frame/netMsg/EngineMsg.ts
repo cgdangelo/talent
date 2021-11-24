@@ -4,6 +4,8 @@ import * as P from "@talent/parser/lib/Parser";
 import { success } from "@talent/parser/lib/ParseResult";
 import { stream } from "@talent/parser/lib/Stream";
 import {
+  number,
+  ord,
   readonlyArray as RA,
   readonlyNonEmptyArray as RNEA,
   string as S,
@@ -287,12 +289,15 @@ const engineMsg_: (messageId: Message) => B.BufferParser<unknown> = (
                 P.struct({ index: BB.ubits(11), type: BB.ubits(2) }),
 
                 P.chain((entity) =>
-                  readDelta(
-                    (entity.type & 1) !== 0
-                      ? entity.index > 0 && entity.index < 33
-                        ? "entity_state_player_t"
-                        : "entity_state_t"
-                      : "custom_entity_state_t"
+                  pipe(
+                    readDelta(
+                      (entity.type & 1) !== 0
+                        ? entity.index > 0 && entity.index < 33
+                          ? "entity_state_player_t"
+                          : "entity_state_t"
+                        : "custom_entity_state_t"
+                    ),
+                    P.map((delta) => ({ ...entity, delta }))
                   )
                 )
               ),
@@ -303,15 +308,26 @@ const engineMsg_: (messageId: Message) => B.BufferParser<unknown> = (
               )
             ),
 
-            P.apFirst(P.skip(5)),
+            // TODO Possibly unnecessary, check order
+            P.map(
+              pipe(
+                number.Ord,
+                ord.contramap(({ index }: { index: number }) => index),
+                RA.sort
+              )
+            ),
+
+            P.chainFirst(() =>
+              pipe(
+                BB.ubits(5),
+                P.filter((footer) => footer === (1 << 5) - 1)
+              )
+            ),
 
             P.chain((entities) =>
               pipe(
                 BB.ubits(6),
-                P.chain((extraCount) =>
-                  P.manyN(readDelta("entity_state_t"), extraCount)
-                ),
-
+                P.chain((n) => P.manyN(readDelta("entity_state_t"), n)),
                 P.map((extraData) => ({ entities, extraData })),
                 P.alt(() => P.of({ entities }))
               )
