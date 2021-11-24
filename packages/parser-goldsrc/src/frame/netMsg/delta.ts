@@ -198,7 +198,7 @@ const readField: (
     O.getOrElseW((): DeltaField<never> => P.fail<number>())
   );
 
-const lookupDecoder = map.lookup(string.Eq);
+const lookupDecoder = pipe(string.Eq, map.lookup);
 
 const maskBits: (maskBitLength: number) => P.Parser<number, readonly number[]> =
   (maskBitLength) => P.manyN(BB.ubits(8), maskBitLength);
