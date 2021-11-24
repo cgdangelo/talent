@@ -212,10 +212,10 @@ const decodeDelta: (
       RA.makeBy(maskBits.length, (i) =>
         pipe(
           RA.makeBy(8, (j) => j + i * 8),
-          RA.filterMapWithIndex((index, j) =>
+          RA.filterMapWithIndex((j, index) =>
             pipe(
               index,
-              O.fromPredicate((index) => index <= deltaDecoder.length),
+              O.fromPredicate((index) => index < deltaDecoder.length),
               O.chain(() =>
                 pipe(
                   maskBits,
