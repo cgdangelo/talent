@@ -1,12 +1,12 @@
 import { buffer as B } from "@talent/parser-buffer";
 import * as P from "@talent/parser/lib/Parser";
 import { pipe } from "fp-ts/lib/function";
-import { engineMsgs } from "./EngineMsg";
-import type { NetMsgInfo } from "./NetMsgInfo";
-import { netMsgInfo } from "./NetMsgInfo";
+import { messages } from "./Message";
+import type { NetworkMessagesInfo } from "./NetworkMessagesInfo";
+import { networkMessagesInfo } from "./NetworkMessagesInfo";
 
-export type NetMsg = {
-  readonly info: NetMsgInfo;
+export type NetworkMessages = {
+  readonly info: NetworkMessagesInfo;
   readonly incomingSequence: number;
   readonly incomingAcknowledged: number;
   readonly incomingReliableAcknowledged: number;
@@ -14,14 +14,15 @@ export type NetMsg = {
   readonly outgoingSequence: number;
   readonly reliableSequence: number;
   readonly lastReliableSequence: number;
-
-  readonly engineMsgsLength: number;
-  readonly engineMsgs: unknown;
+  readonly messagesLength: number;
+  readonly messages: unknown;
 };
 
-export type NetMsgFrameType = "Start" | "Normal" | number;
+export type NetworkMessagesFrameType = "Start" | "Normal" | number;
 
-export const netMsgFrameType = (a: number): NetMsgFrameType => {
+export const networkMessagesFrameType = (
+  a: number
+): NetworkMessagesFrameType => {
   switch (a) {
     case 0:
       return "Start";
@@ -32,7 +33,7 @@ export const netMsgFrameType = (a: number): NetMsgFrameType => {
   }
 };
 
-const engineMsgsLength: B.BufferParser<number> = P.expected(
+const messagesLength: B.BufferParser<number> = P.expected(
   pipe(
     B.uint32_le,
     P.filter((a) => a > 0 && a < 65_536)
@@ -40,9 +41,9 @@ const engineMsgsLength: B.BufferParser<number> = P.expected(
   "message length [0, 65_536]"
 );
 
-export const netMsg: B.BufferParser<NetMsg> = pipe(
+export const networkMessages: B.BufferParser<NetworkMessages> = pipe(
   P.struct({
-    info: netMsgInfo,
+    info: networkMessagesInfo,
     incomingSequence: B.int32_le,
     incomingAcknowledged: B.int32_le,
     incomingReliableAcknowledged: B.int32_le,
@@ -50,15 +51,15 @@ export const netMsg: B.BufferParser<NetMsg> = pipe(
     outgoingSequence: B.int32_le,
     reliableSequence: B.int32_le,
     lastReliableSequence: B.int32_le,
-    engineMsgsLength,
+    messagesLength,
   }),
 
   P.chain((a) =>
     pipe(
-      P.take<number>(a.engineMsgsLength),
+      P.take<number>(a.messagesLength),
       P.map((a) => a as unknown as Buffer),
-      P.chain(engineMsgs),
-      P.map((engineMsgs) => ({ ...a, engineMsgs }))
+      P.chain(messages),
+      P.map((messages) => ({ ...a, messages }))
     )
   )
 );

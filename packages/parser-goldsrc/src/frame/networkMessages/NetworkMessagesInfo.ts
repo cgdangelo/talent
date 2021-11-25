@@ -9,7 +9,7 @@ import { refParams } from "../RefParams";
 import type { UserCmd } from "../UserCmd";
 import { userCmd } from "../UserCmd";
 
-export type NetMsgInfo = {
+export type NetworkMessagesInfo = {
   readonly timestamp: number;
   readonly refParams: RefParams;
   readonly userCmd: UserCmd;
@@ -18,11 +18,12 @@ export type NetMsgInfo = {
   readonly viewModel: number;
 };
 
-export const netMsgInfo: B.BufferParser<NetMsgInfo> = P.struct({
-  timestamp: B.float32_le,
-  refParams,
-  userCmd,
-  moveVars,
-  view: point,
-  viewModel: B.int32_le,
-});
+export const networkMessagesInfo: B.BufferParser<NetworkMessagesInfo> =
+  P.struct({
+    timestamp: B.float32_le,
+    refParams,
+    userCmd,
+    moveVars,
+    view: point,
+    viewModel: B.int32_le,
+  });
