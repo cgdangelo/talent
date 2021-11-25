@@ -16,74 +16,74 @@ import type { DeltaFieldDecoder } from "../../delta";
 import { deltaDecoders, readDelta } from "../../delta";
 
 // TODO Engine messages should be typed
-type EngineMsg = unknown;
+type Message = unknown;
 
-export const engineMsgs: (messageBuffer: Buffer) => B.BufferParser<EngineMsg> =
+export const messages: (messageBuffer: Buffer) => B.BufferParser<Message> =
   (messageBuffer) => (i) =>
     pipe(
       stream(messageBuffer as unknown as number[]),
 
       pipe(
-        P.many(P.logPositions(engineMsg)),
+        P.many(P.logPositions(message)),
         P.chain((parsedMessages) => () => success(parsedMessages, i, i))
       )
     );
 
-const engineMsg: B.BufferParser<EngineMsg> = pipe(
+const message: B.BufferParser<Message> = pipe(
   B.uint8_le,
 
   P.chain((messageId) =>
     pipe(
-      engineMsg_(messageId),
+      message_(messageId),
 
       // TODO Can remove SVC_NOP, deprecated messages, but NOT messages that
       // have no arguments.
       // P.filter(() => messageId !== Message.SVC_NOP),
 
-      P.map((fields) => ({ type: Message[messageId], fields }))
+      P.map((fields) => ({ type: MessageType[messageId], fields }))
     )
   )
 );
 
-const engineMsg_: (messageId: Message) => B.BufferParser<unknown> = (
+const message_: (messageId: Message) => B.BufferParser<unknown> = (
   messageId
 ) => {
   // TODO Replace with Option?
   switch (messageId) {
-    case Message.SVC_BAD:
+    case MessageType.SVC_BAD:
       // Should never see this message, so we can treat it as an exceptional
       // case?
       return P.cut(P.fail());
 
     // TODO Excise these into separate modules, or functions at least
-    case Message.SVC_NOP: // 1
+    case MessageType.SVC_NOP: // 1
       return P.succeed(null);
 
-    case Message.SVC_DISCONNECT: // 2
+    case MessageType.SVC_DISCONNECT: // 2
       return P.struct({ reason: B.ztstr });
 
-    case Message.SVC_EVENT: // 3
+    case MessageType.SVC_EVENT: // 3
       return P.fail();
 
-    case Message.SVC_VERSION: // 4
+    case MessageType.SVC_VERSION: // 4
       return P.struct({ protocolVersion: B.uint32_le });
 
-    case Message.SVC_SETVIEW: // 5
+    case MessageType.SVC_SETVIEW: // 5
       return P.struct({ entityIndex: B.int16_le });
 
-    case Message.SVC_SOUND: // 6
+    case MessageType.SVC_SOUND: // 6
       return P.fail();
 
-    case Message.SVC_TIME: // 7
+    case MessageType.SVC_TIME: // 7
       return P.struct({ time: B.float32_le });
 
-    case Message.SVC_PRINT: // 8
+    case MessageType.SVC_PRINT: // 8
       return P.struct({ message: B.ztstr });
 
-    case Message.SVC_STUFFTEXT: // 9
+    case MessageType.SVC_STUFFTEXT: // 9
       return P.struct({ command: B.ztstr });
 
-    case Message.SVC_SETANGLE: // 10
+    case MessageType.SVC_SETANGLE: // 10
       // TODO The provided angles need to be scaled by (65536 / 360), but
       // hlviewer does not?
       return pipe(
@@ -93,7 +93,7 @@ const engineMsg_: (messageId: Message) => B.BufferParser<unknown> = (
         P.map(([pitch, yaw, roll]) => ({ pitch, yaw, roll }))
       );
 
-    case Message.SVC_SERVERINFO: // 11
+    case MessageType.SVC_SERVERINFO: // 11
       return pipe(
         P.struct({
           protocol: B.int32_le,
@@ -112,10 +112,10 @@ const engineMsg_: (messageId: Message) => B.BufferParser<unknown> = (
         P.apFirst(P.skip(1))
       );
 
-    case Message.SVC_LIGHTSTYLE: // 12
+    case MessageType.SVC_LIGHTSTYLE: // 12
       return P.struct({ index: B.uint8_le, lightInfo: B.ztstr }); // TODO Parse light info?
 
-    case Message.SVC_UPDATEUSERINFO: // 13
+    case MessageType.SVC_UPDATEUSERINFO: // 13
       return P.struct({
         clientIndex: B.uint8_le,
         clientUserId: B.uint32_le,
@@ -129,7 +129,7 @@ const engineMsg_: (messageId: Message) => B.BufferParser<unknown> = (
       });
 
     // 14
-    case Message.SVC_DELTADESCRIPTION: {
+    case MessageType.SVC_DELTADESCRIPTION: {
       return pipe(
         P.struct({ name: B.ztstr, fieldCount: B.uint16_le, fields: P.of([]) }),
 
@@ -159,14 +159,14 @@ const engineMsg_: (messageId: Message) => B.BufferParser<unknown> = (
       );
     }
 
-    case Message.SVC_CLIENTDATA: // 15
+    case MessageType.SVC_CLIENTDATA: // 15
       return P.fail();
 
-    case Message.SVC_STOPSOUND: // 16
+    case MessageType.SVC_STOPSOUND: // 16
       return P.struct({ entityIndex: B.int16_le });
 
     // 17
-    case Message.SVC_PINGS: {
+    case MessageType.SVC_PINGS: {
       return pipe(
         P.skip<number>(1),
         P.apSecond(
@@ -187,7 +187,7 @@ const engineMsg_: (messageId: Message) => B.BufferParser<unknown> = (
       );
     }
 
-    case Message.SVC_PARTICLE: // 18
+    case MessageType.SVC_PARTICLE: // 18
       return P.struct({
         // TODO AlliedMods does not scaling, hlviewer says 1/8
         origin: pipe(
@@ -205,10 +205,10 @@ const engineMsg_: (messageId: Message) => B.BufferParser<unknown> = (
       });
 
     // Deprecated
-    case Message.SVC_DAMAGE: // 19
+    case MessageType.SVC_DAMAGE: // 19
       return P.of(null);
 
-    case Message.SVC_SPAWNSTATIC: // 20
+    case MessageType.SVC_SPAWNSTATIC: // 20
       return pipe(
         P.struct({
           modelIndex: B.int16_le,
@@ -274,11 +274,11 @@ const engineMsg_: (messageId: Message) => B.BufferParser<unknown> = (
         )
       );
 
-    case Message.SVC_EVENT_RELIABLE: // 21
+    case MessageType.SVC_EVENT_RELIABLE: // 21
       return P.fail();
 
     // FIXME no shot this is accurate
-    case Message.SVC_SPAWNBASELINE: // 22
+    case MessageType.SVC_SPAWNBASELINE: // 22
       return (i) =>
         pipe(
           stream(i.buffer, i.cursor * 8),
@@ -338,28 +338,28 @@ const engineMsg_: (messageId: Message) => B.BufferParser<unknown> = (
           )
         );
 
-    case Message.SVC_TEMPENTITY: // 23
+    case MessageType.SVC_TEMPENTITY: // 23
       // TODO Doable, just takes a lot of doing
       return P.fail();
 
-    case Message.SVC_SETPAUSE: // 24
+    case MessageType.SVC_SETPAUSE: // 24
       return P.struct({ isPaused: B.int8_le });
 
-    case Message.SVC_SIGNONNUM: // 25
+    case MessageType.SVC_SIGNONNUM: // 25
       return P.struct({ sign: B.int8_le });
 
-    case Message.SVC_CENTERPRINT: // 26
+    case MessageType.SVC_CENTERPRINT: // 26
       return P.struct({ message: B.ztstr });
 
     // Deprecated
-    case Message.SVC_KILLEDMONSTER: // 27
+    case MessageType.SVC_KILLEDMONSTER: // 27
       return P.of(null);
 
     // Deprecated. Probably old Q2 message?
-    case Message.SVC_FOUNDSECRET: // 28
+    case MessageType.SVC_FOUNDSECRET: // 28
       return P.of(null);
 
-    case Message.SVC_SPAWNSTATICSOUND: // 29
+    case MessageType.SVC_SPAWNSTATICSOUND: // 29
       return P.struct({
         // TODO hlviewer scales by 8 here?
         origin: pipe(
@@ -387,19 +387,19 @@ const engineMsg_: (messageId: Message) => B.BufferParser<unknown> = (
         flags: B.int8_le,
       });
 
-    case Message.SVC_INTERMISSION: // 30
+    case MessageType.SVC_INTERMISSION: // 30
       return P.of(null);
 
-    case Message.SVC_FINALE: // 31
+    case MessageType.SVC_FINALE: // 31
       return P.struct({ text: B.ztstr });
 
-    case Message.SVC_CDTRACK: // 32
+    case MessageType.SVC_CDTRACK: // 32
       return P.struct({
         track: B.int8_le,
         loopTrack: B.int8_le,
       });
 
-    case Message.SVC_RESTORE: // 33
+    case MessageType.SVC_RESTORE: // 33
       return pipe(
         P.struct({
           saveName: B.ztstr,
@@ -413,19 +413,19 @@ const engineMsg_: (messageId: Message) => B.BufferParser<unknown> = (
         )
       );
 
-    case Message.SVC_CUTSCENE: // 34
+    case MessageType.SVC_CUTSCENE: // 34
       return P.struct({ text: B.ztstr });
 
-    case Message.SVC_WEAPONANIM: // 35
+    case MessageType.SVC_WEAPONANIM: // 35
       return P.struct({
         sequenceNumber: B.int8_le,
         weaponModelBodyGroup: B.int8_le,
       });
 
-    case Message.SVC_DECALNAME: // 36
+    case MessageType.SVC_DECALNAME: // 36
       return P.struct({ positionIndex: B.uint8_le, decalName: B.ztstr });
 
-    case Message.SVC_ROOMTYPE: // 37
+    case MessageType.SVC_ROOMTYPE: // 37
       return pipe(
         B.uint16_le,
         P.map((type) =>
@@ -500,7 +500,7 @@ const engineMsg_: (messageId: Message) => B.BufferParser<unknown> = (
         )
       );
 
-    case Message.SVC_ADDANGLE: // 38
+    case MessageType.SVC_ADDANGLE: // 38
       return P.struct({
         angleToAdd: pipe(
           B.int16_le,
@@ -508,7 +508,7 @@ const engineMsg_: (messageId: Message) => B.BufferParser<unknown> = (
         ),
       });
 
-    case Message.SVC_NEWUSERMSG: // 39
+    case MessageType.SVC_NEWUSERMSG: // 39
       return P.struct({
         index: B.uint8_le,
         size: B.uint8_le,
@@ -518,17 +518,17 @@ const engineMsg_: (messageId: Message) => B.BufferParser<unknown> = (
         name: B.ztstr_padded(16),
       });
 
-    case Message.SVC_PACKETENTITIES: // 40
+    case MessageType.SVC_PACKETENTITIES: // 40
       return P.fail();
 
-    case Message.SVC_DELTAPACKETENTITIES: // 41
+    case MessageType.SVC_DELTAPACKETENTITIES: // 41
       return P.fail();
 
-    case Message.SVC_CHOKE: // 42
+    case MessageType.SVC_CHOKE: // 42
       return P.of(null);
 
     // 43
-    case Message.SVC_RESOURCELIST: {
+    case MessageType.SVC_RESOURCELIST: {
       const resource = pipe(
         P.struct({
           type: BB.ubits(4),
@@ -601,7 +601,7 @@ const engineMsg_: (messageId: Message) => B.BufferParser<unknown> = (
         );
     }
 
-    case Message.SVC_NEWMOVEVARS: // 44
+    case MessageType.SVC_NEWMOVEVARS: // 44
       return pipe(
         // TODO sky stuff is at the bottom unlike moveVars parser unfortunately
         P.struct({
@@ -633,10 +633,10 @@ const engineMsg_: (messageId: Message) => B.BufferParser<unknown> = (
         })
       );
 
-    case Message.SVC_RESOURCEREQUEST: // 45
+    case MessageType.SVC_RESOURCEREQUEST: // 45
       return pipe(P.struct({ spawnCount: B.int32_le }), P.apFirst(P.skip(4)));
 
-    case Message.SVC_CUSTOMIZATION: // 46
+    case MessageType.SVC_CUSTOMIZATION: // 46
       return pipe(
         P.struct({
           playerIndex: B.uint8_le,
@@ -658,7 +658,7 @@ const engineMsg_: (messageId: Message) => B.BufferParser<unknown> = (
         )
       );
 
-    case Message.SVC_CROSSHAIRANGLE: // 47
+    case MessageType.SVC_CROSSHAIRANGLE: // 47
       // TODO hlviewer does not scale these. Find out what "engine call" means
       // here: https://wiki.alliedmods.net/Half-Life_1_Engine_Messages#SVC_CROSSHAIRANGLE
       return pipe(
@@ -666,7 +666,7 @@ const engineMsg_: (messageId: Message) => B.BufferParser<unknown> = (
         P.map(([pitch, yaw]) => ({ pitch, yaw }))
       );
 
-    case Message.SVC_SOUNDFADE: // 48
+    case MessageType.SVC_SOUNDFADE: // 48
       return P.struct({
         initialPercent: B.uint8_le,
         holdTime: B.uint8_le,
@@ -674,10 +674,10 @@ const engineMsg_: (messageId: Message) => B.BufferParser<unknown> = (
         fadeInTime: B.uint8_le,
       });
 
-    case Message.SVC_FILETXFERFAILED: // 49
+    case MessageType.SVC_FILETXFERFAILED: // 49
       return P.struct({ filename: B.ztstr });
 
-    case Message.SVC_HLTV: // 50
+    case MessageType.SVC_HLTV: // 50
       // #define HLTV_ACTIVE	0	// tells client that he's an spectator and will get director commands
       // #define HLTV_STATUS	1	// send status infos about proxy
       // #define HLTV_LISTEN	2	// tell client to listen to a multicast stream
@@ -702,7 +702,7 @@ const engineMsg_: (messageId: Message) => B.BufferParser<unknown> = (
         )
       );
 
-    case Message.SVC_DIRECTOR: // 51
+    case MessageType.SVC_DIRECTOR: // 51
       return pipe(
         B.uint8_le,
 
@@ -711,13 +711,13 @@ const engineMsg_: (messageId: Message) => B.BufferParser<unknown> = (
         )
       );
 
-    case Message.SVC_VOICEINIT: // 52
+    case MessageType.SVC_VOICEINIT: // 52
       return P.struct({
         codecName: B.ztstr,
         quality: B.int8_le,
       });
 
-    case Message.SVC_VOICEDATA: // 53
+    case MessageType.SVC_VOICEDATA: // 53
       return pipe(
         P.struct({ playerIndex: B.uint8_le, size: B.uint16_le }),
         P.chain((a) =>
@@ -728,20 +728,20 @@ const engineMsg_: (messageId: Message) => B.BufferParser<unknown> = (
         )
       );
 
-    case Message.SVC_SENDEXTRAINFO: // 54
+    case MessageType.SVC_SENDEXTRAINFO: // 54
       return P.struct({ fallbackDir: B.ztstr, canCheat: B.uint8_le });
 
-    case Message.SVC_TIMESCALE: // 55
+    case MessageType.SVC_TIMESCALE: // 55
       return P.struct({ timeScale: B.float32_le });
 
-    case Message.SVC_RESOURCELOCATION: // 56
+    case MessageType.SVC_RESOURCELOCATION: // 56
       return P.struct({ sv_downloadurl: B.ztstr });
 
-    case Message.SVC_SENDCVARVALUE: // 57
+    case MessageType.SVC_SENDCVARVALUE: // 57
       // Deprecated
       return P.struct({ name: B.ztstr });
 
-    case Message.SVC_SENDCVARVALUE2: // 58
+    case MessageType.SVC_SENDCVARVALUE2: // 58
       return P.struct({ requestId: B.uint32_le, name: B.ztstr });
 
     default:
@@ -778,7 +778,7 @@ const engineMsg_: (messageId: Message) => B.BufferParser<unknown> = (
   }
 };
 
-export enum Message {
+export enum MessageType {
   SVC_BAD = 0,
   SVC_NOP = 1,
   SVC_DISCONNECT = 2,
