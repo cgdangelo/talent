@@ -12,8 +12,8 @@ import {
 } from "fp-ts";
 import { flow, pipe } from "fp-ts/lib/function";
 import { point } from "../../Point";
-import type { DeltaFieldDecoder } from "./delta";
-import { deltaDecoders, readDelta } from "./delta";
+import type { DeltaFieldDecoder } from "../../delta";
+import { deltaDecoders, readDelta } from "../../delta";
 
 // TODO Engine messages should be typed
 type EngineMsg = unknown;
@@ -29,7 +29,7 @@ export const engineMsgs: (messageBuffer: Buffer) => B.BufferParser<EngineMsg> =
       )
     );
 
-const engineMsg: B.BufferParser<unknown> = pipe(
+const engineMsg: B.BufferParser<EngineMsg> = pipe(
   B.uint8_le,
 
   P.chain((messageId) =>
