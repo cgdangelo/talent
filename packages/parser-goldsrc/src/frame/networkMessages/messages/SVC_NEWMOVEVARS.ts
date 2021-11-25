@@ -1,0 +1,37 @@
+import { buffer as B } from "@talent/parser-buffer";
+import * as P from "@talent/parser/lib/Parser";
+import { pipe } from "fp-ts/lib/function";
+import { point } from "../../../Point";
+import type { MoveVars } from "../../MoveVars";
+
+// TODO sky stuff is at the bottom unlike moveVars parser unfortunately, but
+// structure is the same.
+export type NewMoveVars = MoveVars;
+
+export const newMoveVars: B.BufferParser<NewMoveVars> = P.struct({
+  gravity: B.float32_le,
+  stopSpeed: B.float32_le,
+  maxSpeed: B.float32_le,
+  spectatorMaxSpeed: B.float32_le,
+  accelerate: B.float32_le,
+  airAccelerate: B.float32_le,
+  waterAccelerate: B.float32_le,
+  friction: B.float32_le,
+  edgeFriction: B.float32_le,
+  waterFriction: B.float32_le,
+  entGravity: B.float32_le,
+  bounce: B.float32_le,
+  stepSize: B.float32_le,
+  maxVelocity: B.float32_le,
+  zMax: B.float32_le,
+  waveHeight: B.float32_le,
+  footsteps: B.int8_le,
+  rollAngle: B.float32_le,
+  rollSpeed: B.float32_le,
+  skyColor: pipe(
+    point,
+    P.map(({ x: r, y: g, z: b }) => ({ r, g, b }))
+  ),
+  skyVec: point,
+  skyName: B.ztstr,
+});
