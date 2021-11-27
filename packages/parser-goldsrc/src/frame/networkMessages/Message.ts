@@ -7,6 +7,7 @@ import * as M from "./messages";
 import { MessageType } from "./MessageType";
 
 type Message =
+  | void // TODO from parser failures?
   | M.Bad
   | M.Nop
   | M.Disconnect
@@ -67,18 +68,25 @@ type Message =
   | M.SendCvarValue
   | M.SendCvarValue2;
 
-export const messages: (messageBuffer: Buffer) => B.BufferParser<Message> =
-  (messageBuffer) => (i) =>
+type MessageFrame = {
+  // TODO move to parsers for union?
+  readonly type: { readonly id: number; readonly name: string };
+  readonly fields: Message;
+};
+
+export const messages: (
+  messageBuffer: Buffer
+) => B.BufferParser<MessageFrame[]> = (messageBuffer) => (i) =>
+  pipe(
+    stream(messageBuffer as unknown as number[]),
+
     pipe(
-      stream(messageBuffer as unknown as number[]),
+      P.many(P.logPositions(message)),
+      P.chain((parsedMessages) => () => success(parsedMessages, i, i))
+    )
+  );
 
-      pipe(
-        P.many(P.logPositions(message)),
-        P.chain((parsedMessages) => () => success(parsedMessages, i, i))
-      )
-    );
-
-const message: B.BufferParser<Message> = pipe(
+const message: B.BufferParser<MessageFrame> = pipe(
   B.uint8_le,
 
   P.chain((messageId) =>
@@ -89,12 +97,15 @@ const message: B.BufferParser<Message> = pipe(
       // have no arguments.
       // P.filter(() => messageId !== Message.SVC_NOP),
 
-      P.map((fields) => ({ type: MessageType[messageId], fields }))
+      P.map((fields) => ({
+        type: { id: messageId, name: MessageType[messageId]! }, // TODO remove nonnull assertion
+        fields,
+      }))
     )
   )
 );
 
-const message_: (messageId: MessageType) => B.BufferParser<unknown> = (
+const message_: (messageId: MessageType) => B.BufferParser<Message> = (
   messageId
 ) => {
   // TODO Replace with Option?

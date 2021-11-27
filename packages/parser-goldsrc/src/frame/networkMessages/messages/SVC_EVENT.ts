@@ -5,7 +5,13 @@ import { stream } from "@talent/parser/lib/Stream";
 import { pipe } from "fp-ts/lib/function";
 import { readDelta } from "../../../delta";
 
-export type Event = unknown;
+export type Event = {
+  readonly events: readonly {
+    readonly index: number;
+    readonly packetIndex?: number;
+    readonly fireTime?: number;
+  }[];
+};
 
 export const event: B.BufferParser<Event> = (i) =>
   pipe(
