@@ -56,12 +56,23 @@ export const ztstr: P.Parser<number, string> = pipe(
   P.map((as) => String.fromCharCode(...as))
 );
 
-export const nextByte: P.Parser<number, void> = (i) =>
-  success(
-    undefined,
-    i,
-    stream(
-      i.buffer,
-      i.cursor % 8 === 0 ? i.cursor : i.cursor + (8 - (i.cursor % 8))
-    )
-  );
+export const nextByte: <A>(fa: P.Parser<number, A>) => P.Parser<number, A> =
+  (fa) => (i) =>
+    pipe(
+      i,
+
+      pipe(
+        fa,
+        P.chain(
+          (a) => (o) =>
+            success(
+              a,
+              i,
+              stream(
+                o.buffer,
+                o.cursor % 8 === 0 ? o.cursor / 8 : Math.floor(o.cursor / 8) + 1
+              )
+            )
+        )
+      )
+    );

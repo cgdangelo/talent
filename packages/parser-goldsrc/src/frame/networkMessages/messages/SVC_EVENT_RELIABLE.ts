@@ -1,7 +1,6 @@
 import * as BB from "@talent/parser-bitbuffer";
 import type { buffer as B } from "@talent/parser-buffer";
 import * as P from "@talent/parser/lib/Parser";
-import { success } from "@talent/parser/lib/ParseResult";
 import { stream } from "@talent/parser/lib/Stream";
 import { pipe } from "fp-ts/lib/function";
 import type { Delta } from "../../../delta";
@@ -28,8 +27,6 @@ export const eventReliable: B.BufferParser<EventReliable> = (i) =>
           P.alt(() => P.of<number, number | undefined>(undefined))
         ),
       }),
-
-      P.apFirst(BB.nextByte),
-      P.chain((a) => (o) => success(a, i, stream(o.buffer, o.cursor / 8)))
+      BB.nextByte
     )
   );

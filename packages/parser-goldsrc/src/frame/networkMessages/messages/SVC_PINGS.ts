@@ -25,5 +25,5 @@ export const pings: B.BufferParser<Pings> = pipe(
       )
     )
   ),
-  P.apFirst(BB.nextByte)
+  BB.nextByte
 );
