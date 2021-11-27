@@ -94,7 +94,7 @@ const message: B.BufferParser<Message> = pipe(
   )
 );
 
-const message_: (messageId: Message) => B.BufferParser<unknown> = (
+const message_: (messageId: MessageType) => B.BufferParser<unknown> = (
   messageId
 ) => {
   // TODO Replace with Option?
@@ -277,35 +277,19 @@ const message_: (messageId: Message) => B.BufferParser<unknown> = (
       return M.sendCvarValue2;
 
     default:
-      // TODO Can keep for when custom message parsing works
-      // return pipe(
-      //   messageId,
-
-      //   // Messages above 64 are custom messages
-      //   O.fromPredicate((a) => a >= 64),
-
-      //   // Custom message should have been stored previously,
-      //   // potentially with bit length
-      //   O.chain(
-      //     flow(
-      //       // TODO No idea where this is going to live
-      //       (a) => new Map<Message, { size?: number }>().get(a),
-      //       O.fromNullable
-      //     )
-      //   ),
-      //   O.chain(flow((a) => a.size, O.fromNullable)),
-      //   O.chain(O.fromPredicate((a) => a > -1)),
-
-      //   // Use the known bit length
-      //   O.map((a) => P.of<number, number>(a)),
-      //   // or read it from the next byte
-      //   O.alt(() => O.some(B.uint8_le)),
-
-      //   // Skip whatever length we have or fail
-      //   O.fold(P.fail, P.chain<number, number, void>(P.skip))
-      // );
-
-      // HACK For now, fail by default for now so we can see more messages
-      return P.fail();
+      return messageId >= 64
+        ? pipe(
+            P.of<number, M.NewUserMsg | undefined>(
+              M.customMessages.get(messageId)
+            ),
+            P.filter(
+              (customMessage): customMessage is M.NewUserMsg =>
+                customMessage != null && customMessage.size > -1
+            ),
+            P.map((customMessage) => customMessage.size),
+            P.alt(() => B.uint8_le),
+            P.chain((size) => P.skip<number>(size))
+          )
+        : P.fail();
   }
 };
