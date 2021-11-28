@@ -43,7 +43,6 @@ const addFramesToDirectoryEntry: (
   pipe(
     P.seek(directoryEntry.offset),
     P.apSecond(frames),
-    P.maybe(RA.getMonoid()),
     P.map((frames) => ({ ...directoryEntry, frames }))
   );
 
