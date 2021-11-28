@@ -1,13 +1,11 @@
 import { buffer as B } from "@talent/parser-buffer";
 import * as P from "@talent/parser/lib/Parser";
 import { pipe } from "fp-ts/lib/function";
+import type { Point } from "../../../Point";
+import { pointBy } from "../../../Point";
 
 export type SpawnStaticSound = {
-  readonly origin: {
-    readonly x: number;
-    readonly y: number;
-    readonly z: number;
-  };
+  readonly origin: Point;
   readonly soundIndex: number;
   readonly volume: number;
   readonly attenuation: number;
@@ -16,14 +14,12 @@ export type SpawnStaticSound = {
 };
 
 export const spawnStaticSound: B.BufferParser<SpawnStaticSound> = P.struct({
-  // TODO hlviewer scales by 8 here?
-  origin: pipe(
-    B.int16_le,
-    P.map((a) => a / 8),
-    (fa) => P.tuple(fa, fa, fa),
-    P.map(([x, y, z]) => ({ x, y, z }))
+  origin: pointBy(
+    pipe(
+      B.int16_le,
+      P.map((a) => a / 8)
+    )
   ),
-
   soundIndex: B.uint16_le,
   volume: pipe(
     B.int8_le,
