@@ -11,6 +11,10 @@ export type ClientData = {
   weaponData?: Delta[];
 };
 
+// FIXME Something is wrong in this parser? Possibly wrong size because an
+// SVC_BAD is following the first instance of this message in demo.dem. hlviewer
+// misses out on that message because it skips to the end of network message
+// data when parsing a message without fields (SVC_NOP, SVC_CHOKE).
 export const clientData: B.BufferParser<ClientData> = (i) =>
   pipe(
     stream(i.buffer, i.cursor * 8),

@@ -89,6 +89,13 @@ export const messages: (
               currentPosition === i.cursor + messagesLength
           )
         )
+      ),
+
+      P.alt(() =>
+        pipe(
+          P.of<number, readonly MessageFrame[]>([]),
+          P.apFirst(P.seek(i.cursor + messagesLength))
+        )
       )
     )
   );
