@@ -5,7 +5,7 @@ import { pipe } from "fp-ts/lib/function";
 export type VoiceData = {
   readonly playerIndex: number;
   readonly size: number;
-  readonly data: number[];
+  readonly data: readonly number[];
 };
 
 export const voiceData: B.BufferParser<VoiceData> = pipe(

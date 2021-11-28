@@ -25,7 +25,7 @@ const totalEntries: B.BufferParser<number> = P.expected(
 
 const directoryEntries: (
   totalEntries: number
-) => B.BufferParser<DirectoryEntry[]> = (totalEntries) =>
+) => B.BufferParser<readonly DirectoryEntry[]> = (totalEntries) =>
   P.manyN(directoryEntry, totalEntries);
 
 const directoryEntriesWithoutFrames: (
