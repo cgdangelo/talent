@@ -1,4 +1,8 @@
-import { either as E, readonlyArray as RA } from "fp-ts";
+import {
+  either as E,
+  readonlyArray as RA,
+  readonlyNonEmptyArray as RNEA,
+} from "fp-ts";
 import { sequenceS, sequenceT } from "fp-ts/lib/Apply";
 import { pipe } from "fp-ts/lib/function";
 import * as P from "parser-ts/lib/Parser";
@@ -18,16 +22,27 @@ export const seek =
   (i) =>
     success(undefined, i, stream(i.buffer, cursor));
 
-// HACK Not stack safe, not even a little
-export const manyN: <I, A>(
-  fa: P.Parser<I, A>,
+export const manyN = <I, A>(
+  parser: P.Parser<I, A>,
   n: number
-) => P.Parser<I, readonly A[]> = (fa, n) =>
-  pipe(RA.replicate(n, fa), RA.sequence(P.Applicative));
-
-// HACK Not stack safe, not even a little
-// export const take: <I>(n: number) => P.Parser<I, I[]> = (n) =>
-//   manyN(P.item(), n);
+): P.Parser<I, readonly A[]> =>
+  pipe(
+    parser,
+    P.chain((x) =>
+      P.ChainRec.chainRec(RNEA.of(x), (acc) =>
+        pipe(
+          acc.length === n ? P.succeed(undefined) : P.fail<I>(),
+          P.map(() => E.right(acc)),
+          P.alt(() =>
+            pipe(
+              parser,
+              P.map((a) => E.left(RA.append(a)(acc)))
+            )
+          )
+        )
+      )
+    )
+  );
 
 export const take = <I>(length: number): P.Parser<I, I[]> =>
   pipe(
