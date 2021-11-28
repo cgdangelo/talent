@@ -26,23 +26,26 @@ export const manyN = <I, A>(
   parser: P.Parser<I, A>,
   n: number
 ): P.Parser<I, readonly A[]> =>
-  pipe(
-    parser,
-    P.chain((x) =>
-      P.ChainRec.chainRec(RNEA.of(x), (acc) =>
-        pipe(
-          acc.length === n ? P.succeed(undefined) : P.fail<I>(),
-          P.map(() => E.right(acc)),
-          P.alt(() =>
+  n === 0
+    ? P.of([])
+    : pipe(
+        parser,
+
+        P.chain((x) =>
+          P.ChainRec.chainRec(RNEA.of(x), (acc) =>
             pipe(
-              parser,
-              P.map((a) => E.left(RA.append(a)(acc)))
+              acc.length === n ? P.succeed(undefined) : P.fail<I>(),
+              P.map(() => E.right(acc)),
+              P.alt(() =>
+                pipe(
+                  parser,
+                  P.map((a) => E.left(RA.append(a)(acc)))
+                )
+              )
             )
           )
         )
-      )
-    )
-  );
+      );
 
 export const take = <I>(length: number): P.Parser<I, I[]> =>
   pipe(
