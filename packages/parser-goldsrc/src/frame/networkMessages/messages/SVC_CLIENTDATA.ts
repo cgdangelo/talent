@@ -7,8 +7,9 @@ import type { Delta } from "../../../delta";
 import { readDelta } from "../../../delta";
 
 export type ClientData = {
-  clientData: unknown;
-  weaponData?: Delta[];
+  readonly deltaUpdateMask?: number;
+  readonly clientData: Delta;
+  readonly weaponData: readonly Delta[];
 };
 
 // FIXME Something is wrong in this parser? Possibly wrong size because an
@@ -35,7 +36,7 @@ export const clientData: B.BufferParser<ClientData> = (i) =>
 
       P.chain((delta) =>
         pipe(
-          P.many1Till(
+          P.many(
             pipe(
               BB.ubits(1),
               P.filter((hasWeaponData) => hasWeaponData !== 0),
@@ -49,17 +50,12 @@ export const clientData: B.BufferParser<ClientData> = (i) =>
                 weaponIndex,
                 ...weaponData,
               }))
-            ),
-
-            pipe(
-              BB.ubits(1),
-              P.filter((hasWeaponData) => hasWeaponData === 0)
             )
           ),
-          P.map((weaponData) => ({ ...delta, weaponData })),
-          P.alt(() => P.of(delta))
+          P.map((weaponData) => ({ ...delta, weaponData }))
         )
       ),
+
       BB.nextByte
     )
   );
