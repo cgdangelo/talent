@@ -14,8 +14,7 @@ export type NetworkMessages = {
   readonly outgoingSequence: number;
   readonly reliableSequence: number;
   readonly lastReliableSequence: number;
-  readonly messagesLength: number;
-  readonly messages: unknown;
+  readonly messages: readonly unknown[];
 };
 
 export type NetworkMessagesFrameType = "Start" | "Normal" | number;
@@ -41,25 +40,14 @@ const messagesLength: B.BufferParser<number> = P.expected(
   "message length [0, 65_536]"
 );
 
-export const networkMessages: B.BufferParser<NetworkMessages> = pipe(
-  P.struct({
-    info: networkMessagesInfo,
-    incomingSequence: B.int32_le,
-    incomingAcknowledged: B.int32_le,
-    incomingReliableAcknowledged: B.int32_le,
-    incomingReliableSequence: B.int32_le,
-    outgoingSequence: B.int32_le,
-    reliableSequence: B.int32_le,
-    lastReliableSequence: B.int32_le,
-    messagesLength,
-  }),
-
-  P.chain((a) =>
-    pipe(
-      P.take<number>(a.messagesLength),
-      P.map((a) => a as unknown as Buffer),
-      P.chain(messages),
-      P.map((messages) => ({ ...a, messages }))
-    )
-  )
-);
+export const networkMessages: B.BufferParser<NetworkMessages> = P.struct({
+  info: networkMessagesInfo,
+  incomingSequence: B.int32_le,
+  incomingAcknowledged: B.int32_le,
+  incomingReliableAcknowledged: B.int32_le,
+  incomingReliableSequence: B.int32_le,
+  outgoingSequence: B.int32_le,
+  reliableSequence: B.int32_le,
+  lastReliableSequence: B.int32_le,
+  messages: pipe(messagesLength, P.chain(messages)),
+});

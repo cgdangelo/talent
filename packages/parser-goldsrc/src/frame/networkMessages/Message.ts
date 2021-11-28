@@ -1,7 +1,5 @@
 import { buffer as B } from "@talent/parser-buffer";
 import * as P from "@talent/parser/lib/Parser";
-import { success } from "@talent/parser/lib/ParseResult";
-import { stream } from "@talent/parser/lib/Stream";
 import { pipe } from "fp-ts/lib/function";
 import * as M from "./messages";
 import { MessageType } from "./MessageType";
@@ -75,14 +73,23 @@ type MessageFrame = {
 };
 
 export const messages: (
-  messageBuffer: Buffer
-) => B.BufferParser<MessageFrame[]> = (messageBuffer) => (i) =>
+  messagesLength: number
+) => B.BufferParser<readonly MessageFrame[]> = (messagesLength) => (i) =>
   pipe(
-    stream(messageBuffer as unknown as number[]),
+    i,
 
     pipe(
-      P.many(P.logPositions(message)),
-      P.chain((parsedMessages) => () => success(parsedMessages, i, i))
+      P.manyTill(
+        P.logPositions(message),
+
+        pipe(
+          P.withStart(P.of<number, void>(undefined)),
+          P.filter(
+            ([, { cursor: currentPosition }]) =>
+              currentPosition === i.cursor + messagesLength
+          )
+        )
+      )
     )
   );
 
