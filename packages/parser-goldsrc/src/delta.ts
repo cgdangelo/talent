@@ -210,11 +210,11 @@ const decodeDelta: (
     pipe(
       RA.makeBy(maskBits.length, (i) =>
         pipe(
-          RA.makeBy(8, (j) => j + i * 8),
-          RA.filterMapWithIndex((j, index) =>
+          RA.makeBy(8, (fieldIndex) => fieldIndex + i * 8),
+          RA.filterMapWithIndex((j, fieldIndex) =>
             pipe(
-              index,
-              O.fromPredicate((index) => index < deltaDecoder.length),
+              fieldIndex,
+              O.fromPredicate((fieldIndex) => fieldIndex < deltaDecoder.length),
               O.chain(() =>
                 pipe(
                   maskBits,
@@ -222,7 +222,7 @@ const decodeDelta: (
                   O.chain(
                     O.fromPredicate((maskBit) => (maskBit & (1 << j)) !== 0)
                   ),
-                  O.map(() => readField(index, deltaDecoder))
+                  O.map(() => readField(fieldIndex, deltaDecoder))
                 )
               )
             )
