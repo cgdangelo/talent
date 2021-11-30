@@ -2,7 +2,6 @@ import * as BB from "@talent/parser-bitbuffer";
 import type { buffer as B } from "@talent/parser-buffer";
 import * as P from "@talent/parser/lib/Parser";
 import { stream } from "@talent/parser/lib/Stream";
-import { readonlyArray as RA } from "fp-ts";
 import { pipe } from "fp-ts/lib/function";
 import type { Delta } from "../../../delta";
 import { readDelta } from "../../../delta";
@@ -86,16 +85,15 @@ const entityStates: () => B.BufferParser<DeltaPacketEntities["entityStates"]> =
           ),
 
           P.chain(({ removeEntity, entityIndex }) =>
-            removeEntity === 0
+            removeEntity !== 0
               ? entityState(entityIndex)
-              : P.of<number, DeltaPacketEntity>({
+              : P.of({
                   entityIndex,
                   entityState: null,
                 })
           )
         )
-      ),
-      P.map(RA.filter((a): a is DeltaPacketEntity => a != null))
+      )
     );
 
 export const deltaPacketEntities: B.BufferParser<DeltaPacketEntities> = (i) =>
