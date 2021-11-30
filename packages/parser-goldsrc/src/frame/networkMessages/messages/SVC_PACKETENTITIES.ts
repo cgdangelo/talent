@@ -52,8 +52,8 @@ const entityState: (entityIndex: number) => B.BufferParser<PacketEntity> = (
     )
   );
 
-const nextEntityIndex: (currentEntityIndex: number) => B.BufferParser<number> =
-  (currentEntityIndex) =>
+const nextEntityIndex: (currentEntityIndex?: number) => B.BufferParser<number> =
+  (currentEntityIndex = 0) =>
     pipe(
       BB.ubits(1),
 
@@ -80,26 +80,20 @@ const nextEntityIndex: (currentEntityIndex: number) => B.BufferParser<number> =
       P.map((entityIndexDiff) => currentEntityIndex + entityIndexDiff)
     );
 
-const entityStates: B.BufferParser<PacketEntities["entityStates"]> = (() => {
-  let entityIndex = 0;
+const entityStates: B.BufferParser<PacketEntities["entityStates"]> = P.many(
+  pipe(
+    // Check footer before continuing
+    BB.ubits(16),
+    P.filter((footer) => footer !== 0),
+    P.apSecond(P.skip<number>(-16)),
 
-  return P.many(
-    pipe(
-      // Check footer before continuing
-      BB.ubits(16),
-      P.filter((footer) => footer !== 0),
-      P.apSecond(P.skip<number>(-16)),
+    // Parse entity index
+    P.apSecond(nextEntityIndex()),
 
-      // Parse and mutate entity index
-      P.apSecond(nextEntityIndex(entityIndex)),
-      P.chain((nextEntityIndex) => {
-        entityIndex = nextEntityIndex;
-
-        return entityState(entityIndex);
-      })
-    )
-  );
-})();
+    // Parse entity with the given index
+    P.chain(entityState)
+  )
+);
 
 // TODO Refactor this + SVC_DELTAPACKETENTITIES
 export const packetEntities: B.BufferParser<PacketEntities> = (i) =>
