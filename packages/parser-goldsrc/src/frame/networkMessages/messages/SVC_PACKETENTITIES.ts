@@ -70,14 +70,12 @@ const entityStates: B.BufferParser<PacketEntities["entityStates"]> = (() => {
 
         P.chain(({ hasCustomDelta, baselineIndex }) =>
           pipe(
-            P.logPositions(
-              readDelta(
-                entityIndex > 0 && entityIndex < 33
-                  ? "entity_state_player_t"
-                  : hasCustomDelta !== 0
-                  ? "custom_entity_state_t"
-                  : "entity_state_t"
-              )
+            readDelta(
+              entityIndex > 0 && entityIndex < 33
+                ? "entity_state_player_t"
+                : hasCustomDelta !== 0
+                ? "custom_entity_state_t"
+                : "entity_state_t"
             ),
 
             P.map((entityState) => ({
