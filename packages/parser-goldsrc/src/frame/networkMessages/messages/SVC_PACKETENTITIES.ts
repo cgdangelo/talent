@@ -17,59 +17,21 @@ export type PacketEntities = {
   readonly entityStates: readonly PacketEntity[];
 };
 
-const entityStates: B.BufferParser<PacketEntities["entityStates"]> = (() => {
-  let entityIndex = 0;
-
-  return pipe(
-    // Check footer before continuing
-    BB.ubits(16),
-    P.filter((footer) => footer !== 0),
-
-    P.apSecond(
-      pipe(
-        P.skip<number>(-16),
-
-        P.apSecond(BB.ubits(1)),
-
-        // Calculate difference between current and next entity indices
-        P.chain((incrementEntityIndex) =>
-          incrementEntityIndex !== 0
-            ? P.of(1)
-            : pipe(
-                BB.ubits(1),
-                P.chain((absoluteEntityIndex) =>
-                  absoluteEntityIndex !== 0
-                    ? pipe(
-                        BB.ubits(11),
-                        P.map(
-                          (nextEntityIndex) => nextEntityIndex - entityIndex
-                        )
-                      )
-                    : BB.ubits(6)
-                )
-              )
-        ),
-
-        // Mutate current entity index
-        P.map((entityIndexDiff) => (entityIndex += entityIndexDiff))
-      )
-    ),
-
-    P.apSecond(
-      pipe(
-        P.struct({
-          hasCustomDelta: BB.ubits(1),
-          baselineIndex: pipe(
-            BB.ubits(1),
-            P.chain((hasBaselineIndex) =>
-              hasBaselineIndex !== 0
-                ? BB.ubits(6)
-                : P.of<number, number | undefined>(undefined)
-            )
-          ),
-        })
-      )
-    ),
+const entityState: (entityIndex: number) => B.BufferParser<PacketEntity> = (
+  entityIndex
+) =>
+  pipe(
+    P.struct({
+      hasCustomDelta: BB.ubits(1),
+      baselineIndex: pipe(
+        BB.ubits(1),
+        P.chain((hasBaselineIndex) =>
+          hasBaselineIndex !== 0
+            ? BB.ubits(6)
+            : P.of<number, number | undefined>(undefined)
+        )
+      ),
+    }),
 
     P.chain(({ hasCustomDelta, baselineIndex }) =>
       pipe(
@@ -87,11 +49,55 @@ const entityStates: B.BufferParser<PacketEntities["entityStates"]> = (() => {
           entityState,
         }))
       )
-    ),
+    )
+  );
 
-    P.many,
+const nextEntityIndex: (currentEntityIndex: number) => B.BufferParser<number> =
+  (currentEntityIndex) =>
+    pipe(
+      BB.ubits(1),
 
-    P.apFirst(P.skip(16))
+      // Calculate difference between current and next entity indices
+      P.chain((incrementEntityIndex) =>
+        incrementEntityIndex !== 0
+          ? P.of(1)
+          : pipe(
+              BB.ubits(1),
+              P.chain((absoluteEntityIndex) =>
+                absoluteEntityIndex !== 0
+                  ? pipe(
+                      BB.ubits(11),
+                      P.map(
+                        (nextEntityIndex) =>
+                          nextEntityIndex - currentEntityIndex
+                      )
+                    )
+                  : BB.ubits(6)
+              )
+            )
+      ),
+
+      P.map((entityIndexDiff) => currentEntityIndex + entityIndexDiff)
+    );
+
+const entityStates: B.BufferParser<PacketEntities["entityStates"]> = (() => {
+  let entityIndex = 0;
+
+  return P.many(
+    pipe(
+      // Check footer before continuing
+      BB.ubits(16),
+      P.filter((footer) => footer !== 0),
+      P.apSecond(P.skip<number>(-16)),
+
+      // Parse and mutate entity index
+      P.apSecond(nextEntityIndex(entityIndex)),
+      P.chain((nextEntityIndex) => {
+        entityIndex = nextEntityIndex;
+
+        return entityState(entityIndex);
+      })
+    )
   );
 })();
 
@@ -105,6 +111,8 @@ export const packetEntities: B.BufferParser<PacketEntities> = (i) =>
         entityCount: BB.ubits(16),
         entityStates,
       }),
+
+      P.apFirst(P.skip(16)),
       BB.nextByte
     )
   );
