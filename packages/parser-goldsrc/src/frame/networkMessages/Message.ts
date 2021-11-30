@@ -109,7 +109,7 @@ const message: B.BufferParser<MessageFrame> = pipe(
 
       // TODO Can remove SVC_NOP, deprecated messages, but NOT messages that
       // have no arguments.
-      // P.filter(() => messageId !== Message.SVC_NOP),
+      P.filter(() => messageId !== MessageType.SVC_NOP),
 
       P.map((fields) => ({
         type: { id: messageId, name: MessageType[messageId]! }, // TODO remove nonnull assertion
