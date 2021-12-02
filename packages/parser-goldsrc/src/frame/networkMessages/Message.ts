@@ -1,12 +1,11 @@
 import { buffer as B } from "@talent/parser-buffer";
 import * as P from "@talent/parser/lib/Parser";
-import { success } from "@talent/parser/lib/ParseResult";
-import { stream } from "@talent/parser/lib/Stream";
 import { pipe } from "fp-ts/lib/function";
 import * as M from "./messages";
 import { MessageType } from "./MessageType";
 
 type Message =
+  | void // TODO from parser failures?
   | M.Bad
   | M.Nop
   | M.Disconnect
@@ -67,18 +66,41 @@ type Message =
   | M.SendCvarValue
   | M.SendCvarValue2;
 
-export const messages: (messageBuffer: Buffer) => B.BufferParser<Message> =
-  (messageBuffer) => (i) =>
+type MessageFrame = {
+  // TODO move to parsers for union?
+  readonly type: { readonly id: number; readonly name: string };
+  readonly fields: Message;
+};
+
+export const messages: (
+  messagesLength: number
+) => B.BufferParser<readonly MessageFrame[]> = (messagesLength) => (i) =>
+  pipe(
+    i,
+
     pipe(
-      stream(messageBuffer as unknown as number[]),
+      P.manyTill(
+        P.logPositions(message),
 
-      pipe(
-        P.many(P.logPositions(message)),
-        P.chain((parsedMessages) => () => success(parsedMessages, i, i))
+        pipe(
+          P.withStart(P.of<number, void>(undefined)),
+          P.filter(
+            ([, { cursor: currentPosition }]) =>
+              currentPosition === i.cursor + messagesLength
+          )
+        )
+      ),
+
+      P.alt(() =>
+        pipe(
+          P.of<number, readonly MessageFrame[]>([]),
+          P.apFirst(P.seek(i.cursor + messagesLength))
+        )
       )
-    );
+    )
+  );
 
-const message: B.BufferParser<Message> = pipe(
+const message: B.BufferParser<MessageFrame> = pipe(
   B.uint8_le,
 
   P.chain((messageId) =>
@@ -87,14 +109,17 @@ const message: B.BufferParser<Message> = pipe(
 
       // TODO Can remove SVC_NOP, deprecated messages, but NOT messages that
       // have no arguments.
-      // P.filter(() => messageId !== Message.SVC_NOP),
+      P.filter(() => messageId !== MessageType.SVC_NOP),
 
-      P.map((fields) => ({ type: MessageType[messageId], fields }))
+      P.map((fields) => ({
+        type: { id: messageId, name: MessageType[messageId]! }, // TODO remove nonnull assertion
+        fields,
+      }))
     )
   )
 );
 
-const message_: (messageId: Message) => B.BufferParser<unknown> = (
+const message_: (messageId: MessageType) => B.BufferParser<Message> = (
   messageId
 ) => {
   // TODO Replace with Option?
@@ -277,35 +302,19 @@ const message_: (messageId: Message) => B.BufferParser<unknown> = (
       return M.sendCvarValue2;
 
     default:
-      // TODO Can keep for when custom message parsing works
-      // return pipe(
-      //   messageId,
-
-      //   // Messages above 64 are custom messages
-      //   O.fromPredicate((a) => a >= 64),
-
-      //   // Custom message should have been stored previously,
-      //   // potentially with bit length
-      //   O.chain(
-      //     flow(
-      //       // TODO No idea where this is going to live
-      //       (a) => new Map<Message, { size?: number }>().get(a),
-      //       O.fromNullable
-      //     )
-      //   ),
-      //   O.chain(flow((a) => a.size, O.fromNullable)),
-      //   O.chain(O.fromPredicate((a) => a > -1)),
-
-      //   // Use the known bit length
-      //   O.map((a) => P.of<number, number>(a)),
-      //   // or read it from the next byte
-      //   O.alt(() => O.some(B.uint8_le)),
-
-      //   // Skip whatever length we have or fail
-      //   O.fold(P.fail, P.chain<number, number, void>(P.skip))
-      // );
-
-      // HACK For now, fail by default for now so we can see more messages
-      return P.fail();
+      return messageId >= 64
+        ? pipe(
+            P.of<number, M.NewUserMsg | undefined>(
+              M.customMessages.get(messageId)
+            ),
+            P.filter(
+              (customMessage): customMessage is M.NewUserMsg =>
+                customMessage != null && customMessage.size > -1
+            ),
+            P.map((customMessage) => customMessage.size),
+            P.alt(() => B.uint8_le),
+            P.chain((size) => P.skip<number>(size))
+          )
+        : P.fail();
   }
 };

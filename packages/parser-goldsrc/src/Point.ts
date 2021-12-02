@@ -8,8 +8,8 @@ export type Point = {
   readonly z: number;
 };
 
-export const point: BufferParser<Point> = P.struct({
-  x: float32_le,
-  y: float32_le,
-  z: float32_le,
-});
+export const pointBy: <A extends number>(
+  fa: BufferParser<A>
+) => BufferParser<Point> = (fa) => P.struct({ x: fa, y: fa, z: fa });
+
+export const point: BufferParser<Point> = pointBy(float32_le);

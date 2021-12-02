@@ -25,7 +25,7 @@ const totalEntries: B.BufferParser<number> = P.expected(
 
 const directoryEntries: (
   totalEntries: number
-) => B.BufferParser<DirectoryEntry[]> = (totalEntries) =>
+) => B.BufferParser<readonly DirectoryEntry[]> = (totalEntries) =>
   P.manyN(directoryEntry, totalEntries);
 
 const directoryEntriesWithoutFrames: (
@@ -43,7 +43,6 @@ const addFramesToDirectoryEntry: (
   pipe(
     P.seek(directoryEntry.offset),
     P.apSecond(frames),
-    P.maybe(RA.getMonoid()),
     P.map((frames) => ({ ...directoryEntry, frames }))
   );
 
