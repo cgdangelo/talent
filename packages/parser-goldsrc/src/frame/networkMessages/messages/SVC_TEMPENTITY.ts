@@ -996,8 +996,9 @@ enum TempEntityType {
 
 const mapTypeIdToType: (typeId: number) => TempEntity["type"] = (typeId) =>
   ({
-    type: { id: typeId, name: TempEntityType[typeId] },
-  } as unknown as TempEntity["type"]); // HACK
+    id: typeId,
+    name: TempEntityType[typeId],
+  } as TempEntity["type"]); // HACK
 
 export const tempEntity: B.BufferParser<TempEntity> = pipe(
   B.uint8_le,
@@ -1046,11 +1047,6 @@ export const tempEntity: B.BufferParser<TempEntity> = pipe(
             return P.of(8);
 
           case "TE_BSPDECAL":
-            // P.skip(8);
-            // let entityIndex = r.s();
-            // if (entityIndex) {
-            //   return P.of(2);
-            // }
             return pipe(
               P.skip<number>(8),
               P.apSecond(B.int16_le),
@@ -1099,19 +1095,6 @@ export const tempEntity: B.BufferParser<TempEntity> = pipe(
             return P.of(16);
 
           case "TE_TEXTMESSAGE":
-            // data.channel = r.b();
-            // data.x = r.s();
-            // data.y = r.s();
-            // data.effect = r.b();
-            // data.textColor = [r.ub(), r.ub(), r.ub(), r.ub()];
-            // data.effectColor = [r.ub(), r.ub(), r.ub(), r.ub()];
-            // data.fadeInTime = r.s();
-            // data.fadeOutTime = r.s();
-            // data.holdTime = r.s();
-            // if (data.effect) {
-            //   data.effectTime = r.s();
-            // }
-            // data.message = r.str();
             return pipe(
               P.skip<number>(8 + 16 + 16),
               P.apSecond(B.int8_le),

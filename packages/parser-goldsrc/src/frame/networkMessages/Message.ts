@@ -103,6 +103,11 @@ export const messages: (
 const message: B.BufferParser<MessageFrame> = pipe(
   B.uint8_le,
 
+  P.map((a) => {
+    console.log("message", a, MessageType[a]);
+    return a;
+  }),
+
   P.chain((messageId) =>
     pipe(
       message_(messageId),
