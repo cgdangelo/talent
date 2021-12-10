@@ -56,22 +56,13 @@ const nextEntityIndex: () => B.BufferParser<number> = () => {
     BB.ubits(1),
 
     // Calculate difference between current and next entity indices
-    P.chain((incrementEntityIndex) =>
-      incrementEntityIndex !== 0
-        ? P.of(1)
-        : pipe(
-            BB.ubits(1),
-            P.chain((absoluteEntityIndex) =>
-              absoluteEntityIndex !== 0
-                ? pipe(
-                    BB.ubits(11),
-                    P.map(
-                      (nextEntityIndex) => nextEntityIndex - currentEntityIndex
-                    )
-                  )
-                : BB.ubits(6)
-            )
+    P.chain((absoluteEntityIndex) =>
+      absoluteEntityIndex !== 0
+        ? pipe(
+            BB.ubits(11),
+            P.map((nextEntityIndex) => nextEntityIndex - currentEntityIndex)
           )
+        : BB.ubits(6)
     ),
 
     P.map((entityIndexDiff) => (currentEntityIndex += entityIndexDiff))
