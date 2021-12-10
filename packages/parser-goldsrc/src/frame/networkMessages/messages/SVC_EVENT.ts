@@ -3,15 +3,64 @@ import type { buffer as B } from "@talent/parser-buffer";
 import * as P from "@talent/parser/lib/Parser";
 import { stream } from "@talent/parser/lib/Stream";
 import { pipe } from "fp-ts/lib/function";
+import type { Delta } from "../../../delta";
 import { readDelta } from "../../../delta";
 
 export type Event = {
   readonly events: readonly {
-    readonly index: number;
+    readonly eventIndex: number;
     readonly packetIndex?: number;
+    readonly delta?: Delta;
     readonly fireTime?: number;
   }[];
 };
+
+const events: (eventCount: number) => B.BufferParser<Event["events"]> = (
+  eventCount
+) =>
+  pipe(
+    P.struct({ eventIndex: BB.ubits(10) }),
+
+    P.chain((event) =>
+      pipe(
+        BB.ubits(1),
+        P.chain((hasPacketIndex) =>
+          hasPacketIndex !== 0
+            ? pipe(
+                BB.ubits(11),
+                P.chain((packetIndex) =>
+                  pipe(
+                    BB.ubits(1),
+                    P.chain((hasDelta) =>
+                      hasDelta !== 0 ? readDelta("event_t") : P.of(undefined)
+                    ),
+                    P.map((delta) => ({ packetIndex, delta }))
+                  )
+                )
+              )
+            : P.of({})
+        ),
+        P.map((a) => ({ ...event, ...a }))
+      )
+    ),
+
+    P.chain((event) =>
+      pipe(
+        BB.ubits(1),
+        P.chain((hasFireTime) =>
+          hasFireTime !== 0
+            ? pipe(
+                BB.ubits(16),
+                P.map((fireTime) => ({ fireTime }))
+              )
+            : P.of({})
+        ),
+        P.map((a) => ({ ...event, ...a }))
+      )
+    ),
+
+    (fa) => P.manyN(fa, eventCount)
+  );
 
 export const event: B.BufferParser<Event> = (i) =>
   pipe(
@@ -19,47 +68,8 @@ export const event: B.BufferParser<Event> = (i) =>
 
     pipe(
       BB.ubits(5),
-      P.chain((entityCount) =>
-        pipe(
-          P.struct({ index: BB.ubits(10) }),
-
-          P.chain((entity) =>
-            pipe(
-              BB.ubits(1),
-              P.filter((hasPacketIndex) => hasPacketIndex !== 0),
-              P.apSecond(
-                pipe(
-                  BB.ubits(11),
-                  P.chain((packetIndex) =>
-                    pipe(
-                      BB.ubits(1),
-                      P.filter((hasDelta) => hasDelta !== 0),
-                      P.apSecond(readDelta("event_t")),
-                      P.map((delta) => ({ packetIndex, delta })),
-                      P.alt(() => P.of({ packetIndex }))
-                    )
-                  )
-                )
-              ),
-              P.map((packet) => ({ ...entity, ...packet })),
-              P.alt(() => P.of(entity))
-            )
-          ),
-
-          P.chain((entity) =>
-            pipe(
-              BB.ubits(1),
-              P.filter((hasFireTime) => hasFireTime !== 0),
-              P.apSecond(BB.ubits(16)),
-              P.map((fireTime) => ({ ...entity, fireTime })),
-              P.alt(() => P.of(entity))
-            )
-          ),
-
-          (fa) => P.struct({ events: P.manyN(fa, entityCount) }),
-
-          BB.nextByte
-        )
-      )
+      P.chain(events),
+      P.map((events) => ({ events })),
+      BB.nextByte
     )
   );
