@@ -20,17 +20,9 @@ export type DeltaPacketEntities = {
 const entityState: (entityIndex: number) => B.BufferParser<DeltaPacketEntity> =
   (entityIndex) =>
     pipe(
-      P.struct({
-        hasCustomDelta: BB.ubits(1),
-        baselineIndex: pipe(
-          BB.ubits(1),
-          P.chain((hasBaselineIndex) =>
-            hasBaselineIndex !== 0 ? BB.ubits(6) : P.of(undefined)
-          )
-        ),
-      }),
+      BB.ubits(1),
 
-      P.chain(({ hasCustomDelta, baselineIndex }) =>
+      P.chain((hasCustomDelta) =>
         pipe(
           readDelta(
             entityIndex > 0 && entityIndex < 33
@@ -42,7 +34,6 @@ const entityState: (entityIndex: number) => B.BufferParser<DeltaPacketEntity> =
 
           P.map((entityState) => ({
             entityIndex,
-            baselineIndex,
             entityState,
           }))
         )
@@ -89,7 +80,7 @@ const entityStates: () => B.BufferParser<DeltaPacketEntities["entityStates"]> =
         // Parse entity with the given index
         P.chain(({ removeEntity, entityIndex }) =>
           pipe(
-            removeEntity === 1
+            removeEntity !== 0
               ? P.of({ entityIndex, entityState: null })
               : entityState(entityIndex)
           )
