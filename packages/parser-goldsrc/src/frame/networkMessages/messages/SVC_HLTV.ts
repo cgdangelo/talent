@@ -1,6 +1,6 @@
 import { buffer as B } from "@talent/parser-buffer";
 import * as P from "@talent/parser/lib/Parser";
-import { pipe } from "fp-ts/lib/function";
+import { absurd, pipe } from "fp-ts/lib/function";
 
 export type HLTV = {
   readonly mode:
@@ -20,6 +20,8 @@ export const hltv: B.BufferParser<HLTV> = pipe(
         return { id: 1, name: "HLTV_STATUS" };
       case 2:
         return { id: 2, name: "HLTV_LISTEN" };
+      default:
+        return absurd(mode);
     }
   }),
   P.bindTo("mode")
