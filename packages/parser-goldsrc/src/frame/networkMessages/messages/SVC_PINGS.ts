@@ -4,11 +4,13 @@ import * as P from "@talent/parser/lib/Parser";
 import { stream } from "@talent/parser/lib/Stream";
 import { pipe } from "fp-ts/lib/function";
 
-export type Pings = readonly {
-  readonly playerId: number;
-  readonly ping: number;
-  readonly loss: number;
-}[];
+export type Pings = {
+  readonly pings: readonly {
+    readonly playerId: number;
+    readonly ping: number;
+    readonly loss: number;
+  }[];
+};
 
 export const pings: B.BufferParser<Pings> = (i) =>
   pipe(
@@ -21,13 +23,14 @@ export const pings: B.BufferParser<Pings> = (i) =>
           P.filter((hasPing) => hasPing !== 0),
           P.apSecond(
             P.struct({
-              playerId: BB.ubits(5),
-              ping: BB.ubits(12),
-              loss: BB.ubits(7),
+              playerId: BB.ubits(8),
+              ping: BB.ubits(8),
+              loss: BB.ubits(8),
             })
           )
         )
       ),
+      P.bindTo("pings"),
       P.apFirst(P.skip(1)),
       BB.nextByte
     )
