@@ -22,9 +22,9 @@ export const eventReliable: B.BufferParser<EventReliable> = (i) =>
         eventArgs: readDelta("event_args_t"),
         fireTime: pipe(
           BB.ubits(1),
-          P.filter((hasFireTime) => hasFireTime !== 0),
-          P.apSecond(BB.ubits(16)),
-          P.alt(() => P.of<number, number | undefined>(undefined))
+          P.chain((hasFireTime) =>
+            hasFireTime !== 0 ? BB.ubits(16) : P.of(undefined)
+          )
         ),
       }),
       BB.nextByte
