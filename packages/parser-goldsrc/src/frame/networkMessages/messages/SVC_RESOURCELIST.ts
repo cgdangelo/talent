@@ -41,6 +41,21 @@ const resource: B.BufferParser<ResourceList["resources"][number]> = pipe(
   )
 );
 
+const consistency: B.BufferParser<readonly number[]> = pipe(
+  P.manyTill(
+    pipe(
+      P.skip<number>(1),
+      P.apSecond(BB.ubits(1)),
+      P.chain((isShortIndex) => BB.ubits(isShortIndex ? 5 : 10))
+    ),
+
+    pipe(
+      BB.ubits(1),
+      P.filter((a) => a === 0)
+    )
+  )
+);
+
 export const resourceList: B.BufferParser<ResourceList> = (i) =>
   pipe(
     stream(i.buffer, i.cursor * 8),
@@ -48,28 +63,17 @@ export const resourceList: B.BufferParser<ResourceList> = (i) =>
     pipe(
       BB.ubits(12),
       P.chain((entryCount) => P.manyN(resource, entryCount)),
-      P.chain((resources) =>
+      P.bindTo("resources"),
+
+      P.bind("consistency", () =>
         pipe(
           BB.ubits(1),
-          P.filter((hasConsistency) => hasConsistency !== 0),
-          P.apSecond(
-            P.manyTill(
-              pipe(
-                P.skip<number>(1),
-                P.apSecond(BB.ubits(1)),
-                P.chain((isShortIndex) => BB.ubits(isShortIndex ? 5 : 10))
-              ),
-
-              pipe(
-                BB.ubits(1),
-                P.filter((a) => a === 0)
-              )
-            )
-          ),
-          P.map((consistency) => ({ resources, consistency })),
-          P.alt(() => P.of({ resources }))
+          P.chain((hasConsistency) =>
+            hasConsistency !== 0 ? consistency : P.of(undefined)
+          )
         )
       ),
+
       BB.nextByte
     )
   );
