@@ -15,10 +15,10 @@ export type ResourceList = {
     readonly extraInfo?: number;
   }[];
 
-  readonly consistency?: number[];
+  readonly consistency?: readonly number[];
 };
 
-const resource = pipe(
+const resource: B.BufferParser<ResourceList["resources"][number]> = pipe(
   P.struct({
     type: BB.ubits(4),
     name: BB.ztstr,
@@ -27,25 +27,15 @@ const resource = pipe(
     flags: BB.ubits(3),
   }),
 
-  P.chain((resource) =>
-    pipe(
-      P.of<number, number>(resource.flags),
-      P.filter((flags) => (flags & 4) !== 0),
-      P.apSecond(BB.ubits(128)),
-      P.map((md5Hash) => ({ ...resource, md5Hash })),
-      P.alt(() => P.of(resource))
-    )
+  P.bind("md5Hash", ({ flags }) =>
+    (flags & 4) !== 0 ? BB.ubits(128) : P.of(undefined)
   ),
 
-  // TODO this still feels wrong; what if no md5hash?
-  P.chain((resource) =>
+  P.bind("extraInfo", () =>
     pipe(
       BB.ubits(1),
-      P.filter((hasExtraInfo) => hasExtraInfo !== 0),
-      P.apSecond(BB.ubits(256)),
-      P.map((extraInfo) => ({ ...resource, extraInfo })),
-      P.alt(() =>
-        pipe(P.of<number, typeof resource>(resource), P.apFirst(P.skip(1)))
+      P.chain((hasExtraInfo) =>
+        hasExtraInfo !== 0 ? BB.ubits(256) : P.of(undefined)
       )
     )
   )
