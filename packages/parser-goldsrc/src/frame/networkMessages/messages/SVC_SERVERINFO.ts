@@ -6,7 +6,7 @@ export type ServerInfo = {
   readonly protocol: number;
   readonly spawnCount: number;
   readonly mapChecksum: number;
-  readonly clientDllHash: number[]; // TODO buffer
+  readonly clientDllHash: readonly number[]; // TODO buffer
   readonly maxPlayers: number;
   readonly playerIndex: number;
   readonly isDeathmatch: number;
@@ -31,5 +31,12 @@ export const serverInfo: B.BufferParser<ServerInfo> = pipe(
     mapCycle: B.ztstr,
   }),
 
-  P.apFirst(P.skip(1))
+  // TODO What's this?
+  // https://github.com/jpcy/coldemoplayer/blob/9c97ab128ac889739c1643baf0d5fdf884d8a65f/compLexity%20Demo%20Player/demo%20parser/HalfLifeDemoParser.cs#L684-L690
+  P.apFirst(
+    pipe(
+      B.uint8_le,
+      P.chain((hasUnknown) => P.skip(hasUnknown !== 0 ? 21 : 0))
+    )
+  )
 );

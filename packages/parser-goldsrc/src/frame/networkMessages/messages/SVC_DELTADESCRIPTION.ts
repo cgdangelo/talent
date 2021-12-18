@@ -16,27 +16,29 @@ export const deltaDescription: B.BufferParser<DeltaDescription> = pipe(
   P.struct({
     name: B.ztstr,
     fieldCount: B.uint16_le,
-    fields: P.of([]),
   }),
 
-  P.chain(
-    (delta) => (i) =>
-      pipe(
-        stream(i.buffer, i.cursor * 8),
+  P.bind(
+    "fields",
+    ({ fieldCount }) =>
+      (i) =>
         pipe(
-          P.manyN(
-            readDelta<DeltaFieldDecoder>("delta_description_t"),
-            delta.fieldCount
-          ),
-          P.map((fields) => ({ ...delta, fields })),
-          P.map((a) => {
-            // TODO how to handle storing delta decoders?
-            deltaDecoders.set(a.name, a.fields);
-
-            return a;
-          }),
-          BB.nextByte
+          stream(i.buffer, i.cursor * 8),
+          pipe(
+            P.manyN(
+              readDelta<DeltaFieldDecoder>("delta_description_t"),
+              fieldCount
+            )
+          )
         )
-      )
-  )
+  ),
+
+  BB.nextByte,
+
+  P.map((a) => {
+    // TODO how to handle storing delta decoders?
+    deltaDecoders.set(a.name, a.fields);
+
+    return a;
+  })
 );

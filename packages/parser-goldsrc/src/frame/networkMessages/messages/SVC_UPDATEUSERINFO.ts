@@ -11,7 +11,7 @@ export type UpdateUserInfo = {
   readonly clientIndex: number;
   readonly clientUserId: number;
   readonly clientUserInfo: Record<string, string>;
-  readonly clientCdKeyHash: number[];
+  readonly clientCdKeyHash: readonly number[];
 };
 
 export const updateUserInfo: B.BufferParser<UpdateUserInfo> = P.struct({

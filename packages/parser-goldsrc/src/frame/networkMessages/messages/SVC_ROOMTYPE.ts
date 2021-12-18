@@ -2,102 +2,105 @@ import { buffer as B } from "@talent/parser-buffer";
 import * as P from "@talent/parser/lib/Parser";
 import { absurd, pipe } from "fp-ts/lib/function";
 
-export type RoomType =
-  | { readonly type: 0; readonly typeName: "Normal" }
-  | { readonly type: 1; readonly typeName: "Generic" }
-  | { readonly type: 2; readonly typeName: "Metal Small" }
-  | { readonly type: 3; readonly typeName: "Metal Medium" }
-  | { readonly type: 4; readonly typeName: "Metal Large" }
-  | { readonly type: 5; readonly typeName: "Tunnel Small" }
-  | { readonly type: 6; readonly typeName: "Tunnel Medium" }
-  | { readonly type: 7; readonly typeName: "Tunnel Large" }
-  | { readonly type: 8; readonly typeName: "Chamber Small" }
-  | { readonly type: 9; readonly typeName: "Chamber Medium" }
-  | { readonly type: 10; readonly typeName: "Chamber Large" }
-  | { readonly type: 11; readonly typeName: "Bright Small" }
-  | { readonly type: 12; readonly typeName: "Bright Medium" }
-  | { readonly type: 13; readonly typeName: "Bright Large" }
-  | { readonly type: 14; readonly typeName: "Water 1" }
-  | { readonly type: 15; readonly typeName: "Water 2" }
-  | { readonly type: 16; readonly typeName: "Water 3" }
-  | { readonly type: 17; readonly typeName: "Concrete Small" }
-  | { readonly type: 18; readonly typeName: "Concrete Medium" }
-  | { readonly type: 19; readonly typeName: "Concrete Large" }
-  | { readonly type: 20; readonly typeName: "Big 1" }
-  | { readonly type: 21; readonly typeName: "Big 2" }
-  | { readonly type: 22; readonly typeName: "Big 3" }
-  | { readonly type: 23; readonly typeName: "Cavern Small" }
-  | { readonly type: 24; readonly typeName: "Cavern Medium" }
-  | { readonly type: 25; readonly typeName: "Cavern Large" }
-  | { readonly type: 26; readonly typeName: "Weirdo Small" }
-  | { readonly type: 27; readonly typeName: "Weirdo Medium" }
-  | { readonly type: 28; readonly typeName: "Weirdo Large" };
+export type RoomType = {
+  readonly type:
+    | { readonly id: 0; readonly name: "Normal" }
+    | { readonly id: 1; readonly name: "Generic" }
+    | { readonly id: 2; readonly name: "Metal Small" }
+    | { readonly id: 3; readonly name: "Metal Medium" }
+    | { readonly id: 4; readonly name: "Metal Large" }
+    | { readonly id: 5; readonly name: "Tunnel Small" }
+    | { readonly id: 6; readonly name: "Tunnel Medium" }
+    | { readonly id: 7; readonly name: "Tunnel Large" }
+    | { readonly id: 8; readonly name: "Chamber Small" }
+    | { readonly id: 9; readonly name: "Chamber Medium" }
+    | { readonly id: 10; readonly name: "Chamber Large" }
+    | { readonly id: 11; readonly name: "Bright Small" }
+    | { readonly id: 12; readonly name: "Bright Medium" }
+    | { readonly id: 13; readonly name: "Bright Large" }
+    | { readonly id: 14; readonly name: "Water 1" }
+    | { readonly id: 15; readonly name: "Water 2" }
+    | { readonly id: 16; readonly name: "Water 3" }
+    | { readonly id: 17; readonly name: "Concrete Small" }
+    | { readonly id: 18; readonly name: "Concrete Medium" }
+    | { readonly id: 19; readonly name: "Concrete Large" }
+    | { readonly id: 20; readonly name: "Big 1" }
+    | { readonly id: 21; readonly name: "Big 2" }
+    | { readonly id: 22; readonly name: "Big 3" }
+    | { readonly id: 23; readonly name: "Cavern Small" }
+    | { readonly id: 24; readonly name: "Cavern Medium" }
+    | { readonly id: 25; readonly name: "Cavern Large" }
+    | { readonly id: 26; readonly name: "Weirdo Small" }
+    | { readonly id: 27; readonly name: "Weirdo Medium" }
+    | { readonly id: 28; readonly name: "Weirdo Large" };
+};
 
 export const roomType: B.BufferParser<RoomType> = pipe(
   B.uint16_le,
-  P.filter((a): a is RoomType["type"] => a >= 0 && a <= 28),
-  P.map((type) => {
+  P.filter((a): a is RoomType["type"]["id"] => a >= 0 && a <= 28),
+  P.map((type): RoomType["type"] => {
     switch (type) {
       case 0:
-        return { type: 0, typeName: "Normal" };
+        return { id: 0, name: "Normal" };
       case 1:
-        return { type: 1, typeName: "Generic" };
+        return { id: 1, name: "Generic" };
       case 2:
-        return { type: 2, typeName: "Metal Small" };
+        return { id: 2, name: "Metal Small" };
       case 3:
-        return { type: 3, typeName: "Metal Medium" };
+        return { id: 3, name: "Metal Medium" };
       case 4:
-        return { type: 4, typeName: "Metal Large" };
+        return { id: 4, name: "Metal Large" };
       case 5:
-        return { type: 5, typeName: "Tunnel Small" };
+        return { id: 5, name: "Tunnel Small" };
       case 6:
-        return { type: 6, typeName: "Tunnel Medium" };
+        return { id: 6, name: "Tunnel Medium" };
       case 7:
-        return { type: 7, typeName: "Tunnel Large" };
+        return { id: 7, name: "Tunnel Large" };
       case 8:
-        return { type: 8, typeName: "Chamber Small" };
+        return { id: 8, name: "Chamber Small" };
       case 9:
-        return { type: 9, typeName: "Chamber Medium" };
+        return { id: 9, name: "Chamber Medium" };
       case 10:
-        return { type: 10, typeName: "Chamber Large" };
+        return { id: 10, name: "Chamber Large" };
       case 11:
-        return { type: 11, typeName: "Bright Small" };
+        return { id: 11, name: "Bright Small" };
       case 12:
-        return { type: 12, typeName: "Bright Medium" };
+        return { id: 12, name: "Bright Medium" };
       case 13:
-        return { type: 13, typeName: "Bright Large" };
+        return { id: 13, name: "Bright Large" };
       case 14:
-        return { type: 14, typeName: "Water 1" };
+        return { id: 14, name: "Water 1" };
       case 15:
-        return { type: 15, typeName: "Water 2" };
+        return { id: 15, name: "Water 2" };
       case 16:
-        return { type: 16, typeName: "Water 3" };
+        return { id: 16, name: "Water 3" };
       case 17:
-        return { type: 17, typeName: "Concrete Small" };
+        return { id: 17, name: "Concrete Small" };
       case 18:
-        return { type: 18, typeName: "Concrete Medium" };
+        return { id: 18, name: "Concrete Medium" };
       case 19:
-        return { type: 19, typeName: "Concrete Large" };
+        return { id: 19, name: "Concrete Large" };
       case 20:
-        return { type: 20, typeName: "Big 1" };
+        return { id: 20, name: "Big 1" };
       case 21:
-        return { type: 21, typeName: "Big 2" };
+        return { id: 21, name: "Big 2" };
       case 22:
-        return { type: 22, typeName: "Big 3" };
+        return { id: 22, name: "Big 3" };
       case 23:
-        return { type: 23, typeName: "Cavern Small" };
+        return { id: 23, name: "Cavern Small" };
       case 24:
-        return { type: 24, typeName: "Cavern Medium" };
+        return { id: 24, name: "Cavern Medium" };
       case 25:
-        return { type: 25, typeName: "Cavern Large" };
+        return { id: 25, name: "Cavern Large" };
       case 26:
-        return { type: 26, typeName: "Weirdo Small" };
+        return { id: 26, name: "Weirdo Small" };
       case 27:
-        return { type: 27, typeName: "Weirdo Medium" };
+        return { id: 27, name: "Weirdo Medium" };
       case 28:
-        return { type: 28, typeName: "Weirdo Large" };
+        return { id: 28, name: "Weirdo Large" };
       default:
         return absurd(type);
     }
-  })
+  }),
+  P.bindTo("type")
 );

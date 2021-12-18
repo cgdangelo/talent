@@ -15,10 +15,10 @@ export type ResourceList = {
     readonly extraInfo?: number;
   }[];
 
-  readonly consistency?: number[];
+  readonly consistency?: readonly number[];
 };
 
-const resource = pipe(
+const resource: B.BufferParser<ResourceList["resources"][number]> = pipe(
   P.struct({
     type: BB.ubits(4),
     name: BB.ztstr,
@@ -27,28 +27,31 @@ const resource = pipe(
     flags: BB.ubits(3),
   }),
 
-  P.chain((resource) =>
-    pipe(
-      P.of<number, number>(resource.flags),
-      P.filter((flags) => (flags & 4) !== 0),
-      P.apSecond(BB.ubits(128)),
-      P.map((md5Hash) => ({ ...resource, md5Hash })),
-      P.alt(() => P.of(resource))
-    )
+  P.bind("md5Hash", ({ flags }) =>
+    (flags & 4) !== 0 ? BB.ubits(128) : P.of(undefined)
   ),
 
-  // TODO this still feels wrong; what if no md5hash?
-  P.chain((resource) =>
+  P.bind("extraInfo", () =>
     pipe(
       BB.ubits(1),
-      P.filter((hasExtraInfo) => hasExtraInfo !== 0),
-      P.apSecond(BB.ubits(256)),
-      P.map((extraInfo) => ({ ...resource, extraInfo })),
-      P.alt(() =>
-        pipe(P.of<number, typeof resource>(resource), P.apFirst(P.skip(1)))
+      P.chain((hasExtraInfo) =>
+        hasExtraInfo !== 0 ? BB.ubits(256) : P.of(undefined)
       )
     )
   )
+);
+
+const consistency: B.BufferParser<readonly number[]> = pipe(
+  P.many(
+    pipe(
+      BB.ubits(1),
+      P.filter((hasCheckfileFlag) => hasCheckfileFlag !== 0),
+      P.apSecond(BB.ubits(1)),
+      P.chain((isShortIndex) => BB.ubits(isShortIndex ? 5 : 10))
+    )
+  ),
+
+  P.apFirst(P.skip(1))
 );
 
 export const resourceList: B.BufferParser<ResourceList> = (i) =>
@@ -58,28 +61,17 @@ export const resourceList: B.BufferParser<ResourceList> = (i) =>
     pipe(
       BB.ubits(12),
       P.chain((entryCount) => P.manyN(resource, entryCount)),
-      P.chain((resources) =>
+      P.bindTo("resources"),
+
+      P.bind("consistency", () =>
         pipe(
           BB.ubits(1),
-          P.filter((hasConsistency) => hasConsistency !== 0),
-          P.apSecond(
-            P.manyTill(
-              pipe(
-                P.skip<number>(1),
-                P.apSecond(BB.ubits(1)),
-                P.chain((isShortIndex) => BB.ubits(isShortIndex ? 5 : 10))
-              ),
-
-              pipe(
-                BB.ubits(1),
-                P.filter((a) => a === 0)
-              )
-            )
-          ),
-          P.map((consistency) => ({ resources, consistency })),
-          P.alt(() => P.of({ resources }))
+          P.chain((hasConsistency) =>
+            hasConsistency !== 0 ? consistency : P.of(undefined)
+          )
         )
       ),
+
       BB.nextByte
     )
   );

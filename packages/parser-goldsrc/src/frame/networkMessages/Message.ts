@@ -307,19 +307,17 @@ const message_: (messageId: MessageType) => B.BufferParser<Message> = (
       return M.sendCvarValue2;
 
     default:
-      return messageId >= 64
-        ? pipe(
-            P.of<number, M.NewUserMsg | undefined>(
-              M.customMessages.get(messageId)
-            ),
-            P.filter(
-              (customMessage): customMessage is M.NewUserMsg =>
-                customMessage != null && customMessage.size > -1
-            ),
-            P.map((customMessage) => customMessage.size),
-            P.alt(() => B.uint8_le),
-            P.chain((size) => P.skip<number>(size))
-          )
-        : P.fail();
+      return pipe(
+        P.of<number, number>(messageId),
+        P.filter((messageId) => messageId >= 64),
+        P.map((messageId) => M.customMessages.get(messageId)),
+        P.filter(
+          (customMessage): customMessage is M.NewUserMsg =>
+            customMessage != null && customMessage.size > -1
+        ),
+        P.map(({ size }) => size),
+        P.alt(() => B.uint8_le),
+        P.chain((customMessageSize) => P.skip(customMessageSize))
+      );
   }
 };

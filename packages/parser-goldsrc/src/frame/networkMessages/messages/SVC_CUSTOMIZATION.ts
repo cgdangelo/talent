@@ -9,7 +9,7 @@ export type Customization = {
   readonly index: number;
   readonly downloadSize: number;
   readonly flags: number;
-  readonly md5Hash?: number;
+  readonly md5Hash?: readonly number[]; // TODO map to string
 };
 
 export const customization: B.BufferParser<Customization> = pipe(
@@ -22,13 +22,7 @@ export const customization: B.BufferParser<Customization> = pipe(
     flags: B.uint8_le,
   }),
 
-  P.chain((a) =>
-    pipe(
-      P.of<number, number>(a.flags),
-      P.filter((flags) => (flags & 4) !== 0),
-      P.apSecond(P.take(16)),
-      P.map((md5Hash) => ({ ...a, md5Hash })),
-      P.alt(() => P.of(a))
-    )
+  P.bind("md5Hash", ({ flags }) =>
+    (flags & 4) !== 0 ? P.take(16) : P.of(undefined)
   )
 );
