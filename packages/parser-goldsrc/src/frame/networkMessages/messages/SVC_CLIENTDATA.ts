@@ -12,25 +12,15 @@ export type ClientData = {
   readonly weaponData: readonly Delta[];
 };
 
-const deltaUpdateMask = pipe(
+const deltaUpdateMask: B.BufferParser<number | undefined> = pipe(
   BB.ubits(1),
 
   P.chain((hasDeltaMask) =>
-    pipe(
-      P.of<number, number>(hasDeltaMask),
-      P.filter((a) => a !== 0),
-      P.apSecond(BB.ubits(8)),
-      P.alt(() => P.of<number, number | undefined>(undefined))
-    )
+    hasDeltaMask !== 0 ? BB.ubits(8) : P.of(undefined)
   )
-
-  // TODO alternatively
-  // P.chain((hasDeltaMask) =>
-  //   hasDeltaMask !== 0 ? BB.ubits(8) : P.of(undefined)
-  // )
 );
 
-const weaponData = pipe(
+const weaponData: B.BufferParser<ClientData["weaponData"]> = pipe(
   P.many(
     pipe(
       BB.ubits(1),
