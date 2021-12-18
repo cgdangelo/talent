@@ -42,18 +42,16 @@ const resource: B.BufferParser<ResourceList["resources"][number]> = pipe(
 );
 
 const consistency: B.BufferParser<readonly number[]> = pipe(
-  P.manyTill(
-    pipe(
-      P.skip<number>(1),
-      P.apSecond(BB.ubits(1)),
-      P.chain((isShortIndex) => BB.ubits(isShortIndex ? 5 : 10))
-    ),
-
+  P.many(
     pipe(
       BB.ubits(1),
-      P.filter((a) => a === 0)
+      P.filter((hasCheckfileFlag) => hasCheckfileFlag !== 0),
+      P.apSecond(BB.ubits(1)),
+      P.chain((isShortIndex) => BB.ubits(isShortIndex ? 5 : 10))
     )
-  )
+  ),
+
+  P.apFirst(P.skip(1))
 );
 
 export const resourceList: B.BufferParser<ResourceList> = (i) =>
