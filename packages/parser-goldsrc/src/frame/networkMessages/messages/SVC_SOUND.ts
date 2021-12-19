@@ -48,7 +48,7 @@ const originAxisValue: B.BufferParser<Sound["origin"][keyof Sound["origin"]]> =
     P.chain(({ intFlag, fractionFlag }) =>
       pipe(
         BB.ubits(1),
-        P.chain((sign) =>
+        P.chain((isNegative) =>
           pipe(
             P.struct({
               intValue: intFlag !== 0 ? BB.ubits(12) : P.of(0),
@@ -57,7 +57,7 @@ const originAxisValue: B.BufferParser<Sound["origin"][keyof Sound["origin"]]> =
 
             P.map(
               ({ intValue, fractionValue }) =>
-                (intValue + fractionValue / 32) * (sign !== 0 ? -1 : 1)
+                (intValue + fractionValue / 32) * (isNegative !== 0 ? -1 : 1)
             )
           )
         )
