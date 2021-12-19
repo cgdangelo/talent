@@ -32,10 +32,7 @@ const entityState: (entityIndex: number) => B.BufferParser<DeltaPacketEntity> =
               : "entity_state_t"
           ),
 
-          P.map((entityState) => ({
-            entityIndex,
-            entityState,
-          }))
+          P.map((entityState) => ({ entityIndex, entityState }))
         )
       )
     );
