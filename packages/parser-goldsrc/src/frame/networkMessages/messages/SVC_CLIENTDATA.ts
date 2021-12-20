@@ -9,15 +9,14 @@ import { readDelta } from "../../../delta";
 export type ClientData = {
   readonly deltaUpdateMask?: number;
   readonly clientData: Delta;
-  readonly weaponData: readonly Delta[];
+  readonly weaponData: readonly {
+    readonly weaponIndex: number;
+    readonly weaponData: Delta;
+  }[];
 };
 
-const deltaUpdateMask: B.BufferParser<number | undefined> = pipe(
-  BB.ubits(1),
-
-  P.chain((hasDeltaMask) =>
-    hasDeltaMask !== 0 ? BB.ubits(8) : P.of(undefined)
-  )
+const deltaUpdateMask: B.BufferParser<number | undefined> = BB.bitFlagged(() =>
+  BB.ubits(8)
 );
 
 const weaponData: B.BufferParser<ClientData["weaponData"]> = pipe(
@@ -28,10 +27,9 @@ const weaponData: B.BufferParser<ClientData["weaponData"]> = pipe(
       P.apSecond(
         P.struct({
           weaponIndex: BB.ubits(6),
-          weaponData: readDelta("weapon_data_t"),
+          weaponData: readDelta<Delta>("weapon_data_t"),
         })
-      ),
-      P.map(({ weaponIndex, weaponData }) => ({ weaponIndex, ...weaponData }))
+      )
     )
   ),
 
