@@ -31,14 +31,7 @@ const resource: B.BufferParser<ResourceList["resources"][number]> = pipe(
     (flags & 4) !== 0 ? BB.ubits(128) : P.of(undefined)
   ),
 
-  P.bind("extraInfo", () =>
-    pipe(
-      BB.ubits(1),
-      P.chain((hasExtraInfo) =>
-        hasExtraInfo !== 0 ? BB.ubits(256) : P.of(undefined)
-      )
-    )
-  )
+  P.bind("extraInfo", () => BB.bitFlagged(() => BB.ubits(256)))
 );
 
 const consistency: B.BufferParser<readonly number[]> = pipe(
@@ -63,14 +56,7 @@ export const resourceList: B.BufferParser<ResourceList> = (i) =>
       P.chain((entryCount) => P.manyN(resource, entryCount)),
       P.bindTo("resources"),
 
-      P.bind("consistency", () =>
-        pipe(
-          BB.ubits(1),
-          P.chain((hasConsistency) =>
-            hasConsistency !== 0 ? consistency : P.of(undefined)
-          )
-        )
-      ),
+      P.bind("consistency", () => BB.bitFlagged(() => consistency)),
 
       BB.nextByte
     )
