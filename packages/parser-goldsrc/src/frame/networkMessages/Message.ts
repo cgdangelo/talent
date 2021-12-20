@@ -124,6 +124,20 @@ const message: B.BufferParser<MessageFrame> = pipe(
   )
 );
 
+const skipUserMessage: (messageId: number) => B.BufferParser<void> = (
+  messageId
+) =>
+  pipe(
+    P.of<number, M.NewUserMsg | undefined>(M.customMessages.get(messageId)),
+    P.filter(
+      (customMessage): customMessage is M.NewUserMsg =>
+        customMessage != null && customMessage.size > -1
+    ),
+    P.map(({ size }) => size),
+    P.alt(() => B.uint8_le),
+    P.chain((customMessageSize) => P.skip(customMessageSize))
+  );
+
 const message_: (messageId: MessageType) => B.BufferParser<Message> = (
   messageId
 ) => {
@@ -310,14 +324,7 @@ const message_: (messageId: MessageType) => B.BufferParser<Message> = (
       return pipe(
         P.of<number, number>(messageId),
         P.filter((messageId) => messageId >= 64),
-        P.map((messageId) => M.customMessages.get(messageId)),
-        P.filter(
-          (customMessage): customMessage is M.NewUserMsg =>
-            customMessage != null && customMessage.size > -1
-        ),
-        P.map(({ size }) => size),
-        P.alt(() => B.uint8_le),
-        P.chain((customMessageSize) => P.skip(customMessageSize))
+        P.chain(skipUserMessage)
       );
   }
 };
