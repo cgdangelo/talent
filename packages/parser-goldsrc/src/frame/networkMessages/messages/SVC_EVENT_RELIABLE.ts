@@ -20,12 +20,7 @@ export const eventReliable: B.BufferParser<EventReliable> = (i) =>
       P.struct({
         eventIndex: BB.ubits(10),
         eventArgs: readDelta("event_args_t"),
-        fireTime: pipe(
-          BB.ubits(1),
-          P.chain((hasFireTime) =>
-            hasFireTime !== 0 ? BB.ubits(16) : P.of(undefined)
-          )
-        ),
+        fireTime: BB.bitFlagged(() => BB.ubits(16)),
       }),
       BB.nextByte
     )
