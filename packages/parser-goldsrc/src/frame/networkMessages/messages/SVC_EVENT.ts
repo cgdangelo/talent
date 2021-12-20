@@ -19,57 +19,25 @@ const events: (eventCount: number) => B.BufferParser<Event["events"]> = (
   eventCount
 ) =>
   pipe(
-    P.struct({ eventIndex: BB.ubits(10) }),
+    P.struct({
+      eventIndex: BB.ubits(10),
+      packetIndex: BB.bitFlagged(() => BB.ubits(11)),
+    }),
 
-    P.chain((event) =>
-      pipe(
-        BB.ubits(1),
-        P.chain((hasPacketIndex) =>
-          hasPacketIndex !== 0
-            ? pipe(
-                BB.ubits(11),
-                P.chain((packetIndex) =>
-                  pipe(
-                    BB.ubits(1),
-                    P.chain((hasDelta) =>
-                      hasDelta !== 0 ? readDelta("event_t") : P.of(undefined)
-                    ),
-                    P.map((delta) => ({ packetIndex, delta }))
-                  )
-                )
-              )
-            : P.of({})
-        ),
-        P.map((a) => ({ ...event, ...a }))
-      )
+    P.bind("delta", ({ packetIndex }) =>
+      packetIndex != null
+        ? BB.bitFlagged(() => readDelta("event_t"))
+        : P.of(undefined)
     ),
 
-    P.chain((event) =>
-      pipe(
-        BB.ubits(1),
-        P.chain((hasFireTime) =>
-          hasFireTime !== 0
-            ? pipe(
-                BB.ubits(16),
-                P.map((fireTime) => ({ fireTime }))
-              )
-            : P.of({})
-        ),
-        P.map((a) => ({ ...event, ...a }))
-      )
-    ),
+    P.bind("fireTime", () => BB.bitFlagged(() => BB.ubits(16))),
 
-    (fa) => P.manyN(fa, eventCount)
+    (event) => P.manyN(event, eventCount)
   );
 
 export const event: B.BufferParser<Event> = (i) =>
   pipe(
     stream(i.buffer, i.cursor * 8),
 
-    pipe(
-      BB.ubits(5),
-      P.chain(events),
-      P.map((events) => ({ events })),
-      BB.nextByte
-    )
+    pipe(BB.ubits(5), P.chain(events), P.bindTo("events"), BB.nextByte)
   );

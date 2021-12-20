@@ -25,16 +25,13 @@ export const spawnBaseline: B.BufferParser<SpawnBaseline> = (i) =>
         pipe(
           P.struct({ index: BB.ubits(11), type: BB.ubits(2) }),
 
-          P.chain((entity) =>
-            pipe(
-              readDelta(
-                (entity.type & 1) !== 0
-                  ? entity.index > 0 && entity.index < 33
-                    ? "entity_state_player_t"
-                    : "entity_state_t"
-                  : "custom_entity_state_t"
-              ),
-              P.map((delta) => ({ ...entity, delta }))
+          P.bind("delta", ({ index, type }) =>
+            readDelta(
+              (type & 1) !== 0
+                ? index > 0 && index < 33
+                  ? "entity_state_player_t"
+                  : "entity_state_t"
+                : "custom_entity_state_t"
             )
           )
         ),
@@ -54,6 +51,8 @@ export const spawnBaseline: B.BufferParser<SpawnBaseline> = (i) =>
         )
       ),
 
+      P.bindTo("entities"),
+
       P.chainFirst(() =>
         pipe(
           BB.ubits(5),
@@ -61,14 +60,13 @@ export const spawnBaseline: B.BufferParser<SpawnBaseline> = (i) =>
         )
       ),
 
-      P.chain((entities) =>
+      P.bind("extraData", () =>
         pipe(
           BB.ubits(6),
-          P.chain((n) => P.manyN(readDelta("entity_state_t"), n)),
-          P.map((extraData) => ({ entities, extraData })),
-          P.alt(() => P.of({ entities }))
+          P.chain((n) => P.manyN(readDelta("entity_state_t"), n))
         )
       ),
+
       BB.nextByte
     )
   );

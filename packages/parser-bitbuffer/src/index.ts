@@ -72,3 +72,11 @@ export const nextByte: <I, A>(fa: P.Parser<I, A>) => P.Parser<I, A> = (fa) =>
           )
     )
   );
+
+export const bitFlagged: <A>(
+  that: () => P.Parser<number, A>
+) => P.Parser<number, A | undefined> = (that) =>
+  pipe(
+    ubits(1),
+    P.chain((hasBitFlag) => (hasBitFlag !== 0 ? that() : P.of(undefined)))
+  );
