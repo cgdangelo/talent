@@ -62,9 +62,12 @@ const entityStates: () => B.BufferParser<DeltaPacketEntities["entityStates"]> =
     P.many(
       pipe(
         // Check footer before continuing
-        BB.ubits(16),
-        P.filter((footer) => footer !== 0),
-        P.apSecond(P.skip<number>(-16)),
+        P.lookAhead(
+          pipe(
+            BB.ubits(16),
+            P.filter((footer) => footer !== 0)
+          )
+        ),
 
         // Parse entity index
         P.apSecond(
