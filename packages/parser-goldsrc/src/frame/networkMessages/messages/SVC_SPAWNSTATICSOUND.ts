@@ -10,6 +10,7 @@ export type SpawnStaticSound = {
   readonly volume: number;
   readonly attenuation: number;
   readonly entityIndex: number;
+  readonly pitch: number;
   readonly flags: number;
 };
 
@@ -22,18 +23,19 @@ export const spawnStaticSound: B.BufferParser<SpawnStaticSound> = P.struct({
   ),
   soundIndex: B.uint16_le,
   volume: pipe(
-    B.int8_le,
+    B.uint8_le,
     P.map((a) => a / 255)
   ),
   attenuation: pipe(
-    B.int8_le,
+    B.uint8_le,
     P.map((a) => a / 64)
   ),
-  entityIndex: B.int16_le,
+  entityIndex: B.uint16_le,
+  pitch: B.uint8_le,
 
   // TODO Find all the SND_, VOL_ ATTN_, PITCH_ flags?
   // https://forums.alliedmods.net/showthread.php?t=234965
   // https://forums.alliedmods.net/showpost.php?p=2455441&postcount=8
   // https://github.com/baso88/SC_AngelScript/wiki/SoundSystem
-  flags: B.int8_le,
+  flags: B.uint8_le,
 });
