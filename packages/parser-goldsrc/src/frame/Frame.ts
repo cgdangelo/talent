@@ -112,12 +112,8 @@ const frameData: (frameType: FrameType) => B.BufferParser<unknown> = (
 
 const frame: B.BufferParser<Frame> = pipe(
   frameHeader,
-  P.chain((header) =>
-    pipe(
-      frameData(header.frameType),
-      P.map((frameData) => ({ header, frameData }))
-    )
-  )
+  P.bindTo("header"),
+  P.bind("frameData", ({ header: { frameType } }) => frameData(frameType))
 );
 
 export const frames: B.BufferParser<readonly Frame[]> = P.manyTill(
