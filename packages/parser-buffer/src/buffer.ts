@@ -71,7 +71,7 @@ export const str: (byteLength: number) => BufferParser<string> = (byteLength) =>
 
 export const ztstr: BufferParser<string> = pipe(
   P.takeUntil<number>((a) => a === 0),
-  P.chainFirst(() => P.skip(1)),
+  P.apFirst(P.skip(1)),
   P.map((as) => String.fromCharCode(...as))
 );
 
