@@ -18,7 +18,7 @@ export const skip = <I>(offset: number): P.Parser<I, void> =>
   );
 
 export const seek =
-  <I = any>(cursor: number): P.Parser<I, void> =>
+  <I>(cursor: number): P.Parser<I, void> =>
   (i) =>
     success(undefined, i, stream(i.buffer, cursor));
 

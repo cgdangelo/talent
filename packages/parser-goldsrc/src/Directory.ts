@@ -32,7 +32,7 @@ const directoryEntriesWithoutFrames: (
   directoryOffset: number
 ) => B.BufferParser<Directory> = (directoryOffset) =>
   pipe(
-    P.seek(directoryOffset),
+    P.seek<number>(directoryOffset),
     P.apSecond(totalEntries),
     P.chain(directoryEntries)
   );
@@ -41,7 +41,7 @@ const addFramesToDirectoryEntry: (
   directoryEntry: DirectoryEntry
 ) => B.BufferParser<DirectoryEntry> = (directoryEntry) =>
   pipe(
-    P.seek(directoryEntry.offset),
+    P.seek<number>(directoryEntry.offset),
     P.apSecond(frames),
     P.map((frames) => ({ ...directoryEntry, frames }))
   );
