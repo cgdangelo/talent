@@ -7,11 +7,10 @@ import { pipe } from "fp-ts/lib/function";
 export type BufferParser<A> = P.Parser<number, A>;
 
 const int_: (
-  fa: Buffer["readIntLE" | "readUIntLE" | "readIntBE" | "readUIntBE"]
+  fa: Buffer[`read${"U" | ""}Int${"L" | "B"}E`]
 ) => (bitLength: BitLength) => BufferParser<number> = (fa) => (bitLength) =>
   pipe(
     P.take<number>(bitLength / 8),
-    P.map((as) => Buffer.from(as)),
     P.chain((buffer) =>
       pipe(
         E.tryCatch(() => fa.call(buffer, 0, buffer.length), E.toError),
