@@ -80,7 +80,7 @@ export const messages: (
 
     pipe(
       P.manyTill(
-        P.logPositions(message),
+        P.log(message),
 
         pipe(
           P.withStart(P.of<number, void>(undefined)),

@@ -54,22 +54,21 @@ export const take = <I>(length: number): P.Parser<I, I[]> =>
     P.apFirst(skip(length))
   );
 
-export const logPositions: <I, A>(fa: P.Parser<I, A>) => P.Parser<I, A> =
-  (fa) => (i) =>
-    pipe(
-      fa(i),
-      E.map((a) => {
-        console.log(
-          `result: ${
-            typeof a.value === "object" && a.value != null
-              ? JSON.stringify(a.value)
-              : a.value
-          }, before: ${i.cursor}, after: ${a.next.cursor}`
-        );
+export const log: <I, A>(fa: P.Parser<I, A>) => P.Parser<I, A> = (fa) => (i) =>
+  pipe(
+    fa(i),
+    E.map((a) => {
+      console.log(
+        `result: ${
+          typeof a.value === "object" && a.value != null
+            ? JSON.stringify(a.value)
+            : a.value
+        }, before: ${i.cursor}, after: ${a.next.cursor}`
+      );
 
-        return a;
-      })
-    );
+      return a;
+    })
+  );
 
 export const struct = sequenceS(P.Applicative);
 
