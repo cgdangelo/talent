@@ -26,8 +26,8 @@ export const map = stateT.map(P.Functor);
 
 export const of = stateT.of(P.Monad);
 
-export const chainFirst: <E, A, S>(
-  f: (a: A) => stateT.StateT2<P.URI, S, E, A>
+export const chainFirst: <E, A, S, B>(
+  f: (a: A) => stateT.StateT2<P.URI, S, E, B>
 ) => (ma: stateT.StateT2<P.URI, S, E, A>) => stateT.StateT2<P.URI, S, E, A> =
   (f) => (ma) =>
     flow(
@@ -35,26 +35,9 @@ export const chainFirst: <E, A, S>(
       P.chainFirst(([a, s]) => pipe(f(a)(s)))
     );
 
-export const put: <I, S>(
-  newState: S
-) => (oldState: S) => P.Parser<I, [void, S]> = (s) => () =>
-  P.of([undefined, s]);
+export const put: <E, S>(s: S) => stateT.StateT2<P.URI, S, E, undefined> =
+  (s) => () =>
+    P.of([undefined, s]);
 
-export const get: <I, S>() => (s: S) => P.Parser<I, [S, S]> = () => (s) =>
+export const get: <E, S>() => stateT.StateT2<P.URI, S, E, S> = () => (s) =>
   P.of([s, s]);
-
-//===============
-// worky
-// export declare const put: <S, I>(s: S) => (_: S) => P.Parser<I, [void, S]>;
-
-// export declare const get: <S, I>() => (s: S) => P.Parser<I, [S, S]>;
-
-//===============
-// export declare const get: <S, I>() => (s: S) => P.Parser<I, [S, S]>;
-//
-
-// export const put: <I, S>(s: S) => () => P.Parser<I, [void, S]> = (s) => () =>
-//   P.of([undefined, s]);
-
-// export const get: <I, S>() => (s: S) => P.Parser<I, [S, S]> = () => (s) =>
-//   P.of([s, s]);

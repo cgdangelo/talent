@@ -13,16 +13,7 @@ export type Demo = {
 
 export const demo_ = pipe(
   DS.lift<number, DemoHeader, DS.DemoState>(header),
-
-  DS.chain((demoHeader) =>
-    pipe(
-      DS.put<number, DS.DemoState>({
-        networkProtocol: demoHeader.networkProtocol,
-      }),
-      DS.map(() => demoHeader)
-    )
-  ),
-
+  DS.chainFirst(({ networkProtocol }) => DS.put({ networkProtocol })),
   DS.chain((header) =>
     pipe(
       DS.lift<number, Directory, DS.DemoState>(directory),
