@@ -32,7 +32,12 @@ export const chainFirst: <E, A, S, B>(
   (f) => (ma) =>
     flow(
       ma,
-      P.chainFirst(([a, s]) => pipe(f(a)(s)))
+      P.chain(([a, s]) =>
+        pipe(
+          f(a)(s),
+          P.map(([, s]) => [a, s])
+        )
+      )
     );
 
 export const put: <E, S>(s: S) => stateT.StateT2<P.URI, S, E, undefined> =

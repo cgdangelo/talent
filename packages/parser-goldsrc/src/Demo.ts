@@ -8,7 +8,7 @@ import { directory } from "./Directory";
 
 export type Demo = {
   readonly header: DemoHeader;
-  readonly directory?: Directory;
+  readonly directory: Directory;
 };
 
 export const demo_ = pipe(
