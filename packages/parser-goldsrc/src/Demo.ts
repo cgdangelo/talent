@@ -1,4 +1,5 @@
 import type { buffer as B } from "@talent/parser-buffer";
+import * as SP from "@talent/parser/lib/StatefulParser";
 import { pipe } from "fp-ts/lib/function";
 import type { DemoHeader } from "./DemoHeader";
 import { header } from "./DemoHeader";
@@ -12,15 +13,15 @@ export type Demo = {
 };
 
 export const demo_: DS.DemoStateParser<Demo> = pipe(
-  DS.lift(header) as DS.DemoStateParser<DemoHeader>,
-  DS.bindTo("header"),
-  DS.chainFirst(({ header: { networkProtocol } }) =>
-    DS.put({ networkProtocol })
+  SP.lift(header) as DS.DemoStateParser<DemoHeader>,
+  SP.bindTo("header"),
+  SP.chainFirst(({ header: { networkProtocol } }) =>
+    SP.put({ networkProtocol })
   ),
-  DS.bind("directory", () => DS.lift(directory))
+  SP.bind("directory", () => SP.lift(directory))
 );
 
 export const demo: B.BufferParser<Demo> = pipe(
   demo_,
-  DS.evaluate(DS.initialState)
+  SP.evaluate(DS.initialState)
 );
