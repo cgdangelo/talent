@@ -11,15 +11,13 @@ export type Demo = {
   readonly directory: Directory;
 };
 
-export const demo_ = pipe(
-  DS.lift<number, DemoHeader, DS.DemoState>(header),
-  DS.chainFirst(({ networkProtocol }) => DS.put({ networkProtocol })),
-  DS.chain((header) =>
-    pipe(
-      DS.lift<number, Directory, DS.DemoState>(directory),
-      DS.map((directory) => ({ header, directory }))
-    )
-  )
+export const demo_: DS.DemoStateParser<Demo> = pipe(
+  DS.lift(header) as DS.DemoStateParser<DemoHeader>,
+  DS.bindTo("header"),
+  DS.chainFirst(({ header: { networkProtocol } }) =>
+    DS.put({ networkProtocol })
+  ),
+  DS.bind("directory", () => DS.lift(directory))
 );
 
 export const demo: B.BufferParser<Demo> = pipe(
