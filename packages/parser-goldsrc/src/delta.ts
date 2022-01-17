@@ -90,6 +90,8 @@ export const deltaDecoders: Map<string, DeltaDecoder> = new Map([
   ],
 ]);
 
+export const initialDeltaDecoders = new Map(deltaDecoders);
+
 type DeltaField<A> = P.Parser<number, [fieldName: string, value: A]>;
 
 type DeltaFieldParser<A> = (
