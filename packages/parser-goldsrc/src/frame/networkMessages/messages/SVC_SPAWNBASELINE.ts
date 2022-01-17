@@ -1,11 +1,12 @@
+import { parser as P, statefulParser as SP } from "@talent/parser";
 import * as BB from "@talent/parser-bitbuffer";
-import type { buffer as B } from "@talent/parser-buffer";
-import * as P from "@talent/parser/lib/Parser";
+import { success } from "@talent/parser/lib/ParseResult";
 import { stream } from "@talent/parser/lib/Stream";
 import { number, ord, readonlyArray as RA } from "fp-ts";
 import { pipe } from "fp-ts/lib/function";
 import type { Delta } from "../../../delta";
 import { readDelta } from "../../../delta";
+import type { DemoState, DemoStateParser } from "../../../DemoState";
 
 export type SpawnBaseline = {
   readonly entities: readonly {
@@ -16,16 +17,17 @@ export type SpawnBaseline = {
   readonly extraData?: readonly Delta[];
 };
 
-export const spawnBaseline: B.BufferParser<SpawnBaseline> = (i) =>
+export const spawnBaseline: DemoStateParser<SpawnBaseline> = (s) => (i) =>
   pipe(
     stream(i.buffer, i.cursor * 8),
 
     pipe(
-      P.manyTill(
+      SP.manyTill(
         pipe(
-          P.struct({ index: BB.ubits(11), type: BB.ubits(2) }),
-
-          P.bind("delta", ({ index, type }) =>
+          SP.lift<number, number, DemoState>(BB.ubits(11)),
+          SP.bindTo("index"),
+          SP.bind("type", () => SP.lift(BB.ubits(2))),
+          SP.bind("delta", ({ index, type }) =>
             readDelta(
               (type & 1) !== 0
                 ? index > 0 && index < 33
@@ -36,14 +38,16 @@ export const spawnBaseline: B.BufferParser<SpawnBaseline> = (i) =>
           )
         ),
 
-        pipe(
-          BB.ubits(11),
-          P.filter((entityIndex) => entityIndex === (1 << 11) - 1)
+        SP.lift(
+          pipe(
+            BB.ubits(11),
+            P.filter((entityIndex) => entityIndex === (1 << 11) - 1)
+          )
         )
       ),
 
       // TODO Possibly unnecessary, check order
-      P.map(
+      SP.map(
         pipe(
           number.Ord,
           ord.contramap(({ index }: { index: number }) => index),
@@ -51,22 +55,35 @@ export const spawnBaseline: B.BufferParser<SpawnBaseline> = (i) =>
         )
       ),
 
-      P.bindTo("entities"),
+      SP.bindTo("entities"),
 
-      P.chainFirst(() =>
-        pipe(
-          BB.ubits(5),
-          P.filter((footer) => footer === (1 << 5) - 1)
+      SP.chainFirst(() =>
+        SP.lift(
+          pipe(
+            BB.ubits(5),
+            P.filter((footer) => footer === (1 << 5) - 1)
+          )
         )
       ),
 
-      P.bind("extraData", () =>
+      SP.bind("extraData", () =>
         pipe(
-          BB.ubits(6),
-          P.chain((n) => P.manyN(readDelta("entity_state_t"), n))
+          SP.lift<number, number, DemoState>(BB.ubits(6)),
+          SP.chain((n) => SP.manyN(readDelta("entity_state_t"), n))
         )
       ),
 
-      BB.nextByte
-    )
+      SP.chain((a) =>
+        SP.lift((i) =>
+          success(
+            a,
+            i,
+            stream(
+              i.buffer,
+              i.cursor % 8 === 0 ? i.cursor / 8 : Math.floor(i.cursor / 8) + 1
+            )
+          )
+        )
+      )
+    )(s)
   );
