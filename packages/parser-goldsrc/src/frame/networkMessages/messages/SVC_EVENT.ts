@@ -16,18 +16,18 @@ export type Event = {
   }[];
 };
 
-export const events: DemoStateParser<Event> = (s) => (i) =>
+export const event: DemoStateParser<Event> = (s) => (i) =>
   pipe(
     stream(i.buffer, i.cursor * 8),
 
     pipe(
       SP.lift<number, number, DemoState>(BB.ubits(5)),
-      SP.chain((eventCount) => SP.manyN(event, eventCount)),
+      SP.chain((eventCount) => SP.manyN(event_, eventCount)),
       SP.bindTo("events")
     )(s)
   );
 
-const event = pipe(
+const event_ = pipe(
   SP.lift<number, { eventIndex: number; packetIndex?: number }, DemoState>(
     P.struct({
       eventIndex: BB.ubits(10),
