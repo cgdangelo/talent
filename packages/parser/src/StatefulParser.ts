@@ -1,4 +1,4 @@
-import { stateT } from "fp-ts";
+import { readonlyArray as RA, stateT } from "fp-ts";
 import type { Applicative3 } from "fp-ts/lib/Applicative";
 import type { Chain3 } from "fp-ts/lib/Chain";
 import { bind as bind_ } from "fp-ts/lib/Chain";
@@ -44,6 +44,13 @@ export const get: <E, S>() => StatefulParser<S, E, S> = () => (s) =>
   P.of([s, s]);
 
 export const lift = stateT.fromF(P.Functor);
+
+// NOTE Not stack safe
+export const manyN: <S, E, A>(
+  ma: StatefulParser<S, E, A>,
+  n: number
+) => StatefulParser<S, E, readonly A[]> = (ma, n) =>
+  pipe(RA.replicate(n, ma), RA.sequence(Applicative));
 
 export const map = stateT.map(P.Functor);
 
