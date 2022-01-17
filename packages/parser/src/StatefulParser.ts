@@ -54,6 +54,10 @@ export const manyN: <S, E, A>(
 
 export const map = stateT.map(P.Functor);
 
+export const modify: <S, E>(fs: (s: S) => S) => StatefulParser<S, E, void> =
+  (fs) => (s) =>
+    P.of([undefined, fs(s)]);
+
 export const of = stateT.of(P.Monad);
 
 export const put: <E, S>(s: S) => StatefulParser<S, E, undefined> = (s) => () =>
