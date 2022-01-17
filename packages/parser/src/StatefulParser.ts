@@ -57,6 +57,24 @@ export const get: <E, S>() => StatefulParser<S, E, S> = () => (s) =>
 
 export const lift = stateT.fromF(P.Functor);
 
+export const log: <S, I, A>(
+  ma: StatefulParser<S, I, A>
+) => StatefulParser<S, I, A> = (ma) => (s) => (i) =>
+  pipe(
+    ma(s)(i),
+    E.map((a) => {
+      console.log(
+        `result: ${
+          typeof a.value === "object" && a.value != null
+            ? JSON.stringify(a.value)
+            : a.value
+        }, before: ${i.cursor}, after: ${a.next.cursor}`
+      );
+
+      return a;
+    })
+  );
+
 export const many1 = <S, I, A>(
   ma: StatefulParser<S, I, A>
 ): StatefulParser<S, I, RNEA.ReadonlyNonEmptyArray<A>> =>
@@ -162,7 +180,7 @@ export const Alt: Alt3<URI> = {
   map: Functor.map,
 };
 
-const alt: <S, E, A>(
+export const alt: <S, E, A>(
   that: Lazy<StatefulParser<S, E, A>>
 ) => (ma: StatefulParser<S, E, A>) => StatefulParser<S, E, A> =
   (that) => (ma) =>

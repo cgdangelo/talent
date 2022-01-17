@@ -1,8 +1,9 @@
 import { buffer as B } from "@talent/parser-buffer";
-import * as P from "@talent/parser/lib/Parser";
+import { parser as P, statefulParser as SP } from "@talent/parser";
 import { readonlyArray as RA } from "fp-ts";
 import { flow, pipe } from "fp-ts/lib/function";
 import { fst } from "fp-ts/lib/ReadonlyTuple";
+import type { DemoState, DemoStateParser } from "./DemoState";
 import type { DirectoryEntry } from "./DirectoryEntry";
 import { directoryEntry } from "./DirectoryEntry";
 import { frames } from "./frame/Frame";
@@ -39,22 +40,23 @@ const directoryEntriesWithoutFrames: (
 
 const addFramesToDirectoryEntry: (
   directoryEntry: DirectoryEntry
-) => B.BufferParser<DirectoryEntry> = (directoryEntry) =>
+) => DemoStateParser<DirectoryEntry> = (directoryEntry) =>
   pipe(
-    P.seek<number>(directoryEntry.offset),
-    P.apSecond(frames),
-    P.map((frames) => ({ ...directoryEntry, frames }))
+    SP.lift<number, void, DemoState>(P.seek<number>(directoryEntry.offset)),
+    SP.chain(() => frames),
+    SP.map((frames) => ({ ...directoryEntry, frames }))
   );
 
 const addFramesToDirectoryEntries: (
   directoryEntries: Directory
-) => B.BufferParser<Directory> = flow(
+) => DemoStateParser<Directory> = flow(
   RA.map(addFramesToDirectoryEntry),
-  RA.sequence(P.Applicative)
+  RA.sequence(SP.Applicative)
 );
 
-export const directory: B.BufferParser<Directory> = pipe(
-  directoryOffset,
-  P.chain(directoryEntriesWithoutFrames),
-  P.chain(addFramesToDirectoryEntries)
+export const directory: DemoStateParser<Directory> = pipe(
+  SP.lift<number, Directory, DemoState>(
+    pipe(directoryOffset, P.chain(directoryEntriesWithoutFrames))
+  ),
+  SP.chain(addFramesToDirectoryEntries)
 );

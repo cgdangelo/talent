@@ -1,6 +1,7 @@
+import { parser as P, statefulParser as SP } from "@talent/parser";
 import { buffer as B } from "@talent/parser-buffer";
-import * as P from "@talent/parser/lib/Parser";
 import { pipe } from "fp-ts/lib/function";
+import type { DemoState, DemoStateParser } from "../DemoState";
 import { clientData } from "./ClientData";
 import { consoleCommand } from "./ConsoleCommand";
 import { demoBuffer } from "./DemoBuffer";
@@ -73,53 +74,55 @@ const frameHeader: B.BufferParser<FrameHeader> = P.struct({
   frame: B.uint32_le,
 });
 
-const frameData: (frameType: FrameType) => B.BufferParser<unknown> = (
+const frameData: (frameType: FrameType) => DemoStateParser<unknown> = (
   frameType
 ) => {
-  const noFields: B.BufferParser<Record<never, never>> = P.of({});
+  const noFields: DemoStateParser<Record<never, never>> = SP.of({});
 
   switch (frameType) {
     case "DemoStart":
       return noFields;
 
     case "ConsoleCommand":
-      return consoleCommand;
+      return SP.lift(consoleCommand);
 
     case "ClientData":
-      return clientData;
+      return SP.lift(clientData);
 
     case "NextSection":
       return noFields;
 
     case "Event":
-      return event;
+      return SP.lift(event);
 
     case "WeaponAnimation":
-      return weaponAnimation;
+      return SP.lift(weaponAnimation);
 
     case "Sound":
-      return sound;
+      return SP.lift(sound);
 
     case "DemoBuffer":
-      return demoBuffer;
+      return SP.lift(demoBuffer);
 
     default:
       return frameType.startsWith("NetworkMessages")
         ? networkMessages
-        : P.fail();
+        : SP.lift(P.fail());
   }
 };
 
-const frame: B.BufferParser<Frame> = pipe(
-  frameHeader,
-  P.bindTo("header"),
-  P.bind("frameData", ({ header: { frameType } }) => frameData(frameType))
+const frame: DemoStateParser<Frame> = pipe(
+  SP.lift<number, FrameHeader, DemoState>(frameHeader),
+  SP.bindTo("header"),
+  SP.bind("frameData", ({ header: { frameType } }) => frameData(frameType))
 );
 
-export const frames: B.BufferParser<readonly Frame[]> = P.manyTill(
+export const frames: DemoStateParser<readonly Frame[]> = SP.manyTill(
   frame,
-  pipe(
-    frameType,
-    P.filter((a) => a === "NextSection")
+  SP.lift(
+    pipe(
+      frameType,
+      P.filter((a) => a === "NextSection")
+    )
   )
 );

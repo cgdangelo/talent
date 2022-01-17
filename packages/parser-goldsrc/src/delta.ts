@@ -242,7 +242,7 @@ const decodeDelta: (
       P.map((fields) => Object.fromEntries(fields))
     );
 
-export const readDelta = <A extends Delta>(
+export const readDelta = <A extends Delta = Delta>(
   deltaDecoderName: string
 ): DemoStateParser<A> =>
   pipe(

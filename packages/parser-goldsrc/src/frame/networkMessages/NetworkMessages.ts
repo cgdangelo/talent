@@ -1,6 +1,7 @@
+import { parser as P, statefulParser as SP } from "@talent/parser";
 import { buffer as B } from "@talent/parser-buffer";
-import * as P from "@talent/parser/lib/Parser";
 import { pipe } from "fp-ts/lib/function";
+import type { DemoState, DemoStateParser } from "../../DemoState";
 import { messages } from "./Message";
 import type { NetworkMessagesInfo } from "./NetworkMessagesInfo";
 import { networkMessagesInfo } from "./NetworkMessagesInfo";
@@ -40,14 +41,21 @@ const messagesLength: B.BufferParser<number> = P.expected(
   "message length [0, 65_536]"
 );
 
-export const networkMessages: B.BufferParser<NetworkMessages> = P.struct({
-  info: networkMessagesInfo,
-  incomingSequence: B.int32_le,
-  incomingAcknowledged: B.int32_le,
-  incomingReliableAcknowledged: B.int32_le,
-  incomingReliableSequence: B.int32_le,
-  outgoingSequence: B.int32_le,
-  reliableSequence: B.int32_le,
-  lastReliableSequence: B.int32_le,
-  messages: pipe(messagesLength, P.chain(messages)),
-});
+export const networkMessages: DemoStateParser<NetworkMessages> = pipe(
+  SP.lift<number, Omit<NetworkMessages, "messages">, DemoState>(
+    P.struct({
+      info: networkMessagesInfo,
+      incomingSequence: B.int32_le,
+      incomingAcknowledged: B.int32_le,
+      incomingReliableAcknowledged: B.int32_le,
+      incomingReliableSequence: B.int32_le,
+      outgoingSequence: B.int32_le,
+      reliableSequence: B.int32_le,
+      lastReliableSequence: B.int32_le,
+    })
+  ),
+
+  SP.bind("messages", () =>
+    pipe(SP.lift<number, number, DemoState>(messagesLength), SP.chain(messages))
+  )
+);
