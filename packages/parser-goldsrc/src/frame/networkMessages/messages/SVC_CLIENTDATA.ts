@@ -1,10 +1,12 @@
+import { parser as P, statefulParser as SP } from "@talent/parser";
 import * as BB from "@talent/parser-bitbuffer";
 import type { buffer as B } from "@talent/parser-buffer";
-import * as P from "@talent/parser/lib/Parser";
+import { success } from "@talent/parser/lib/ParseResult";
 import { stream } from "@talent/parser/lib/Stream";
 import { pipe } from "fp-ts/lib/function";
 import type { Delta } from "../../../delta";
 import { readDelta } from "../../../delta";
+import type { DemoState, DemoStateParser } from "../../../DemoState";
 
 export type ClientData = {
   readonly deltaUpdateMask?: number;
@@ -19,33 +21,45 @@ const deltaUpdateMask: B.BufferParser<number | undefined> = BB.bitFlagged(() =>
   BB.ubits(8)
 );
 
-const weaponData: B.BufferParser<ClientData["weaponData"]> = pipe(
-  P.many(
-    pipe(
-      BB.ubits(1),
-      P.filter((hasWeaponData) => hasWeaponData !== 0),
-      P.apSecond(
-        P.struct({
-          weaponIndex: BB.ubits(6),
-          weaponData: readDelta<Delta>("weapon_data_t"),
-        })
-      )
-    )
-  ),
-
-  P.apFirst(P.skip(1)) // skip hasWeaponData flag
+const hasWeaponData: DemoStateParser<number> = SP.lift(
+  pipe(
+    BB.ubits(1),
+    P.filter((hasWeaponData) => hasWeaponData !== 0)
+  )
 );
 
-export const clientData: B.BufferParser<ClientData> = (i) =>
-  pipe(
-    stream(i.buffer, i.cursor * 8),
-
+const weaponData: DemoStateParser<ClientData["weaponData"]> = pipe(
+  SP.many(
     pipe(
-      P.struct({
-        deltaUpdateMask,
-        clientData: readDelta("clientdata_t"),
-        weaponData,
-      }),
-      BB.nextByte
+      hasWeaponData,
+      SP.chain(() =>
+        pipe(
+          SP.lift<number, number, DemoState>(BB.ubits(6)),
+          SP.bindTo("weaponIndex"),
+          SP.bind("weaponData", () => readDelta("weapon_data_t"))
+        )
+      )
     )
-  );
+  )
+);
+
+export const clientData: DemoStateParser<ClientData> = pipe(
+  SP.lift<number, number | undefined, DemoState>(deltaUpdateMask),
+  SP.bindTo("deltaUpdateMask"),
+  SP.bind("clientData", () => readDelta("clientdata_t")),
+  SP.bind("weaponData", () => weaponData),
+  SP.chainFirst(() => SP.lift(P.skip(1))),
+
+  SP.chain((a) =>
+    SP.lift((i) =>
+      success(
+        a,
+        i,
+        stream(
+          i.buffer,
+          i.cursor % 8 === 0 ? i.cursor / 8 : Math.floor(i.cursor / 8) + 1
+        )
+      )
+    )
+  )
+);
