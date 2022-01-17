@@ -1,13 +1,19 @@
+import { parser as P, statefulParser as SP } from "@talent/parser";
 import * as BB from "@talent/parser-bitbuffer";
-import * as P from "@talent/parser/lib/Parser";
-import { map, option as O, readonlyArray as RA, string } from "fp-ts";
+import {
+  option as O,
+  readonlyArray as RA,
+  readonlyMap as RM,
+  string,
+} from "fp-ts";
 import { constant, flow, pipe } from "fp-ts/lib/function";
+import type { DemoState, DemoStateParser } from "./DemoState";
 
 // A delta is some collection of fields, specified by a decoder.
 export type Delta = Record<string, number | string>;
 
 // A delta decoder is a collection of delta field decoders.
-type DeltaDecoder = readonly DeltaFieldDecoder[];
+export type DeltaDecoder = readonly DeltaFieldDecoder[];
 
 // A delta field decoder is a set of attributes that defines how to parse a
 // delta field.
@@ -198,7 +204,7 @@ const readField: (
     O.getOrElseW((): DeltaField<never> => P.fail<number>())
   );
 
-const lookupDecoder = pipe(string.Eq, map.lookup);
+const lookupDecoder = pipe(string.Eq, RM.lookup);
 
 const maskBits: (maskBitLength: number) => P.Parser<number, readonly number[]> =
   (maskBitLength) => P.manyN(BB.ubits(8), maskBitLength);
@@ -236,18 +242,25 @@ const decodeDelta: (
 
 export const readDelta = <A extends Delta>(
   deltaDecoderName: string
-): P.Parser<number, A> =>
+): DemoStateParser<A> =>
   pipe(
-    BB.ubits(3),
-    P.chain(maskBits),
-    P.chain((maskBits) =>
-      pipe(
-        lookupDecoder(deltaDecoderName)(deltaDecoders),
-        O.map(decodeDelta(maskBits)),
-        O.getOrElseW(() => P.fail<number>())
-      )
-    ),
+    SP.get<number, DemoState>(),
+    SP.chain(({ deltaDecoders }) =>
+      SP.lift(
+        pipe(
+          BB.ubits(3),
+          P.chain(maskBits),
+          P.chain((maskBits) =>
+            pipe(
+              lookupDecoder(deltaDecoderName)(deltaDecoders),
+              O.map(decodeDelta(maskBits)),
+              O.getOrElseW(() => P.fail<number>())
+            )
+          ),
 
-    // TODO safe?
-    P.map((a) => a as A)
+          // TODO safe?
+          P.map((a) => a as A)
+        )
+      )
+    )
   );
