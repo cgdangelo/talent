@@ -132,41 +132,44 @@ export const manyTill = <S, I, A, B>(
   );
 
 // NOTE Not stack safe
-// export const manyN: <S, E, A>(
-//   ma: StatefulParser<S, E, A>,
-//   n: number
-// ) => StatefulParser<S, E, readonly A[]> = (ma, n) =>
-//   pipe(RA.replicate(n, ma), RA.sequence(Applicative));
-
-export const manyN = <S, I, A>(
-  parser: StatefulParser<S, I, A>,
+export const manyN: <S, E, A>(
+  ma: StatefulParser<S, E, A>,
   n: number
-): StatefulParser<S, I, readonly A[]> =>
-  n === 0
-    ? of([])
-    : pipe(
-        parser,
+) => StatefulParser<S, E, readonly A[]> = (ma, n) =>
+  pipe(RA.replicate(n, ma), RA.sequence(Applicative));
 
-        chain((x) =>
-          chainRec_(RNEA.of(x), (acc) =>
-            pipe(
-              lift<I, E.Either<never, RNEA.ReadonlyNonEmptyArray<A>>, S>(
-                pipe(
-                  acc.length === n ? P.succeed(undefined) : P.fail<I>(),
-                  P.map(() => E.right(acc))
-                )
-              ),
+// FIXME returns first outgoing position instead of last
+// export const manyN = <S, I, A>(
+//   parser: StatefulParser<S, I, A>,
+//   n: number
+// ): StatefulParser<S, I, readonly A[]> =>
+//   n === 0
+//     ? of([])
+//     : pipe(
+//         parser,
 
-              alt(() =>
-                pipe(
-                  parser,
-                  map((a) => E.left(RA.append(a)(acc)))
-                )
-              )
-            )
-          )
-        )
-      );
+//         chain((x) =>
+//           chainRec_(RNEA.of(x), (acc) =>
+//             pipe(
+//               lift<I, E.Either<never, RNEA.ReadonlyNonEmptyArray<A>>, S>(
+//                 pipe(
+//                   acc.length === n ? P.succeed(undefined) : P.fail<I>(),
+//                   P.map(() => E.right(acc))
+//                 )
+//               ),
+
+//               alt(() =>
+//                 log(
+//                   pipe(
+//                     parser,
+//                     map((a) => E.left(RA.append(a)(acc)))
+//                   )
+//                 )
+//               )
+//             )
+//           )
+//         )
+//       );
 
 export const map = stateT.map(P.Functor);
 
