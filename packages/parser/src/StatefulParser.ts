@@ -1,11 +1,23 @@
-import { readonlyArray as RA, stateT } from "fp-ts";
+import {
+  either as E,
+  readonlyArray as RA,
+  readonlyNonEmptyArray as RNEA,
+  stateT,
+} from "fp-ts";
+import type { Alt3 } from "fp-ts/lib/Alt";
 import type { Applicative3 } from "fp-ts/lib/Applicative";
 import type { Chain3 } from "fp-ts/lib/Chain";
 import { bind as bind_ } from "fp-ts/lib/Chain";
+import type { ChainRec3 } from "fp-ts/lib/ChainRec";
+import { tailRec } from "fp-ts/lib/ChainRec";
+import type { Lazy } from "fp-ts/lib/function";
 import { flow, pipe } from "fp-ts/lib/function";
 import type { Functor3 } from "fp-ts/lib/Functor";
 import { bindTo as bindTo_ } from "fp-ts/lib/Functor";
 import * as P from "./Parser";
+import type { ParseResult, ParseSuccess } from "./ParseResult";
+import { error, success } from "./ParseResult";
+import type { Stream } from "./Stream";
 
 export type StatefulParser<R, E, A> = stateT.StateT2<P.URI, R, E, A>;
 
@@ -44,6 +56,30 @@ export const get: <E, S>() => StatefulParser<S, E, S> = () => (s) =>
   P.of([s, s]);
 
 export const lift = stateT.fromF(P.Functor);
+
+export const many1 = <S, I, A>(
+  ma: StatefulParser<S, I, A>
+): StatefulParser<S, I, RNEA.ReadonlyNonEmptyArray<A>> =>
+  pipe(
+    ma,
+    chain((head) =>
+      chainRec_(RNEA.of(head), (acc) =>
+        pipe(
+          ma,
+          map((a) => E.left(RNEA.snoc(acc, a))),
+          alt(() => of(E.right(acc)))
+        )
+      )
+    )
+  );
+
+export const many = <S, I, A>(
+  ma: StatefulParser<S, I, A>
+): StatefulParser<S, I, readonly A[]> =>
+  pipe(
+    many1(ma),
+    alt(() => of<readonly A[], S, I>([]))
+  );
 
 // NOTE Not stack safe
 export const manyN: <S, E, A>(
@@ -84,4 +120,65 @@ export const Applicative: Applicative3<URI> = {
   of,
 };
 
+export const Alt: Alt3<URI> = {
+  URI,
+  alt: (fa, that) => (s) => (i) =>
+    pipe(
+      fa(s)(i),
+      E.alt(() => that()(s)(i))
+    ),
+  map: Functor.map,
+};
+
+const alt: <S, E, A>(
+  that: Lazy<StatefulParser<S, E, A>>
+) => (ma: StatefulParser<S, E, A>) => StatefulParser<S, E, A> =
+  (that) => (ma) =>
+    Alt.alt(ma, that);
+
 export const bind = bind_(Chain);
+
+const chainRec_: ChainRec3<URI>["chainRec"] = <S, I, A, B>(
+  a: A,
+  f: (a: A) => StatefulParser<S, I, E.Either<A, B>>
+): StatefulParser<S, I, B> => {
+  const split =
+    (start: Stream<I>) =>
+    (
+      result: ParseSuccess<I, [E.Either<A, B>, S]>
+    ): E.Either<
+      { readonly value: A; readonly stream: Stream<I>; readonly state: S },
+      ParseResult<I, [B, S]>
+    > =>
+      E.isLeft(result.value[0])
+        ? E.left({
+            value: result.value[0].left,
+            stream: result.next,
+            state: result.value[1],
+          })
+        : E.right(
+            success(
+              [result.value[0].right, result.value[1]],
+              result.next,
+              start
+            )
+          );
+  return (s) => (start) =>
+    tailRec({ value: a, stream: start, state: s }, (state) => {
+      const result = f(state.value)(state.state)(state.stream);
+      if (E.isLeft(result)) {
+        return E.right(
+          error(state.stream, result.left.expected, result.left.fatal)
+        );
+      }
+      return split(start)(result.right);
+    });
+};
+
+export const ChainRec: ChainRec3<URI> = {
+  URI,
+  ap: Chain.ap,
+  chain: Chain.chain,
+  chainRec: chainRec_,
+  map: Functor.map,
+};
