@@ -1,4 +1,5 @@
 import { stateT } from "fp-ts";
+import type { Applicative3 } from "fp-ts/lib/Applicative";
 import type { Chain3 } from "fp-ts/lib/Chain";
 import { bind as bind_ } from "fp-ts/lib/Chain";
 import { flow, pipe } from "fp-ts/lib/function";
@@ -51,18 +52,25 @@ export const of = stateT.of(P.Monad);
 export const put: <E, S>(s: S) => StatefulParser<S, E, undefined> = (s) => () =>
   P.of([undefined, s]);
 
-const Functor: Functor3<URI> = {
+export const Functor: Functor3<URI> = {
   URI,
   map: (fa, fab) => pipe(fa, map(fab)),
 };
 
 export const bindTo = bindTo_(Functor);
 
-const Chain: Chain3<URI> = {
+export const Chain: Chain3<URI> = {
   URI,
   ap: (fab, fa) => pipe(fab, ap(fa)),
   chain: (fa, f) => pipe(fa, chain(f)),
   map: Functor.map,
+};
+
+export const Applicative: Applicative3<URI> = {
+  URI,
+  ap: Chain.ap,
+  map: Functor.map,
+  of,
 };
 
 export const bind = bind_(Chain);
