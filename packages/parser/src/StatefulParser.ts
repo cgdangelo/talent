@@ -81,6 +81,38 @@ export const many = <S, I, A>(
     alt(() => of<readonly A[], S, I>([]))
   );
 
+export const many1Till = <S, I, A, B>(
+  parser: StatefulParser<S, I, A>,
+  terminator: StatefulParser<S, I, B>
+): StatefulParser<S, I, RNEA.ReadonlyNonEmptyArray<A>> =>
+  pipe(
+    parser,
+    chain((x) =>
+      chainRec_(RNEA.of(x), (acc) =>
+        pipe(
+          terminator,
+          map(() => E.right(acc)),
+          alt(() =>
+            pipe(
+              parser,
+              map((a) => E.left(RNEA.snoc(acc, a)))
+            )
+          )
+        )
+      )
+    )
+  );
+
+export const manyTill = <S, I, A, B>(
+  parser: StatefulParser<S, I, A>,
+  terminator: StatefulParser<S, I, B>
+): StatefulParser<S, I, ReadonlyArray<A>> =>
+  pipe(
+    terminator,
+    map<B, ReadonlyArray<A>>(() => RA.empty),
+    alt<S, I, ReadonlyArray<A>>(() => many1Till(parser, terminator))
+  );
+
 // NOTE Not stack safe
 export const manyN: <S, E, A>(
   ma: StatefulParser<S, E, A>,
