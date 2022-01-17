@@ -23,22 +23,24 @@ export const ap = stateT.ap(P.Monad);
 export const chain = stateT.chain(P.Monad);
 
 export const chainFirst: <E, A, S, B>(
-  f: (a: A) => stateT.StateT2<P.URI, S, E, B>
-) => (ma: stateT.StateT2<P.URI, S, E, A>) => stateT.StateT2<P.URI, S, E, A> =
-  (f) => (ma) =>
-    flow(
-      ma,
-      P.chain(([a, s]) =>
-        pipe(
-          f(a)(s),
-          P.map(([, s]) => [a, s])
-        )
+  f: (a: A) => StatefulParser<S, E, B>
+) => (ma: StatefulParser<S, E, A>) => StatefulParser<S, E, A> = (f) => (ma) =>
+  flow(
+    ma,
+    P.chain(([a, s]) =>
+      pipe(
+        f(a)(s),
+        P.map(([, s]) => [a, s])
       )
-    );
+    )
+  );
 
 export const evaluate = stateT.evaluate(P.Functor);
 
 export const execute = stateT.execute(P.Functor);
+
+export const get: <E, S>() => StatefulParser<S, E, S> = () => (s) =>
+  P.of([s, s]);
 
 export const lift = stateT.fromF(P.Functor);
 
@@ -46,12 +48,8 @@ export const map = stateT.map(P.Functor);
 
 export const of = stateT.of(P.Monad);
 
-export const put: <E, S>(s: S) => stateT.StateT2<P.URI, S, E, undefined> =
-  (s) => () =>
-    P.of([undefined, s]);
-
-export const get: <E, S>() => stateT.StateT2<P.URI, S, E, S> = () => (s) =>
-  P.of([s, s]);
+export const put: <E, S>(s: S) => StatefulParser<S, E, undefined> = (s) => () =>
+  P.of([undefined, s]);
 
 const Functor: Functor3<URI> = {
   URI,
