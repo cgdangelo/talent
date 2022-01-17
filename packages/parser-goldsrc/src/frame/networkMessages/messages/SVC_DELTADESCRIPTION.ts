@@ -1,5 +1,7 @@
 import { statefulParser as SP } from "@talent/parser";
 import { buffer as B } from "@talent/parser-buffer";
+import { success } from "@talent/parser/lib/ParseResult";
+import { stream } from "@talent/parser/lib/Stream";
 import { readonlyMap as RM, string } from "fp-ts";
 import { pipe } from "fp-ts/lib/function";
 import type { DeltaFieldDecoder } from "../../../delta";
@@ -19,14 +21,37 @@ export const deltaDescription: DemoStateParser<DeltaDescription> = pipe(
   SP.bind("fields", () =>
     pipe(
       SP.lift<number, number, DemoState>(B.uint16_le),
-      SP.chain((fieldCount) =>
-        SP.manyN(
-          readDelta<DeltaFieldDecoder>("delta_description_t"),
-          fieldCount
-        )
+      SP.chain(
+        (fieldCount) => (s) => (i) =>
+          pipe(
+            stream(i.buffer, i.cursor * 8),
+
+            pipe(
+              SP.manyN(
+                readDelta<DeltaFieldDecoder>("delta_description_t"),
+                fieldCount
+              ),
+
+              SP.chain((a) =>
+                SP.lift((i) =>
+                  success(
+                    a,
+                    i,
+                    stream(
+                      i.buffer,
+                      i.cursor % 8 === 0
+                        ? i.cursor / 8
+                        : Math.floor(i.cursor / 8) + 1
+                    )
+                  )
+                )
+              )
+            )(s)
+          )
       )
     )
   ),
+
   SP.chainFirst(({ name, fields }) =>
     SP.modify((s) => ({
       ...s,
