@@ -18,7 +18,7 @@ import type { Predicate } from "fp-ts/lib/Predicate";
 import type { Refinement } from "fp-ts/lib/Refinement";
 import * as P from "./Parser";
 import type { ParseResult, ParseSuccess } from "./ParseResult";
-import { error, success } from "./ParseResult";
+import { error, extend, success } from "./ParseResult";
 import type { Stream } from "./Stream";
 
 export type StatefulParser<R, E, A> = stateT.StateT2<P.URI, R, E, A>;
@@ -223,11 +223,18 @@ export const Applicative: Applicative3<URI> = {
 
 export const Alt: Alt3<URI> = {
   URI,
-  alt: (fa, that) => (s) => (i) =>
-    pipe(
-      fa(s)(i),
-      E.alt(() => that()(s)(i))
-    ),
+  alt: (fa, that) => (s) => (i) => {
+    const e = fa(s)(i);
+
+    if (E.isRight(e) || e.left.fatal) {
+      return e;
+    }
+
+    return pipe(
+      that()(s)(i),
+      E.mapLeft((err) => extend(e.left, err))
+    );
+  },
   map: Functor.map,
 };
 
@@ -260,8 +267,8 @@ const chainRec_: ChainRec3<URI>["chainRec"] = <S, I, A, B>(
         : E.right(
             success(
               [result.value[0].right, result.value[1]],
-              result.next,
-              start
+              start,
+              result.next
             )
           );
   return (s) => (start) =>
