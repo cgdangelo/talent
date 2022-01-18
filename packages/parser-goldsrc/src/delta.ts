@@ -39,8 +39,7 @@ enum DeltaType {
   SIGNED = 1 << 31,
 }
 
-// FIXME HACK FIXME HACK mutable shared state
-export const deltaDecoders: Map<string, DeltaDecoder> = new Map([
+export const initialDeltaDecoders: ReadonlyMap<string, DeltaDecoder> = new Map([
   [
     "delta_description_t",
     [
@@ -89,8 +88,6 @@ export const deltaDecoders: Map<string, DeltaDecoder> = new Map([
     ],
   ],
 ]);
-
-export const initialDeltaDecoders = new Map(deltaDecoders);
 
 type DeltaField<A> = P.Parser<number, [fieldName: string, value: A]>;
 

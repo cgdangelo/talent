@@ -13,7 +13,7 @@ export type DemoState = {
 };
 
 export const initialState: DemoState = {
-  deltaDecoders: RM.fromMap(initialDeltaDecoders),
+  deltaDecoders: initialDeltaDecoders,
   networkProtocol: 0,
   userMessages: RM.empty,
 };
