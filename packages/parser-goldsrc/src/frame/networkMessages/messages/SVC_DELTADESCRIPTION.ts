@@ -33,15 +33,15 @@ export const deltaDescription: DemoStateParser<DeltaDescription> = pipe(
               ),
 
               SP.chain((a) =>
-                SP.lift((i) =>
+                SP.lift((o) =>
                   success(
                     a,
                     i,
                     stream(
-                      i.buffer,
-                      i.cursor % 8 === 0
-                        ? i.cursor / 8
-                        : Math.floor(i.cursor / 8) + 1
+                      o.buffer,
+                      o.cursor % 8 === 0
+                        ? o.cursor / 8
+                        : Math.floor(o.cursor / 8) + 1
                     )
                   )
                 )

@@ -45,22 +45,27 @@ const weaponData: DemoStateParser<ClientData["weaponData"]> = pipe(
   SP.chainFirst(() => SP.lift(P.skip(1)))
 );
 
-export const clientData: DemoStateParser<ClientData> = pipe(
-  SP.lift<number, number | undefined, DemoState>(deltaUpdateMask),
-  SP.bindTo("deltaUpdateMask"),
-  SP.bind("clientData", () => readDelta("clientdata_t")),
-  SP.bind("weaponData", () => weaponData),
+export const clientData: DemoStateParser<ClientData> = (s) => (i) =>
+  pipe(
+    stream(i.buffer, i.cursor * 8),
 
-  SP.chain((a) =>
-    SP.lift((i) =>
-      success(
-        a,
-        i,
-        stream(
-          i.buffer,
-          i.cursor % 8 === 0 ? i.cursor / 8 : Math.floor(i.cursor / 8) + 1
+    pipe(
+      SP.lift<number, number | undefined, DemoState>(deltaUpdateMask),
+      SP.bindTo("deltaUpdateMask"),
+      SP.bind("clientData", () => readDelta("clientdata_t")),
+      SP.bind("weaponData", () => weaponData),
+
+      SP.chain((a) =>
+        SP.lift((o) =>
+          success(
+            a,
+            i,
+            stream(
+              o.buffer,
+              o.cursor % 8 === 0 ? o.cursor / 8 : Math.floor(o.cursor / 8) + 1
+            )
+          )
         )
       )
-    )
-  )
-);
+    )(s)
+  );
