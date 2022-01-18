@@ -1,44 +1,61 @@
-import * as BB from "@talent/parser-bitbuffer";
+import { statefulParser as SP } from "@talent/parser";
 import { buffer as B } from "@talent/parser-buffer";
-import * as P from "@talent/parser/lib/Parser";
+import { success } from "@talent/parser/lib/ParseResult";
 import { stream } from "@talent/parser/lib/Stream";
+import { readonlyMap as RM, string } from "fp-ts";
 import { pipe } from "fp-ts/lib/function";
 import type { DeltaFieldDecoder } from "../../../delta";
-import { deltaDecoders, readDelta } from "../../../delta";
+import { readDelta } from "../../../delta";
+import type { DemoState, DemoStateParser } from "../../../DemoState";
 
 export type DeltaDescription = {
   readonly name: string;
-  readonly fieldCount: number;
   readonly fields: readonly DeltaFieldDecoder[];
 };
 
-export const deltaDescription: B.BufferParser<DeltaDescription> = pipe(
-  P.struct({
-    name: B.ztstr,
-    fieldCount: B.uint16_le,
-  }),
+const addDeltaDecoder = RM.upsertAt(string.Eq);
 
-  P.bind(
-    "fields",
-    ({ fieldCount }) =>
-      (i) =>
-        pipe(
-          stream(i.buffer, i.cursor * 8),
+export const deltaDescription: DemoStateParser<DeltaDescription> = pipe(
+  SP.lift<number, string, DemoState>(B.ztstr),
+  SP.bindTo("name"),
+  SP.bind("fields", () =>
+    pipe(
+      SP.lift<number, number, DemoState>(B.uint16_le),
+      SP.chain(
+        (fieldCount) => (s) => (i) =>
           pipe(
-            P.manyN(
-              readDelta<DeltaFieldDecoder>("delta_description_t"),
-              fieldCount
-            )
+            stream(i.buffer, i.cursor * 8),
+
+            pipe(
+              SP.manyN(
+                readDelta<DeltaFieldDecoder>("delta_description_t"),
+                fieldCount
+              ),
+
+              SP.chain((a) =>
+                SP.lift((o) =>
+                  success(
+                    a,
+                    i,
+                    stream(
+                      o.buffer,
+                      o.cursor % 8 === 0
+                        ? o.cursor / 8
+                        : Math.floor(o.cursor / 8) + 1
+                    )
+                  )
+                )
+              )
+            )(s)
           )
-        )
+      )
+    )
   ),
 
-  BB.nextByte,
-
-  P.map((a) => {
-    // TODO how to handle storing delta decoders?
-    deltaDecoders.set(a.name, a.fields);
-
-    return a;
-  })
+  SP.chainFirst(({ name, fields }) =>
+    SP.modify((s) => ({
+      ...s,
+      deltaDecoders: pipe(s.deltaDecoders, addDeltaDecoder(name, fields)),
+    }))
+  )
 );

@@ -16,9 +16,9 @@ export const demo_: DS.DemoStateParser<Demo> = pipe(
   SP.lift(header) as DS.DemoStateParser<DemoHeader>,
   SP.bindTo("header"),
   SP.chainFirst(({ header: { networkProtocol } }) =>
-    SP.put({ networkProtocol })
+    SP.modify((s) => ({ ...s, networkProtocol }))
   ),
-  SP.bind("directory", () => SP.lift(directory))
+  SP.bind("directory", () => directory)
 );
 
 export const demo: B.BufferParser<Demo> = pipe(

@@ -1,6 +1,7 @@
 import { buffer as B } from "@talent/parser-buffer";
-import * as P from "@talent/parser/lib/Parser";
+import { parser as P, statefulParser as SP } from "@talent/parser";
 import { pipe } from "fp-ts/lib/function";
+import type { DemoState, DemoStateParser } from "../../DemoState";
 import * as M from "./messages";
 import { MessageType } from "./MessageType";
 
@@ -74,49 +75,54 @@ type MessageFrame = {
 
 export const messages: (
   messagesLength: number
-) => B.BufferParser<readonly MessageFrame[]> = (messagesLength) => (i) =>
-  pipe(
-    i,
-
+) => DemoStateParser<readonly MessageFrame[]> =
+  (messagesLength) => (s) => (i) =>
     pipe(
-      P.manyTill(
-        P.log(message),
+      i,
 
-        pipe(
-          P.withStart(P.of<number, void>(undefined)),
-          P.filter(
-            ([, { cursor: currentPosition }]) =>
-              currentPosition === i.cursor + messagesLength
+      pipe(
+        SP.manyTill(
+          SP.log(message),
+
+          SP.lift(
+            pipe(
+              P.withStart(P.of<number, void>(undefined)),
+              P.filter(
+                ([, { cursor: currentPosition }]) =>
+                  currentPosition === i.cursor + messagesLength
+              )
+            )
+          )
+        ),
+
+        SP.alt(() =>
+          SP.lift(
+            pipe(
+              P.of<number, readonly MessageFrame[]>([]),
+              P.apFirst(P.seek(i.cursor + messagesLength))
+            )
           )
         )
-      ),
+      )(s)
+    );
 
-      P.alt(() =>
-        pipe(
-          P.of<number, readonly MessageFrame[]>([]),
-          P.apFirst(P.seek(i.cursor + messagesLength))
-        )
-      )
-    )
-  );
+const message: DemoStateParser<MessageFrame> = pipe(
+  SP.lift<number, number, DemoState>(B.uint8_le),
 
-const message: B.BufferParser<MessageFrame> = pipe(
-  B.uint8_le,
-
-  P.map((a) => {
+  SP.map((a) => {
     console.log("message", a, MessageType[a]);
     return a;
   }),
 
-  P.chain((messageId) =>
+  SP.chain((messageId) =>
     pipe(
       message_(messageId),
 
       // TODO Can remove SVC_NOP, deprecated messages, but NOT messages that
       // have no arguments.
-      P.filter(() => messageId !== MessageType.SVC_NOP),
+      SP.filter(() => messageId !== MessageType.SVC_NOP),
 
-      P.map((fields) => ({
+      SP.map((fields) => ({
         type: { id: messageId, name: MessageType[messageId]! }, // TODO remove nonnull assertion
         fields,
       }))
@@ -138,52 +144,52 @@ const skipUserMessage: (messageId: number) => B.BufferParser<void> = (
     P.chain((customMessageSize) => P.skip(customMessageSize))
   );
 
-const message_: (messageId: MessageType) => B.BufferParser<Message> = (
+const message_: (messageId: MessageType) => DemoStateParser<Message> = (
   messageId
 ) => {
   // TODO Replace with Option?
   switch (messageId) {
     case MessageType.SVC_BAD:
-      return M.bad;
+      return SP.lift(M.bad);
 
     case MessageType.SVC_NOP: // 1
-      return M.nop;
+      return SP.lift(M.nop);
 
     case MessageType.SVC_DISCONNECT: // 2
-      return M.disconnect;
+      return SP.lift(M.disconnect);
 
     case MessageType.SVC_EVENT: // 3
       return M.event;
 
     case MessageType.SVC_VERSION: // 4
-      return M.version;
+      return SP.lift(M.version);
 
     case MessageType.SVC_SETVIEW: // 5
-      return M.setView;
+      return SP.lift(M.setView);
 
     case MessageType.SVC_SOUND: // 6
-      return M.sound;
+      return SP.lift(M.sound);
 
     case MessageType.SVC_TIME: // 7
-      return M.time;
+      return SP.lift(M.time);
 
     case MessageType.SVC_PRINT: // 8
-      return M.print;
+      return SP.lift(M.print);
 
     case MessageType.SVC_STUFFTEXT: // 9
-      return M.stuffText;
+      return SP.lift(M.stuffText);
 
     case MessageType.SVC_SETANGLE: // 10
-      return M.setAngle;
+      return SP.lift(M.setAngle);
 
     case MessageType.SVC_SERVERINFO: // 11
-      return M.serverInfo;
+      return SP.lift(M.serverInfo);
 
     case MessageType.SVC_LIGHTSTYLE: // 12
-      return M.lightStyle;
+      return SP.lift(M.lightStyle);
 
     case MessageType.SVC_UPDATEUSERINFO: // 13
-      return M.updateUserInfo;
+      return SP.lift(M.updateUserInfo);
 
     case MessageType.SVC_DELTADESCRIPTION: // 14
       return M.deltaDescription;
@@ -192,19 +198,19 @@ const message_: (messageId: MessageType) => B.BufferParser<Message> = (
       return M.clientData;
 
     case MessageType.SVC_STOPSOUND: // 16
-      return M.stopSound;
+      return SP.lift(M.stopSound);
 
     case MessageType.SVC_PINGS: // 17
-      return M.pings;
+      return SP.lift(M.pings);
 
     case MessageType.SVC_PARTICLE: // 18
-      return M.particle;
+      return SP.lift(M.particle);
 
     case MessageType.SVC_DAMAGE: // 19
-      return M.damage;
+      return SP.lift(M.damage);
 
     case MessageType.SVC_SPAWNSTATIC: // 20
-      return M.spawnStatic;
+      return SP.lift(M.spawnStatic);
 
     case MessageType.SVC_EVENT_RELIABLE: // 21
       return M.eventReliable;
@@ -213,55 +219,55 @@ const message_: (messageId: MessageType) => B.BufferParser<Message> = (
       return M.spawnBaseline;
 
     case MessageType.SVC_TEMPENTITY: // 23
-      return M.tempEntity;
+      return SP.lift(M.tempEntity);
 
     case MessageType.SVC_SETPAUSE: // 24
-      return M.setPause;
+      return SP.lift(M.setPause);
 
     case MessageType.SVC_SIGNONNUM: // 25
-      return M.signOnNum;
+      return SP.lift(M.signOnNum);
 
     case MessageType.SVC_CENTERPRINT: // 26
-      return M.centerPrint;
+      return SP.lift(M.centerPrint);
 
     case MessageType.SVC_KILLEDMONSTER: // 27
-      return M.killedMonster;
+      return SP.lift(M.killedMonster);
 
     case MessageType.SVC_FOUNDSECRET: // 28
-      return M.foundSecret;
+      return SP.lift(M.foundSecret);
 
     case MessageType.SVC_SPAWNSTATICSOUND: // 29
-      return M.spawnStaticSound;
+      return SP.lift(M.spawnStaticSound);
 
     case MessageType.SVC_INTERMISSION: // 30
-      return M.intermission;
+      return SP.lift(M.intermission);
 
     case MessageType.SVC_FINALE: // 31
-      return M.finale;
+      return SP.lift(M.finale);
 
     case MessageType.SVC_CDTRACK: // 32
-      return M.cdTrack;
+      return SP.lift(M.cdTrack);
 
     case MessageType.SVC_RESTORE: // 33
-      return M.restore;
+      return SP.lift(M.restore);
 
     case MessageType.SVC_CUTSCENE: // 34
-      return M.cutscene;
+      return SP.lift(M.cutscene);
 
     case MessageType.SVC_WEAPONANIM: // 35
-      return M.weaponAnim;
+      return SP.lift(M.weaponAnim);
 
     case MessageType.SVC_DECALNAME: // 36
-      return M.decalName;
+      return SP.lift(M.decalName);
 
     case MessageType.SVC_ROOMTYPE: // 37
-      return M.roomType;
+      return SP.lift(M.roomType);
 
     case MessageType.SVC_ADDANGLE: // 38
-      return M.addAngle;
+      return SP.lift(M.addAngle);
 
     case MessageType.SVC_NEWUSERMSG: // 39
-      return M.newUserMsg;
+      return SP.lift(M.newUserMsg);
 
     case MessageType.SVC_PACKETENTITIES: // 40
       return M.packetEntities;
@@ -270,61 +276,63 @@ const message_: (messageId: MessageType) => B.BufferParser<Message> = (
       return M.deltaPacketEntities;
 
     case MessageType.SVC_CHOKE: // 42
-      return M.choke;
+      return SP.lift(M.choke);
 
     case MessageType.SVC_RESOURCELIST: // 43
-      return M.resourceList;
+      return SP.lift(M.resourceList);
 
     case MessageType.SVC_NEWMOVEVARS: // 44
-      return M.newMoveVars;
+      return SP.lift(M.newMoveVars);
 
     case MessageType.SVC_RESOURCEREQUEST: // 45
-      return M.resourceRequest;
+      return SP.lift(M.resourceRequest);
 
     case MessageType.SVC_CUSTOMIZATION: // 46
-      return M.customization;
+      return SP.lift(M.customization);
 
     case MessageType.SVC_CROSSHAIRANGLE: // 47
-      return M.crosshairAngle;
+      return SP.lift(M.crosshairAngle);
 
     case MessageType.SVC_SOUNDFADE: // 48
-      return M.soundFade;
+      return SP.lift(M.soundFade);
 
     case MessageType.SVC_FILETXFERFAILED: // 49
-      return M.fileTxferFailed;
+      return SP.lift(M.fileTxferFailed);
 
     case MessageType.SVC_HLTV: // 50
-      return M.hltv;
+      return SP.lift(M.hltv);
 
     case MessageType.SVC_DIRECTOR: // 51
-      return M.director;
+      return SP.lift(M.director);
 
     case MessageType.SVC_VOICEINIT: // 52
-      return M.voiceInit;
+      return SP.lift(M.voiceInit);
 
     case MessageType.SVC_VOICEDATA: // 53
-      return M.voiceData;
+      return SP.lift(M.voiceData);
 
     case MessageType.SVC_SENDEXTRAINFO: // 54
-      return M.sendExtraInfo;
+      return SP.lift(M.sendExtraInfo);
 
     case MessageType.SVC_TIMESCALE: // 55
-      return M.timeScale;
+      return SP.lift(M.timeScale);
 
     case MessageType.SVC_RESOURCELOCATION: // 56
-      return M.resourceLocation;
+      return SP.lift(M.resourceLocation);
 
     case MessageType.SVC_SENDCVARVALUE: // 57
-      return M.sendCvarValue;
+      return SP.lift(M.sendCvarValue);
 
     case MessageType.SVC_SENDCVARVALUE2: // 58
-      return M.sendCvarValue2;
+      return SP.lift(M.sendCvarValue2);
 
     default:
-      return pipe(
-        P.of<number, number>(messageId),
-        P.filter((messageId) => messageId >= 64),
-        P.chain(skipUserMessage)
+      return SP.lift(
+        pipe(
+          P.of<number, number>(messageId),
+          P.filter((messageId) => messageId >= 64),
+          P.chain(skipUserMessage)
+        )
       );
   }
 };
