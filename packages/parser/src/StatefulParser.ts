@@ -2,9 +2,10 @@ import {
   either as E,
   readonlyArray as RA,
   readonlyNonEmptyArray as RNEA,
-  stateT,
+  stateT as ST,
 } from "fp-ts";
 import type { Alt3 } from "fp-ts/lib/Alt";
+import type { Alternative3 } from "fp-ts/lib/Alternative";
 import type { Applicative3 } from "fp-ts/lib/Applicative";
 import type { Chain3 } from "fp-ts/lib/Chain";
 import { bind as bind_ } from "fp-ts/lib/Chain";
@@ -26,7 +27,7 @@ import type { Stream } from "./Stream";
 // model
 // -----------------------------------------------------------------------------
 
-export type StatefulParser<R, E, A> = stateT.StateT2<P.URI, R, E, A>;
+export type StatefulParser<R, E, A> = ST.StateT2<P.URI, R, E, A>;
 
 // -----------------------------------------------------------------------------
 // constructors
@@ -236,9 +237,9 @@ export const alt: <S, I, A>(
   (that) => (ma) =>
     alt_(ma, that);
 
-export const ap = stateT.ap(P.Monad);
+export const ap = ST.ap(P.Monad);
 
-export const chain = stateT.chain(P.Monad);
+export const chain = ST.chain(P.Monad);
 
 export const chainFirst: <A, S, I, B>(
   f: (a: A) => StatefulParser<S, I, B>
@@ -253,9 +254,9 @@ export const chainFirst: <A, S, I, B>(
     )
   );
 
-export const map = stateT.map(P.Functor);
+export const map = ST.map(P.Functor);
 
-export const of = stateT.of(P.Monad);
+export const of = ST.of(P.Monad);
 
 // -----------------------------------------------------------------------------
 // instances
@@ -275,6 +276,15 @@ export const Alt: Alt3<URI> = {
   URI,
   alt: alt_,
   map: map_,
+};
+
+export const Alternative: Alternative3<URI> = {
+  URI,
+  alt: alt_,
+  ap: ap_,
+  map: map_,
+  of,
+  zero: fail,
 };
 
 export const Applicative: Applicative3<URI> = {
@@ -316,11 +326,11 @@ export const Monad: Monad3<URI> = {
 // utils
 // -----------------------------------------------------------------------------
 
-export const evaluate = stateT.evaluate(P.Functor);
+export const evaluate = ST.evaluate(P.Functor);
 
-export const execute = stateT.execute(P.Functor);
+export const execute = ST.execute(P.Functor);
 
-export const lift = stateT.fromF(P.Functor);
+export const lift = ST.fromF(P.Functor);
 
 export const log: <S, I, A>(
   ma: StatefulParser<S, I, A>
