@@ -7,12 +7,13 @@ import {
 import type { Alt3 } from "fp-ts/lib/Alt";
 import type { Alternative3 } from "fp-ts/lib/Alternative";
 import type { Applicative3 } from "fp-ts/lib/Applicative";
+import { sequenceS, sequenceT } from "fp-ts/lib/Apply";
 import type { Chain3 } from "fp-ts/lib/Chain";
 import { bind as bind_ } from "fp-ts/lib/Chain";
 import type { ChainRec3 } from "fp-ts/lib/ChainRec";
 import { tailRec } from "fp-ts/lib/ChainRec";
 import type { Lazy } from "fp-ts/lib/function";
-import { flow, pipe } from "fp-ts/lib/function";
+import { pipe } from "fp-ts/lib/function";
 import type { Functor3 } from "fp-ts/lib/Functor";
 import { bindTo as bindTo_ } from "fp-ts/lib/Functor";
 import type { Monad3 } from "fp-ts/lib/Monad";
@@ -20,7 +21,7 @@ import type { Predicate } from "fp-ts/lib/Predicate";
 import type { Refinement } from "fp-ts/lib/Refinement";
 import * as P from "./Parser";
 import type { ParseResult, ParseSuccess } from "./ParseResult";
-import { error, extend, success } from "./ParseResult";
+import { error, success } from "./ParseResult";
 import type { Stream } from "./Stream";
 
 // -----------------------------------------------------------------------------
@@ -159,30 +160,31 @@ export const manyN = <S, I, A>(
         )
       );
 
+export const seek: <S, I>(cursor: number) => StatefulParser<S, I, void> = (
+  cursor
+) => lift(P.seek(cursor));
+
+export const skip: <S, I>(offset: number) => StatefulParser<S, I, void> = (
+  offset
+) => lift(P.skip(offset));
+
+export const take: <S, I>(
+  length: number
+) => StatefulParser<S, I, readonly I[]> = (length) => lift(P.take(length));
+
 // -----------------------------------------------------------------------------
 // non-pipeables
 // -----------------------------------------------------------------------------
 
-const alt_: Alt3<URI>["alt"] = (fa, that) => (s) => (i) => {
-  const e = fa(s)(i);
-
-  if (E.isRight(e) || e.left.fatal) {
-    return e;
-  }
-
-  return pipe(
-    that()(s)(i),
-    E.mapLeft((err) => extend(e.left, err))
+const alt_: Alt3<URI>["alt"] = (fa, that) => (s) =>
+  pipe(
+    fa(s),
+    P.alt(() => that()(s))
   );
-};
 
 const ap_: Monad3<URI>["ap"] = (fab, fa) => pipe(fab, ap(fa));
 
-const chain_: Chain3<URI>["chain"] = (fa, f) =>
-  pipe(
-    fa,
-    chain((a) => f(a))
-  );
+const chain_: Chain3<URI>["chain"] = (fa, f) => pipe(fa, chain(f));
 
 const chainRec_: ChainRec3<URI>["chainRec"] = <S, I, A, B>(
   a: A,
@@ -247,15 +249,7 @@ export const chain: <A, S, I, B>(
 export const chainFirst: <A, S, I, B>(
   f: (a: A) => StatefulParser<S, I, B>
 ) => (ma: StatefulParser<S, I, A>) => StatefulParser<S, I, A> = (f) => (ma) =>
-  flow(
-    ma,
-    P.chain(([a, s]) =>
-      pipe(
-        f(a)(s),
-        P.map(([, s]) => [a, s])
-      )
-    )
-  );
+  chain_(ma, (a) => map_(f(a), () => a));
 
 export const map: <A, B>(
   f: (a: A) => B
@@ -363,6 +357,10 @@ export const log: <S, I, A>(
       return a;
     })
   );
+
+export const struct = sequenceS(Applicative);
+
+export const tuple = sequenceT(Applicative);
 
 // -----------------------------------------------------------------------------
 // do notation
