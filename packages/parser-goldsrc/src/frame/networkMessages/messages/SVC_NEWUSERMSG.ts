@@ -10,9 +10,6 @@ export type NewUserMsg = {
   readonly name: string;
 };
 
-// FIXME HACK FIXME HACK mutable shared state
-export const customMessages: Map<number, NewUserMsg> = new Map();
-
 const addUserMessage = RM.upsertAt(number.Eq);
 
 export const newUserMsg: DemoStateParser<NewUserMsg> = pipe(
@@ -30,13 +27,7 @@ export const newUserMsg: DemoStateParser<NewUserMsg> = pipe(
   SP.chainFirst((a) =>
     SP.modify((s) => ({
       ...s,
-      userMessages: addUserMessage(a.index, a)(s.userMessages),
+      userMessages: pipe(s.userMessages, addUserMessage(a.index, a)),
     }))
   )
-
-  // SP.map((a) => {
-  //   customMessages.set(a.index, a);
-
-  //   return a;
-  // })
 );
