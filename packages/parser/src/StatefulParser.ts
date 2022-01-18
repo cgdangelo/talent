@@ -14,6 +14,8 @@ import type { Lazy } from "fp-ts/lib/function";
 import { flow, pipe } from "fp-ts/lib/function";
 import type { Functor3 } from "fp-ts/lib/Functor";
 import { bindTo as bindTo_ } from "fp-ts/lib/Functor";
+import type { Predicate } from "fp-ts/lib/Predicate";
+import type { Refinement } from "fp-ts/lib/Refinement";
 import * as P from "./Parser";
 import type { ParseResult, ParseSuccess } from "./ParseResult";
 import { error, success } from "./ParseResult";
@@ -51,6 +53,22 @@ export const chainFirst: <E, A, S, B>(
 export const evaluate = stateT.evaluate(P.Functor);
 
 export const execute = stateT.execute(P.Functor);
+
+export const filter: {
+  <A>(f: Predicate<A>): <S, I>(
+    p: StatefulParser<S, I, A>
+  ) => StatefulParser<S, I, A>;
+
+  <A, B extends A>(f: Refinement<A, B>): <S, I>(
+    p: StatefulParser<S, I, A>
+  ) => StatefulParser<S, I, B>;
+} =
+  <A>(f: Predicate<A>) =>
+  <S, I>(p: StatefulParser<S, I, A>): StatefulParser<S, I, A> =>
+    pipe(
+      p,
+      chain((a) => (f(a) ? of(a) : lift(P.fail())))
+    );
 
 export const get: <E, S>() => StatefulParser<S, E, S> = () => (s) =>
   P.of([s, s]);

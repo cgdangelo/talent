@@ -120,7 +120,7 @@ const message: DemoStateParser<MessageFrame> = pipe(
 
       // TODO Can remove SVC_NOP, deprecated messages, but NOT messages that
       // have no arguments.
-      // P.filter(() => messageId !== MessageType.SVC_NOP),
+      SP.filter(() => messageId !== MessageType.SVC_NOP),
 
       SP.map((fields) => ({
         type: { id: messageId, name: MessageType[messageId]! }, // TODO remove nonnull assertion
