@@ -37,9 +37,9 @@ export const ap = stateT.ap(P.Monad);
 
 export const chain = stateT.chain(P.Monad);
 
-export const chainFirst: <E, A, S, B>(
-  f: (a: A) => StatefulParser<S, E, B>
-) => (ma: StatefulParser<S, E, A>) => StatefulParser<S, E, A> = (f) => (ma) =>
+export const chainFirst: <A, S, I, B>(
+  f: (a: A) => StatefulParser<S, I, B>
+) => (ma: StatefulParser<S, I, A>) => StatefulParser<S, I, A> = (f) => (ma) =>
   flow(
     ma,
     P.chain(([a, s]) =>
@@ -65,12 +65,13 @@ export const filter: {
 } =
   <A>(f: Predicate<A>) =>
   <S, I>(p: StatefulParser<S, I, A>): StatefulParser<S, I, A> =>
+  (s) =>
     pipe(
-      p,
-      chain((a) => (f(a) ? of(a) : lift(P.fail())))
+      p(s),
+      P.filter(([a]) => f(a))
     );
 
-export const get: <E, S>() => StatefulParser<S, E, S> = () => (s) =>
+export const get: <I, S>() => StatefulParser<S, I, S> = () => (s) =>
   P.of([s, s]);
 
 export const lift = stateT.fromF(P.Functor);
@@ -150,10 +151,10 @@ export const manyTill = <S, I, A, B>(
   );
 
 // NOTE Not stack safe
-export const manyN: <S, E, A>(
-  ma: StatefulParser<S, E, A>,
+export const manyN: <S, I, A>(
+  ma: StatefulParser<S, I, A>,
   n: number
-) => StatefulParser<S, E, readonly A[]> = (ma, n) =>
+) => StatefulParser<S, I, readonly A[]> = (ma, n) =>
   pipe(RA.replicate(n, ma), RA.sequence(Applicative));
 
 // FIXME returns first outgoing position instead of last
@@ -191,13 +192,13 @@ export const manyN: <S, E, A>(
 
 export const map = stateT.map(P.Functor);
 
-export const modify: <S, E>(fs: (s: S) => S) => StatefulParser<S, E, void> =
+export const modify: <S, I>(fs: (s: S) => S) => StatefulParser<S, I, void> =
   (fs) => (s) =>
     P.of([undefined, fs(s)]);
 
 export const of = stateT.of(P.Monad);
 
-export const put: <E, S>(s: S) => StatefulParser<S, E, undefined> = (s) => () =>
+export const put: <S, I>(s: S) => StatefulParser<S, I, undefined> = (s) => () =>
   P.of([undefined, s]);
 
 export const Functor: Functor3<URI> = {
@@ -238,9 +239,9 @@ export const Alt: Alt3<URI> = {
   map: Functor.map,
 };
 
-export const alt: <S, E, A>(
-  that: Lazy<StatefulParser<S, E, A>>
-) => (ma: StatefulParser<S, E, A>) => StatefulParser<S, E, A> =
+export const alt: <S, I, A>(
+  that: Lazy<StatefulParser<S, I, A>>
+) => (ma: StatefulParser<S, I, A>) => StatefulParser<S, I, A> =
   (that) => (ma) =>
     Alt.alt(ma, that);
 
