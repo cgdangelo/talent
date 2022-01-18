@@ -1,5 +1,6 @@
-import { buffer as B } from "@talent/parser-buffer";
 import { parser as P, statefulParser as SP } from "@talent/parser";
+import { buffer as B } from "@talent/parser-buffer";
+import { number, option as O, readonlyMap as RM } from "fp-ts";
 import { pipe } from "fp-ts/lib/function";
 import type { DemoState, DemoStateParser } from "../../DemoState";
 import * as M from "./messages";
@@ -130,18 +131,24 @@ const message: DemoStateParser<MessageFrame> = pipe(
   )
 );
 
-const skipUserMessage: (messageId: number) => B.BufferParser<void> = (
+const skipUserMessage: (messageId: number) => DemoStateParser<void> = (
   messageId
 ) =>
   pipe(
-    P.of<number, M.NewUserMsg | undefined>(M.customMessages.get(messageId)),
-    P.filter(
-      (customMessage): customMessage is M.NewUserMsg =>
-        customMessage != null && customMessage.size > -1
+    SP.get<number, DemoState>(),
+    SP.chain(({ userMessages }) =>
+      pipe(
+        userMessages,
+        RM.lookup(number.Eq)(messageId),
+        O.chain(O.fromPredicate(({ size }) => size > -1)),
+        O.fold(
+          () => SP.lift(B.uint8_le),
+          ({ size }) => SP.of(size)
+        )
+      )
     ),
-    P.map(({ size }) => size),
-    P.alt(() => B.uint8_le),
-    P.chain((customMessageSize) => P.skip(customMessageSize))
+
+    SP.chain((customMessageSize) => SP.lift(P.skip(customMessageSize)))
   );
 
 const message_: (messageId: MessageType) => DemoStateParser<Message> = (
@@ -267,7 +274,7 @@ const message_: (messageId: MessageType) => DemoStateParser<Message> = (
       return SP.lift(M.addAngle);
 
     case MessageType.SVC_NEWUSERMSG: // 39
-      return SP.lift(M.newUserMsg);
+      return M.newUserMsg;
 
     case MessageType.SVC_PACKETENTITIES: // 40
       return M.packetEntities;
@@ -327,12 +334,14 @@ const message_: (messageId: MessageType) => DemoStateParser<Message> = (
       return SP.lift(M.sendCvarValue2);
 
     default:
-      return SP.lift(
-        pipe(
-          P.of<number, number>(messageId),
-          P.filter((messageId) => messageId >= 64),
-          P.chain(skipUserMessage)
-        )
+      return pipe(
+        SP.lift<number, number, DemoState>(
+          pipe(
+            P.of<number, number>(messageId),
+            P.filter((messageId) => messageId >= 64)
+          )
+        ),
+        SP.chain(skipUserMessage)
       );
   }
 };
