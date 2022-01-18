@@ -40,7 +40,9 @@ const weaponData: DemoStateParser<ClientData["weaponData"]> = pipe(
         )
       )
     )
-  )
+  ),
+
+  SP.chainFirst(() => SP.lift(P.skip(1)))
 );
 
 export const clientData: DemoStateParser<ClientData> = pipe(
@@ -48,7 +50,6 @@ export const clientData: DemoStateParser<ClientData> = pipe(
   SP.bindTo("deltaUpdateMask"),
   SP.bind("clientData", () => readDelta("clientdata_t")),
   SP.bind("weaponData", () => weaponData),
-  SP.chainFirst(() => SP.lift(P.skip(1))),
 
   SP.chain((a) =>
     SP.lift((i) =>

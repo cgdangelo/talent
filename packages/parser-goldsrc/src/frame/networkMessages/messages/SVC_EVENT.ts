@@ -23,7 +23,20 @@ export const event: DemoStateParser<Event> = (s) => (i) =>
     pipe(
       SP.lift<number, number, DemoState>(BB.ubits(5)),
       SP.chain((eventCount) => SP.manyN(event_, eventCount)),
-      SP.bindTo("events")
+      SP.bindTo("events"),
+
+      SP.chain((a) =>
+        SP.lift((i) =>
+          success(
+            a,
+            i,
+            stream(
+              i.buffer,
+              i.cursor % 8 === 0 ? i.cursor / 8 : Math.floor(i.cursor / 8) + 1
+            )
+          )
+        )
+      )
     )(s)
   );
 
@@ -49,19 +62,6 @@ const event_ = pipe(
   SP.bind("fireTime", () =>
     SP.lift<number, number | undefined, DemoState>(
       BB.bitFlagged(() => BB.ubits(16))
-    )
-  ),
-
-  SP.chain((a) =>
-    SP.lift((i) =>
-      success(
-        a,
-        i,
-        stream(
-          i.buffer,
-          i.cursor % 8 === 0 ? i.cursor / 8 : Math.floor(i.cursor / 8) + 1
-        )
-      )
     )
   )
 );
