@@ -344,17 +344,14 @@ export const lift: <I, A, S>(p: P.Parser<I, A>) => StatefulParser<S, I, A> =
 
 export const log: <S, I, A>(
   ma: StatefulParser<S, I, A>
-) => StatefulParser<S, I, A> = (ma) => (s) => (i) =>
+) => StatefulParser<S, I, A> = (ma) => (s) =>
   pipe(
-    ma(s)(i),
-    E.map((a) => {
+    P.log(ma(s)),
+    P.map(([a, s_]) => {
       console.log(
-        `result: ${JSON.stringify(a.value[0])}, before: ${i.cursor}, after: ${
-          a.next.cursor
-        }`
+        `state: start=${JSON.stringify(s)} end=${JSON.stringify(s_)}`
       );
-
-      return a;
+      return [a, s_];
     })
   );
 
