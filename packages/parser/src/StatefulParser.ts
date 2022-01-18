@@ -14,6 +14,7 @@ import type { Lazy } from "fp-ts/lib/function";
 import { flow, pipe } from "fp-ts/lib/function";
 import type { Functor3 } from "fp-ts/lib/Functor";
 import { bindTo as bindTo_ } from "fp-ts/lib/Functor";
+import type { Monad3 } from "fp-ts/lib/Monad";
 import type { Predicate } from "fp-ts/lib/Predicate";
 import type { Refinement } from "fp-ts/lib/Refinement";
 import * as P from "./Parser";
@@ -21,38 +22,36 @@ import type { ParseResult, ParseSuccess } from "./ParseResult";
 import { error, extend, success } from "./ParseResult";
 import type { Stream } from "./Stream";
 
+// -----------------------------------------------------------------------------
+// model
+// -----------------------------------------------------------------------------
+
 export type StatefulParser<R, E, A> = stateT.StateT2<P.URI, R, E, A>;
 
-const URI = "StatefulParser";
+// -----------------------------------------------------------------------------
+// constructors
+// -----------------------------------------------------------------------------
 
-type URI = typeof URI;
+export const fail: <S, I, A = never>() => StatefulParser<S, I, A> = () =>
+  lift(P.fail());
 
-declare module "fp-ts/lib/HKT" {
-  interface URItoKind3<R, E, A> {
-    readonly [URI]: StatefulParser<R, E, A>;
-  }
-}
+// TODO reverse typeparams
+export const get: <I, S>() => StatefulParser<S, I, S> = () => (s) =>
+  P.of([s, s]);
 
-export const ap = stateT.ap(P.Monad);
+export const modify: <S, I>(fs: (s: S) => S) => StatefulParser<S, I, void> =
+  (fs) => (s) =>
+    P.of([undefined, fs(s)]);
 
-export const chain = stateT.chain(P.Monad);
+export const put: <S, I>(s: S) => StatefulParser<S, I, undefined> = (s) => () =>
+  P.of([undefined, s]);
 
-export const chainFirst: <A, S, I, B>(
-  f: (a: A) => StatefulParser<S, I, B>
-) => (ma: StatefulParser<S, I, A>) => StatefulParser<S, I, A> = (f) => (ma) =>
-  flow(
-    ma,
-    P.chain(([a, s]) =>
-      pipe(
-        f(a)(s),
-        P.map(([, s]) => [a, s])
-      )
-    )
-  );
+export const succeed: <S, I, A>(a: A) => StatefulParser<S, I, A> = (a) =>
+  lift(P.succeed(a));
 
-export const evaluate = stateT.evaluate(P.Functor);
-
-export const execute = stateT.execute(P.Functor);
+// -----------------------------------------------------------------------------
+// combinators
+// -----------------------------------------------------------------------------
 
 export const filter: {
   <A>(f: Predicate<A>): <S, I>(
@@ -70,29 +69,6 @@ export const filter: {
       p(s),
       P.filter(([a]) => f(a))
     );
-
-export const get: <I, S>() => StatefulParser<S, I, S> = () => (s) =>
-  P.of([s, s]);
-
-export const lift = stateT.fromF(P.Functor);
-
-export const log: <S, I, A>(
-  ma: StatefulParser<S, I, A>
-) => StatefulParser<S, I, A> = (ma) => (s) => (i) =>
-  pipe(
-    ma(s)(i),
-    E.map((a) => {
-      console.log(
-        `result: ${
-          typeof a.value === "object" && a.value != null
-            ? JSON.stringify(a.value)
-            : a.value
-        }, before: ${i.cursor}, after: ${a.next.cursor}`
-      );
-
-      return a;
-    })
-  );
 
 export const many1 = <S, I, A>(
   ma: StatefulParser<S, I, A>
@@ -190,62 +166,26 @@ export const manyN: <S, I, A>(
 //         )
 //       );
 
-export const map = stateT.map(P.Functor);
+// -----------------------------------------------------------------------------
+// non-pipeables
+// -----------------------------------------------------------------------------
 
-export const modify: <S, I>(fs: (s: S) => S) => StatefulParser<S, I, void> =
-  (fs) => (s) =>
-    P.of([undefined, fs(s)]);
+const alt_: Alt3<URI>["alt"] = (fa, that) => (s) => (i) => {
+  const e = fa(s)(i);
 
-export const of = stateT.of(P.Monad);
+  if (E.isRight(e) || e.left.fatal) {
+    return e;
+  }
 
-export const put: <S, I>(s: S) => StatefulParser<S, I, undefined> = (s) => () =>
-  P.of([undefined, s]);
-
-export const Functor: Functor3<URI> = {
-  URI,
-  map: (fa, fab) => pipe(fa, map(fab)),
+  return pipe(
+    that()(s)(i),
+    E.mapLeft((err) => extend(e.left, err))
+  );
 };
 
-export const bindTo = bindTo_(Functor);
+const ap_: Monad3<URI>["ap"] = (fab, fa) => pipe(fab, ap(fa));
 
-export const Chain: Chain3<URI> = {
-  URI,
-  ap: (fab, fa) => pipe(fab, ap(fa)),
-  chain: (fa, f) => pipe(fa, chain(f)),
-  map: Functor.map,
-};
-
-export const Applicative: Applicative3<URI> = {
-  URI,
-  ap: Chain.ap,
-  map: Functor.map,
-  of,
-};
-
-export const Alt: Alt3<URI> = {
-  URI,
-  alt: (fa, that) => (s) => (i) => {
-    const e = fa(s)(i);
-
-    if (E.isRight(e) || e.left.fatal) {
-      return e;
-    }
-
-    return pipe(
-      that()(s)(i),
-      E.mapLeft((err) => extend(e.left, err))
-    );
-  },
-  map: Functor.map,
-};
-
-export const alt: <S, I, A>(
-  that: Lazy<StatefulParser<S, I, A>>
-) => (ma: StatefulParser<S, I, A>) => StatefulParser<S, I, A> =
-  (that) => (ma) =>
-    Alt.alt(ma, that);
-
-export const bind = bind_(Chain);
+const chain_: Chain3<URI>["chain"] = (fa, f) => pipe(fa, chain(f));
 
 const chainRec_: ChainRec3<URI>["chainRec"] = <S, I, A, B>(
   a: A,
@@ -284,10 +224,126 @@ const chainRec_: ChainRec3<URI>["chainRec"] = <S, I, A, B>(
     });
 };
 
+const map_: Functor3<URI>["map"] = (fa, fab) => pipe(fa, map(fab));
+
+// -----------------------------------------------------------------------------
+// pipeables
+// -----------------------------------------------------------------------------
+
+export const alt: <S, I, A>(
+  that: Lazy<StatefulParser<S, I, A>>
+) => (ma: StatefulParser<S, I, A>) => StatefulParser<S, I, A> =
+  (that) => (ma) =>
+    alt_(ma, that);
+
+export const ap = stateT.ap(P.Monad);
+
+export const chain = stateT.chain(P.Monad);
+
+export const chainFirst: <A, S, I, B>(
+  f: (a: A) => StatefulParser<S, I, B>
+) => (ma: StatefulParser<S, I, A>) => StatefulParser<S, I, A> = (f) => (ma) =>
+  flow(
+    ma,
+    P.chain(([a, s]) =>
+      pipe(
+        f(a)(s),
+        P.map(([, s]) => [a, s])
+      )
+    )
+  );
+
+export const map = stateT.map(P.Functor);
+
+export const of = stateT.of(P.Monad);
+
+// -----------------------------------------------------------------------------
+// instances
+// -----------------------------------------------------------------------------
+
+export const URI = "StatefulParser";
+
+export type URI = typeof URI;
+
+declare module "fp-ts/lib/HKT" {
+  interface URItoKind3<R, E, A> {
+    readonly [URI]: StatefulParser<R, E, A>;
+  }
+}
+
+export const Alt: Alt3<URI> = {
+  URI,
+  alt: alt_,
+  map: map_,
+};
+
+export const Applicative: Applicative3<URI> = {
+  URI,
+  ap: ap_,
+  map: map_,
+  of,
+};
+
+export const Chain: Chain3<URI> = {
+  URI,
+  ap: ap_,
+  chain: chain_,
+  map: map_,
+};
+
 export const ChainRec: ChainRec3<URI> = {
   URI,
-  ap: Chain.ap,
-  chain: Chain.chain,
+  ap: ap_,
+  chain: chain_,
   chainRec: chainRec_,
-  map: Functor.map,
+  map: map_,
 };
+
+export const Functor: Functor3<URI> = {
+  URI,
+  map: map_,
+};
+
+export const Monad: Monad3<URI> = {
+  URI,
+  ap: ap_,
+  chain: chain_,
+  map: map_,
+  of,
+};
+
+// -----------------------------------------------------------------------------
+// utils
+// -----------------------------------------------------------------------------
+
+export const evaluate = stateT.evaluate(P.Functor);
+
+export const execute = stateT.execute(P.Functor);
+
+export const lift = stateT.fromF(P.Functor);
+
+export const log: <S, I, A>(
+  ma: StatefulParser<S, I, A>
+) => StatefulParser<S, I, A> = (ma) => (s) => (i) =>
+  pipe(
+    ma(s)(i),
+    E.map((a) => {
+      console.log(
+        `result: ${
+          typeof a.value === "object" && a.value != null
+            ? JSON.stringify(a.value)
+            : a.value
+        }, before: ${i.cursor}, after: ${a.next.cursor}`
+      );
+
+      return a;
+    })
+  );
+
+// -----------------------------------------------------------------------------
+// do notation
+// -----------------------------------------------------------------------------
+
+export const bind = bind_(Chain);
+
+export const bindTo = bindTo_(Functor);
