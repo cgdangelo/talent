@@ -72,6 +72,8 @@ export const filter: {
       P.filter(([a]) => f(a))
     );
 
+export const item = <S, I>(): StatefulParser<S, I, I> => lift(P.item<I>());
+
 export const many1 = <S, I, A>(
   ma: StatefulParser<S, I, A>
 ): StatefulParser<S, I, RNEA.ReadonlyNonEmptyArray<A>> =>
@@ -148,11 +150,9 @@ export const manyN = <S, I, A>(
               ),
 
               alt(() =>
-                log(
-                  pipe(
-                    parser,
-                    map((a) => E.left(RA.append(a)(acc)))
-                  )
+                pipe(
+                  parser,
+                  map((a) => E.left(RA.append(a)(acc)))
                 )
               )
             )
