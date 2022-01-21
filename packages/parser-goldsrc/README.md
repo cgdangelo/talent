@@ -196,11 +196,11 @@ Sources for this information include:
 
 | Name            | Type             | Description                                                                                               |
 | --------------- | ---------------- | --------------------------------------------------------------------------------------------------------- |
-| magic           | NullString (8)   | ~HLDEMO~ for GoldSrc, ~HLDEMO2~ for Source.                                                               |
-| demoProtocol    | Word32           | Protocol version the demo was recorded in. Expected to be ~5~.                                            |
+| magic           | NullString (8)   | `HLDEMO` for GoldSrc, `HLDEMO2` for Source.                                                               |
+| demoProtocol    | Word32           | Protocol version the demo was recorded in. Expected to be `5`.                                            |
 | networkProtocol | Word32           | Network version the demo was recorded in. Can be used to deal with format changes.                        |
 | mapName         | NullString (260) | Name of the map.                                                                                          |
-| gameDirectory   | NullString (260) | Name of the directory: ~valve~ for Half-Life, ~cstrike~ for Counter-Strike, ~dod~ for Day of Defeat, etc. |
+| gameDirectory   | NullString (260) | Name of the directory: `valve` for Half-Life, `cstrike` for Counter-Strike, `dod` for Day of Defeat, etc. |
 | mapChecksum     | Int32            | CRC32 map file checksum. A checksum mismatch will cause the client to disconnect.                         |
 | directoryOffset | Word32           | Byte position of the directory.                                                                           |
 
@@ -571,7 +571,7 @@ Once the coordinate has been read, calculate intValue + fractionValue / 32, and 
 | --------- | ----------- | ---------------------------------------------------------------------- |
 | index     | Word8       |                                                                        |
 | id        | Word32      |                                                                        |
-| userInfo  | NullString  | A string of field names and their values in the format ~field//value~. |
+| userInfo  | NullString  | A string of field names and their values in the format `field//value`. |
 | cdKeyHash | Word8 \* 16 |                                                                        |
 
 #### SVC_DELTADESCRIPTION (14)
