@@ -2,22 +2,30 @@ import { buffer as B } from "@talent/parser-buffer";
 import * as P from "@talent/parser/lib/Parser";
 import { pipe } from "fp-ts/lib/function";
 import type { Point } from "../../../Point";
+import { MessageType } from "../MessageType";
 
 export type SpawnStatic = {
-  readonly modelIndex: number;
-  readonly sequence: number;
-  readonly frame: number;
-  readonly colorMap: number;
-  readonly skin: number;
-  readonly origin: Point;
-  readonly angle: Point;
-  readonly renderMode: number;
-  readonly renderColor?: {
-    readonly r: number;
-    readonly g: number;
-    readonly b: number;
+  readonly type: {
+    readonly id: MessageType.SVC_SPAWNSTATIC;
+    readonly name: "SVC_SPAWNSTATIC";
   };
-  readonly renderFx?: number;
+
+  readonly fields: {
+    readonly modelIndex: number;
+    readonly sequence: number;
+    readonly frame: number;
+    readonly colorMap: number;
+    readonly skin: number;
+    readonly origin: Point;
+    readonly angle: Point;
+    readonly renderMode: number;
+    readonly renderColor?: {
+      readonly r: number;
+      readonly g: number;
+      readonly b: number;
+    };
+    readonly renderFx?: number;
+  };
 };
 
 export const spawnStatic: B.BufferParser<SpawnStatic> = pipe(
@@ -82,5 +90,10 @@ export const spawnStatic: B.BufferParser<SpawnStatic> = pipe(
       ),
       P.alt(() => P.of(a))
     )
-  )
+  ),
+
+  P.map((fields) => ({
+    type: { id: MessageType.SVC_SPAWNSTATIC, name: "SVC_SPAWNSTATIC" } as const,
+    fields,
+  }))
 );

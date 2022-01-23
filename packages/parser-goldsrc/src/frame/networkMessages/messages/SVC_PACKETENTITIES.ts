@@ -7,6 +7,7 @@ import { pipe } from "fp-ts/lib/function";
 import type { Delta } from "../../../delta";
 import { readDelta } from "../../../delta";
 import type { DemoState, DemoStateParser } from "../../../DemoState";
+import { MessageType } from "../MessageType";
 
 type PacketEntity = {
   readonly entityIndex: number;
@@ -15,8 +16,15 @@ type PacketEntity = {
 };
 
 export type PacketEntities = {
-  readonly entityCount: number;
-  readonly entityStates: readonly PacketEntity[];
+  readonly type: {
+    readonly id: MessageType.SVC_PACKETENTITIES;
+    readonly name: "SVC_PACKETENTITIES";
+  };
+
+  readonly fields: {
+    readonly entityCount: number;
+    readonly entityStates: readonly PacketEntity[];
+  };
 };
 
 const entityState: (entityIndex: number) => DemoStateParser<PacketEntity> = (
@@ -74,29 +82,30 @@ const nextEntityIndex: () => B.BufferParser<number> = () => {
   );
 };
 
-const entityStates: () => DemoStateParser<PacketEntities["entityStates"]> =
-  () =>
-    SP.many(
-      pipe(
-        SP.lift<number, number, DemoState>(
-          pipe(
-            // Check footer before continuing
-            P.lookAhead(
-              pipe(
-                BB.ubits(16),
-                P.filter((footer) => footer !== 0)
-              )
-            ),
+const entityStates: () => DemoStateParser<
+  PacketEntities["fields"]["entityStates"]
+> = () =>
+  SP.many(
+    pipe(
+      SP.lift<number, number, DemoState>(
+        pipe(
+          // Check footer before continuing
+          P.lookAhead(
+            pipe(
+              BB.ubits(16),
+              P.filter((footer) => footer !== 0)
+            )
+          ),
 
-            // Parse entity index
-            P.apSecond(nextEntityIndex())
-          )
-        ),
+          // Parse entity index
+          P.apSecond(nextEntityIndex())
+        )
+      ),
 
-        // Parse entity with the given index
-        SP.chain(entityState)
-      )
-    );
+      // Parse entity with the given index
+      SP.chain(entityState)
+    )
+  );
 
 // TODO Refactor this + SVC_DELTAPACKETENTITIES
 export const packetEntities: DemoStateParser<PacketEntities> = (s) => (i) =>
@@ -119,6 +128,14 @@ export const packetEntities: DemoStateParser<PacketEntities> = (s) => (i) =>
             )
           )
         )
-      )
+      ),
+
+      SP.map((fields) => ({
+        type: {
+          id: MessageType.SVC_PACKETENTITIES,
+          name: "SVC_PACKETENTITIES",
+        } as const,
+        fields,
+      }))
     )(s)
   );

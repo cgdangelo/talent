@@ -7,20 +7,27 @@ import { pipe } from "fp-ts/lib/function";
 import type { Delta } from "../../../delta";
 import { readDelta } from "../../../delta";
 import type { DemoState, DemoStateParser } from "../../../DemoState";
+import { MessageType } from "../MessageType";
 
 export type ClientData = {
-  readonly deltaUpdateMask?: number;
-  readonly clientData: Delta;
-  readonly weaponData: readonly {
-    readonly weaponIndex: number;
-    readonly weaponData: Delta;
-  }[];
+  readonly type: {
+    readonly id: MessageType.SVC_CLIENTDATA;
+    readonly name: "SVC_CLIENTDATA";
+  };
+
+  readonly fields: {
+    readonly deltaUpdateMask?: number;
+    readonly clientData: Delta;
+    readonly weaponData: readonly {
+      readonly weaponIndex: number;
+      readonly weaponData: Delta;
+    }[];
+  };
 };
 
 const deltaUpdateMask: B.BufferParser<number | undefined> = BB.bitFlagged(() =>
   BB.ubits(8)
 );
-
 const hasWeaponData: DemoStateParser<number> = SP.lift(
   pipe(
     BB.ubits(1),
@@ -28,7 +35,7 @@ const hasWeaponData: DemoStateParser<number> = SP.lift(
   )
 );
 
-const weaponData: DemoStateParser<ClientData["weaponData"]> = pipe(
+const weaponData: DemoStateParser<ClientData["fields"]["weaponData"]> = pipe(
   SP.many(
     pipe(
       hasWeaponData,
@@ -66,6 +73,14 @@ export const clientData: DemoStateParser<ClientData> = (s) => (i) =>
             )
           )
         )
-      )
+      ),
+
+      SP.map((fields) => ({
+        type: {
+          id: MessageType.SVC_CLIENTDATA,
+          name: "SVC_CLIENTDATA",
+        } as const,
+        fields,
+      }))
     )(s)
   );

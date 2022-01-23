@@ -9,7 +9,7 @@ export type DemoStateParser<A> = StatefulParser<DemoState, number, A>;
 export type DemoState = {
   readonly deltaDecoders: ReadonlyMap<string, DeltaDecoder>;
   readonly networkProtocol: number;
-  readonly userMessages: ReadonlyMap<number, NewUserMsg>;
+  readonly userMessages: ReadonlyMap<number, NewUserMsg["fields"]>;
 };
 
 export const initialState: DemoState = {

@@ -1,44 +1,52 @@
 import { buffer as B } from "@talent/parser-buffer";
 import * as P from "@talent/parser/lib/Parser";
 import { absurd, pipe } from "fp-ts/lib/function";
+import { MessageType } from "../MessageType";
 
 export type RoomType = {
-  readonly type:
-    | { readonly id: 0; readonly name: "Normal" }
-    | { readonly id: 1; readonly name: "Generic" }
-    | { readonly id: 2; readonly name: "Metal Small" }
-    | { readonly id: 3; readonly name: "Metal Medium" }
-    | { readonly id: 4; readonly name: "Metal Large" }
-    | { readonly id: 5; readonly name: "Tunnel Small" }
-    | { readonly id: 6; readonly name: "Tunnel Medium" }
-    | { readonly id: 7; readonly name: "Tunnel Large" }
-    | { readonly id: 8; readonly name: "Chamber Small" }
-    | { readonly id: 9; readonly name: "Chamber Medium" }
-    | { readonly id: 10; readonly name: "Chamber Large" }
-    | { readonly id: 11; readonly name: "Bright Small" }
-    | { readonly id: 12; readonly name: "Bright Medium" }
-    | { readonly id: 13; readonly name: "Bright Large" }
-    | { readonly id: 14; readonly name: "Water 1" }
-    | { readonly id: 15; readonly name: "Water 2" }
-    | { readonly id: 16; readonly name: "Water 3" }
-    | { readonly id: 17; readonly name: "Concrete Small" }
-    | { readonly id: 18; readonly name: "Concrete Medium" }
-    | { readonly id: 19; readonly name: "Concrete Large" }
-    | { readonly id: 20; readonly name: "Big 1" }
-    | { readonly id: 21; readonly name: "Big 2" }
-    | { readonly id: 22; readonly name: "Big 3" }
-    | { readonly id: 23; readonly name: "Cavern Small" }
-    | { readonly id: 24; readonly name: "Cavern Medium" }
-    | { readonly id: 25; readonly name: "Cavern Large" }
-    | { readonly id: 26; readonly name: "Weirdo Small" }
-    | { readonly id: 27; readonly name: "Weirdo Medium" }
-    | { readonly id: 28; readonly name: "Weirdo Large" };
+  readonly type: {
+    readonly id: MessageType.SVC_ROOMTYPE;
+    readonly name: "SVC_ROOMTYPE";
+  };
+
+  readonly fields: {
+    readonly type:
+      | { readonly id: 0; readonly name: "Normal" }
+      | { readonly id: 1; readonly name: "Generic" }
+      | { readonly id: 2; readonly name: "Metal Small" }
+      | { readonly id: 3; readonly name: "Metal Medium" }
+      | { readonly id: 4; readonly name: "Metal Large" }
+      | { readonly id: 5; readonly name: "Tunnel Small" }
+      | { readonly id: 6; readonly name: "Tunnel Medium" }
+      | { readonly id: 7; readonly name: "Tunnel Large" }
+      | { readonly id: 8; readonly name: "Chamber Small" }
+      | { readonly id: 9; readonly name: "Chamber Medium" }
+      | { readonly id: 10; readonly name: "Chamber Large" }
+      | { readonly id: 11; readonly name: "Bright Small" }
+      | { readonly id: 12; readonly name: "Bright Medium" }
+      | { readonly id: 13; readonly name: "Bright Large" }
+      | { readonly id: 14; readonly name: "Water 1" }
+      | { readonly id: 15; readonly name: "Water 2" }
+      | { readonly id: 16; readonly name: "Water 3" }
+      | { readonly id: 17; readonly name: "Concrete Small" }
+      | { readonly id: 18; readonly name: "Concrete Medium" }
+      | { readonly id: 19; readonly name: "Concrete Large" }
+      | { readonly id: 20; readonly name: "Big 1" }
+      | { readonly id: 21; readonly name: "Big 2" }
+      | { readonly id: 22; readonly name: "Big 3" }
+      | { readonly id: 23; readonly name: "Cavern Small" }
+      | { readonly id: 24; readonly name: "Cavern Medium" }
+      | { readonly id: 25; readonly name: "Cavern Large" }
+      | { readonly id: 26; readonly name: "Weirdo Small" }
+      | { readonly id: 27; readonly name: "Weirdo Medium" }
+      | { readonly id: 28; readonly name: "Weirdo Large" };
+  };
 };
 
 export const roomType: B.BufferParser<RoomType> = pipe(
   B.uint16_le,
-  P.filter((a): a is RoomType["type"]["id"] => a >= 0 && a <= 28),
-  P.map((type): RoomType["type"] => {
+  P.filter((a): a is RoomType["fields"]["type"]["id"] => a >= 0 && a <= 28),
+  P.map((type): RoomType["fields"]["type"] => {
     switch (type) {
       case 0:
         return { id: 0, name: "Normal" };
@@ -102,5 +110,10 @@ export const roomType: B.BufferParser<RoomType> = pipe(
         return absurd(type);
     }
   }),
-  P.bindTo("type")
+  P.bindTo("type"),
+
+  P.map((fields) => ({
+    type: { id: MessageType.SVC_ROOMTYPE, name: "SVC_ROOMTYPE" } as const,
+    fields,
+  }))
 );

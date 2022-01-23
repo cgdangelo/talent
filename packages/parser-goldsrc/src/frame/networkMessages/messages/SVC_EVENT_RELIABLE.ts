@@ -6,11 +6,19 @@ import { pipe } from "fp-ts/lib/function";
 import type { Delta } from "../../../delta";
 import { readDelta } from "../../../delta";
 import type { DemoState, DemoStateParser } from "../../../DemoState";
+import { MessageType } from "../MessageType";
 
 export type EventReliable = {
-  readonly eventIndex: number;
-  readonly eventArgs: Delta;
-  readonly fireTime?: number;
+  readonly type: {
+    readonly id: MessageType.SVC_EVENT_RELIABLE;
+    readonly name: "SVC_EVENT_RELIABLE";
+  };
+
+  readonly fields: {
+    readonly eventIndex: number;
+    readonly eventArgs: Delta;
+    readonly fireTime?: number;
+  };
 };
 
 const fireTime = BB.bitFlagged(() => BB.ubits(16));
@@ -36,6 +44,14 @@ export const eventReliable: DemoStateParser<EventReliable> = (s) => (i) =>
             )
           )
         )
-      )
+      ),
+
+      SP.map((fields) => ({
+        type: {
+          id: MessageType.SVC_EVENT_RELIABLE,
+          name: "SVC_EVENT_RELIABLE",
+        } as const,
+        fields,
+      }))
     )(s)
   );

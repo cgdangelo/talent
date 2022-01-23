@@ -3,36 +3,45 @@ import type { buffer as B } from "@talent/parser-buffer";
 import * as P from "@talent/parser/lib/Parser";
 import { stream } from "@talent/parser/lib/Stream";
 import { pipe } from "fp-ts/lib/function";
+import { MessageType } from "../MessageType";
 
 export type ResourceList = {
-  readonly resources: readonly {
-    readonly type: number;
-    readonly name: string;
-    readonly index: number;
-    readonly size: number;
-    readonly flags: number;
-    readonly md5Hash?: number;
-    readonly extraInfo?: number;
-  }[];
+  readonly type: {
+    readonly id: MessageType.SVC_RESOURCELIST;
+    readonly name: "SVC_RESOURCELIST";
+  };
 
-  readonly consistency?: readonly number[];
+  readonly fields: {
+    readonly resources: readonly {
+      readonly type: number;
+      readonly name: string;
+      readonly index: number;
+      readonly size: number;
+      readonly flags: number;
+      readonly md5Hash?: number;
+      readonly extraInfo?: number;
+    }[];
+
+    readonly consistency?: readonly number[];
+  };
 };
 
-const resource: B.BufferParser<ResourceList["resources"][number]> = pipe(
-  P.struct({
-    type: BB.ubits(4),
-    name: BB.ztstr,
-    index: BB.ubits(12),
-    size: BB.ubits(24),
-    flags: BB.ubits(3),
-  }),
+const resource: B.BufferParser<ResourceList["fields"]["resources"][number]> =
+  pipe(
+    P.struct({
+      type: BB.ubits(4),
+      name: BB.ztstr,
+      index: BB.ubits(12),
+      size: BB.ubits(24),
+      flags: BB.ubits(3),
+    }),
 
-  P.bind("md5Hash", ({ flags }) =>
-    (flags & 4) !== 0 ? BB.ubits(128) : P.of(undefined)
-  ),
+    P.bind("md5Hash", ({ flags }) =>
+      (flags & 4) !== 0 ? BB.ubits(128) : P.of(undefined)
+    ),
 
-  P.bind("extraInfo", () => BB.bitFlagged(() => BB.ubits(256)))
-);
+    P.bind("extraInfo", () => BB.bitFlagged(() => BB.ubits(256)))
+  );
 
 const consistency: B.BufferParser<readonly number[]> = pipe(
   P.many(
@@ -58,6 +67,14 @@ export const resourceList: B.BufferParser<ResourceList> = (i) =>
 
       P.bind("consistency", () => BB.bitFlagged(() => consistency)),
 
-      BB.nextByte
+      BB.nextByte,
+
+      P.map((fields) => ({
+        type: {
+          id: MessageType.SVC_RESOURCELIST,
+          name: "SVC_RESOURCELIST",
+        } as const,
+        fields,
+      }))
     )
   );

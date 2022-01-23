@@ -7,14 +7,22 @@ import { pipe } from "fp-ts/lib/function";
 import type { Delta } from "../../../delta";
 import { readDelta } from "../../../delta";
 import type { DemoState, DemoStateParser } from "../../../DemoState";
+import { MessageType } from "../MessageType";
 
 export type SpawnBaseline = {
-  readonly entities: readonly {
-    readonly index: number;
-    readonly type: number;
-    readonly delta: Delta;
-  }[];
-  readonly extraData?: readonly Delta[];
+  readonly type: {
+    readonly id: MessageType.SVC_SPAWNBASELINE;
+    readonly name: "SVC_SPAWNBASELINE";
+  };
+
+  readonly fields: {
+    readonly entities: readonly {
+      readonly index: number;
+      readonly type: number;
+      readonly delta: Delta;
+    }[];
+    readonly extraData?: readonly Delta[];
+  };
 };
 
 export const spawnBaseline: DemoStateParser<SpawnBaseline> = (s) => (i) =>
@@ -84,6 +92,14 @@ export const spawnBaseline: DemoStateParser<SpawnBaseline> = (s) => (i) =>
             )
           )
         )
-      )
+      ),
+
+      SP.map((fields) => ({
+        type: {
+          id: MessageType.SVC_SPAWNBASELINE,
+          name: "SVC_SPAWNBASELINE",
+        } as const,
+        fields,
+      }))
     )(s)
   );

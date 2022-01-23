@@ -1,13 +1,26 @@
 import { buffer as B } from "@talent/parser-buffer";
 import * as P from "@talent/parser/lib/Parser";
+import { pipe } from "fp-ts/lib/function";
+import { MessageType } from "../MessageType";
 
 export type LightStyle = {
-  readonly index: number;
-  readonly lightInfo: string;
+  readonly type: {
+    readonly id: MessageType.SVC_LIGHTSTYLE;
+    readonly name: "SVC_LIGHTSTYLE";
+  };
+
+  readonly fields: {
+    readonly index: number;
+    readonly lightInfo: string;
+  };
 };
 
 // TODO Parse light info
-export const lightStyle: B.BufferParser<LightStyle> = P.struct({
-  index: B.uint8_le,
-  lightInfo: B.ztstr,
-});
+export const lightStyle: B.BufferParser<LightStyle> = pipe(
+  P.struct({ index: B.uint8_le, lightInfo: B.ztstr }),
+
+  P.map((fields) => ({
+    type: { id: MessageType.SVC_LIGHTSTYLE, name: "SVC_LIGHTSTYLE" } as const,
+    fields,
+  }))
+);
