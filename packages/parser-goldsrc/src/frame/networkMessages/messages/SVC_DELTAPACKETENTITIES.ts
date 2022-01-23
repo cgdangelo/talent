@@ -7,6 +7,7 @@ import { pipe } from "fp-ts/lib/function";
 import type { Delta } from "../../../delta";
 import { readDelta } from "../../../delta";
 import type { DemoState, DemoStateParser } from "../../../DemoState";
+import { MessageType } from "../MessageType";
 
 type DeltaPacketEntity = {
   readonly entityIndex: number;
@@ -14,9 +15,16 @@ type DeltaPacketEntity = {
 };
 
 export type DeltaPacketEntities = {
-  readonly entityCount: number;
-  readonly deltaSequence: number;
-  readonly entityStates: readonly DeltaPacketEntity[];
+  readonly type: {
+    readonly id: MessageType.SVC_DELTAPACKETENTITIES;
+    readonly name: "SVC_DELTAPACKETENTITIES";
+  };
+
+  readonly fields: {
+    readonly entityCount: number;
+    readonly deltaSequence: number;
+    readonly entityStates: readonly DeltaPacketEntity[];
+  };
 };
 
 const entityState: (entityIndex: number) => DemoStateParser<DeltaPacketEntity> =
@@ -59,43 +67,40 @@ const nextEntityIndex: () => B.BufferParser<number> = () => {
   );
 };
 
-const entityStates: () => DemoStateParser<DeltaPacketEntities["entityStates"]> =
-  () =>
-    SP.many(
-      pipe(
-        SP.lift<
-          number,
-          { removeEntity: number; entityIndex: number },
-          DemoState
-        >(
-          pipe(
-            // Check footer before continuing
-            P.lookAhead(
-              pipe(
-                BB.ubits(16),
-                P.filter((footer) => footer !== 0)
-              )
-            ),
-
-            P.chain(() =>
-              P.struct({
-                removeEntity: BB.ubits(1),
-                entityIndex: nextEntityIndex(),
-              })
+const entityStates: () => DemoStateParser<
+  DeltaPacketEntities["fields"]["entityStates"]
+> = () =>
+  SP.many(
+    pipe(
+      SP.lift<number, { removeEntity: number; entityIndex: number }, DemoState>(
+        pipe(
+          // Check footer before continuing
+          P.lookAhead(
+            pipe(
+              BB.ubits(16),
+              P.filter((footer) => footer !== 0)
             )
-          )
-        ),
+          ),
 
-        // Parse entity with the given index
-        SP.chain(({ removeEntity, entityIndex }) =>
-          pipe(
-            removeEntity !== 0
-              ? SP.of({ entityIndex, entityState: null })
-              : entityState(entityIndex)
+          P.chain(() =>
+            P.struct({
+              removeEntity: BB.ubits(1),
+              entityIndex: nextEntityIndex(),
+            })
           )
         )
+      ),
+
+      // Parse entity with the given index
+      SP.chain(({ removeEntity, entityIndex }) =>
+        pipe(
+          removeEntity !== 0
+            ? SP.of({ entityIndex, entityState: null })
+            : entityState(entityIndex)
+        )
       )
-    );
+    )
+  );
 
 // TODO Refactor this + SVC_DELTAPACKETENTITIES
 export const deltaPacketEntities: DemoStateParser<DeltaPacketEntities> =
@@ -120,6 +125,14 @@ export const deltaPacketEntities: DemoStateParser<DeltaPacketEntities> =
               )
             )
           )
-        )
+        ),
+
+        SP.map((fields) => ({
+          type: {
+            id: MessageType.SVC_DELTAPACKETENTITIES,
+            name: "SVC_DELTAPACKETENTITIES",
+          } as const,
+          fields,
+        }))
       )(s)
     );

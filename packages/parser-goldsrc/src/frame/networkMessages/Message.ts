@@ -6,8 +6,8 @@ import type { DemoState, DemoStateParser } from "../../DemoState";
 import * as M from "./messages";
 import { MessageType } from "./MessageType";
 
-type Message =
-  | void // TODO from parser failures?
+export type Message =
+  | void // TODO from user messages
   | M.Bad
   | M.Nop
   | M.Disconnect
@@ -68,52 +68,40 @@ type Message =
   | M.SendCvarValue
   | M.SendCvarValue2;
 
-type MessageFrame = {
-  // TODO move to parsers for union?
-  readonly type: { readonly id: number; readonly name: string };
-  readonly fields: Message;
-};
-
 export const messages: (
   messagesLength: number
-) => DemoStateParser<readonly MessageFrame[]> =
-  (messagesLength) => (s) => (i) =>
+) => DemoStateParser<readonly Message[]> = (messagesLength) => (s) => (i) =>
+  pipe(
+    i,
+
     pipe(
-      i,
+      SP.manyTill(
+        SP.log(message),
 
-      pipe(
-        SP.manyTill(
-          SP.log(message),
-
-          SP.lift(
-            pipe(
-              P.withStart(P.of<number, void>(undefined)),
-              P.filter(
-                ([, { cursor: currentPosition }]) =>
-                  currentPosition === i.cursor + messagesLength
-              )
-            )
-          )
-        ),
-
-        SP.alt(() =>
-          SP.lift(
-            pipe(
-              P.of<number, readonly MessageFrame[]>([]),
-              P.apFirst(P.seek(i.cursor + messagesLength))
+        SP.lift(
+          pipe(
+            P.withStart(P.of<number, void>(undefined)),
+            P.filter(
+              ([, { cursor: currentPosition }]) =>
+                currentPosition === i.cursor + messagesLength
             )
           )
         )
-      )(s)
-    );
+      ),
 
-const message: DemoStateParser<MessageFrame> = pipe(
+      SP.alt(() =>
+        SP.lift(
+          pipe(
+            P.of<number, readonly Message[]>([]),
+            P.apFirst(P.seek(i.cursor + messagesLength))
+          )
+        )
+      )
+    )(s)
+  );
+
+const message: DemoStateParser<Message> = pipe(
   SP.lift<number, number, DemoState>(B.uint8_le),
-
-  SP.map((a) => {
-    console.log("message", a, MessageType[a]);
-    return a;
-  }),
 
   SP.chain((messageId) =>
     pipe(
@@ -121,12 +109,7 @@ const message: DemoStateParser<MessageFrame> = pipe(
 
       // TODO Can remove SVC_NOP, deprecated messages, but NOT messages that
       // have no arguments.
-      SP.filter(() => messageId !== MessageType.SVC_NOP),
-
-      SP.map((fields) => ({
-        type: { id: messageId, name: MessageType[messageId]! }, // TODO remove nonnull assertion
-        fields,
-      }))
+      SP.filter(() => messageId !== MessageType.SVC_NOP)
     )
   )
 );

@@ -3,13 +3,21 @@ import type { buffer as B } from "@talent/parser-buffer";
 import * as P from "@talent/parser/lib/Parser";
 import { stream } from "@talent/parser/lib/Stream";
 import { pipe } from "fp-ts/lib/function";
+import { MessageType } from "../MessageType";
 
 export type Pings = {
-  readonly pings: readonly {
-    readonly playerId: number;
-    readonly ping: number;
-    readonly loss: number;
-  }[];
+  readonly type: {
+    readonly id: MessageType.SVC_PINGS;
+    readonly name: "SVC_PINGS";
+  };
+
+  readonly fields: {
+    readonly pings: readonly {
+      readonly playerId: number;
+      readonly ping: number;
+      readonly loss: number;
+    }[];
+  };
 };
 
 export const pings: B.BufferParser<Pings> = (i) =>
@@ -32,6 +40,11 @@ export const pings: B.BufferParser<Pings> = (i) =>
       ),
       P.bindTo("pings"),
       P.apFirst(P.skip(1)),
-      BB.nextByte
+      BB.nextByte,
+
+      P.map((fields) => ({
+        type: { id: MessageType.SVC_PINGS, name: "SVC_PINGS" } as const,
+        fields,
+      }))
     )
   );

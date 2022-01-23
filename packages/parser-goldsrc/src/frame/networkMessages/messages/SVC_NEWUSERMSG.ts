@@ -3,17 +3,25 @@ import { buffer as B } from "@talent/parser-buffer";
 import { number, readonlyMap as RM } from "fp-ts";
 import { pipe } from "fp-ts/lib/function";
 import type { DemoState, DemoStateParser } from "../../../DemoState";
+import { MessageType } from "../MessageType";
 
 export type NewUserMsg = {
-  readonly index: number;
-  readonly size: number;
-  readonly name: string;
+  readonly type: {
+    readonly id: MessageType.SVC_NEWUSERMSG;
+    readonly name: "SVC_NEWUSERMSG";
+  };
+
+  readonly fields: {
+    readonly index: number;
+    readonly size: number;
+    readonly name: string;
+  };
 };
 
 const addUserMessage = RM.upsertAt(number.Eq);
 
 export const newUserMsg: DemoStateParser<NewUserMsg> = pipe(
-  SP.lift<number, NewUserMsg, DemoState>(
+  SP.lift<number, NewUserMsg["fields"], DemoState>(
     P.struct({
       index: B.uint8_le,
       size: B.uint8_le,
@@ -29,5 +37,10 @@ export const newUserMsg: DemoStateParser<NewUserMsg> = pipe(
       ...s,
       userMessages: pipe(s.userMessages, addUserMessage(a.index, a)),
     }))
-  )
+  ),
+
+  SP.map((fields) => ({
+    type: { id: MessageType.SVC_NEWUSERMSG, name: "SVC_NEWUSERMSG" } as const,
+    fields,
+  }))
 );

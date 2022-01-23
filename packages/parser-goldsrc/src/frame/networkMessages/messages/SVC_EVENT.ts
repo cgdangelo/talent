@@ -1,19 +1,27 @@
 import { parser as P, statefulParser as SP } from "@talent/parser";
 import * as BB from "@talent/parser-bitbuffer";
-import { stream } from "@talent/parser/lib/Stream";
 import { success } from "@talent/parser/lib/ParseResult";
+import { stream } from "@talent/parser/lib/Stream";
 import { pipe } from "fp-ts/lib/function";
 import type { Delta } from "../../../delta";
 import { readDelta } from "../../../delta";
 import type { DemoState, DemoStateParser } from "../../../DemoState";
+import { MessageType } from "../MessageType";
 
 export type Event = {
-  readonly events: readonly {
-    readonly eventIndex: number;
-    readonly packetIndex?: number;
-    readonly delta?: Delta;
-    readonly fireTime?: number;
-  }[];
+  readonly type: {
+    readonly id: 3;
+    readonly name: "SVC_EVENT";
+  };
+
+  readonly fields: {
+    readonly events: readonly {
+      readonly eventIndex: number;
+      readonly packetIndex?: number;
+      readonly delta?: Delta;
+      readonly fireTime?: number;
+    }[];
+  };
 };
 
 export const event: DemoStateParser<Event> = (s) => (i) =>
@@ -36,7 +44,12 @@ export const event: DemoStateParser<Event> = (s) => (i) =>
             )
           )
         )
-      )
+      ),
+
+      SP.map((fields) => ({
+        type: { id: MessageType.SVC_EVENT, name: "SVC_EVENT" } as const,
+        fields,
+      }))
     )(s)
   );
 
