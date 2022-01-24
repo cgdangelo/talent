@@ -9,10 +9,8 @@ import type { DemoState, DemoStateParser } from "../../../DemoState";
 import { MessageType } from "../MessageType";
 
 export type EventReliable = {
-  readonly type: {
-    readonly id: MessageType.SVC_EVENT_RELIABLE;
-    readonly name: "SVC_EVENT_RELIABLE";
-  };
+  readonly id: MessageType.SVC_EVENT_RELIABLE;
+  readonly name: "SVC_EVENT_RELIABLE";
 
   readonly fields: {
     readonly eventIndex: number;
@@ -46,12 +44,13 @@ export const eventReliable: DemoStateParser<EventReliable> = (s) => (i) =>
         )
       ),
 
-      SP.map((fields) => ({
-        type: {
-          id: MessageType.SVC_EVENT_RELIABLE,
-          name: "SVC_EVENT_RELIABLE",
-        } as const,
-        fields,
-      }))
+      SP.map(
+        (fields) =>
+          ({
+            id: MessageType.SVC_EVENT_RELIABLE,
+            name: "SVC_EVENT_RELIABLE",
+            fields,
+          } as const)
+      )
     )(s)
   );

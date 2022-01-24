@@ -6,10 +6,8 @@ import { pointBy } from "../../../Point";
 import { MessageType } from "../MessageType";
 
 export type Particle = {
-  readonly type: {
-    readonly id: MessageType.SVC_PARTICLE;
-    readonly name: "SVC_PARTICLE";
-  };
+  readonly id: MessageType.SVC_PARTICLE;
+  readonly name: "SVC_PARTICLE";
 
   readonly fields: {
     readonly origin: Point;
@@ -36,7 +34,8 @@ export const particle: B.BufferParser<Particle> = pipe(
   }),
 
   P.map((fields) => ({
-    type: { id: MessageType.SVC_PARTICLE, name: "SVC_PARTICLE" } as const,
+    id: MessageType.SVC_PARTICLE,
+    name: "SVC_PARTICLE",
     fields,
   }))
 );

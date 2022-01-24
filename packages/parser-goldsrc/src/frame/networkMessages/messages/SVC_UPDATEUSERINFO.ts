@@ -9,10 +9,8 @@ import { flow, pipe } from "fp-ts/lib/function";
 import { MessageType } from "../MessageType";
 
 export type UpdateUserInfo = {
-  readonly type: {
-    readonly id: MessageType.SVC_UPDATEUSERINFO;
-    readonly name: "SVC_UPDATEUSERINFO";
-  };
+  readonly id: MessageType.SVC_UPDATEUSERINFO;
+  readonly name: "SVC_UPDATEUSERINFO";
 
   readonly fields: {
     readonly clientIndex: number;
@@ -34,10 +32,8 @@ export const updateUserInfo: B.BufferParser<UpdateUserInfo> = pipe(
   }),
 
   P.map((fields) => ({
-    type: {
-      id: MessageType.SVC_UPDATEUSERINFO,
-      name: "SVC_UPDATEUSERINFO",
-    } as const,
+    id: MessageType.SVC_UPDATEUSERINFO,
+    name: "SVC_UPDATEUSERINFO",
     fields,
   }))
 );

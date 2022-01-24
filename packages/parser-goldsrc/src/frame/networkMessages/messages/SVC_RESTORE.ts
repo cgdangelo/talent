@@ -4,10 +4,8 @@ import { pipe } from "fp-ts/lib/function";
 import { MessageType } from "../MessageType";
 
 export type Restore = {
-  readonly type: {
-    readonly id: MessageType.SVC_RESTORE;
-    readonly name: "SVC_RESTORE";
-  };
+  readonly id: MessageType.SVC_RESTORE;
+  readonly name: "SVC_RESTORE";
 
   readonly fields: {
     readonly saveName: string;
@@ -21,7 +19,8 @@ export const restore: B.BufferParser<Restore> = pipe(
   P.bind("mapNames", ({ mapCount }) => P.manyN(B.ztstr, mapCount)),
 
   P.map((fields) => ({
-    type: { id: MessageType.SVC_RESTORE, name: "SVC_RESTORE" } as const,
+    id: MessageType.SVC_RESTORE,
+    name: "SVC_RESTORE",
     fields,
   }))
 );

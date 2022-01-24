@@ -10,10 +10,8 @@ import type { DemoState, DemoStateParser } from "../../../DemoState";
 import { MessageType } from "../MessageType";
 
 export type ClientData = {
-  readonly type: {
-    readonly id: MessageType.SVC_CLIENTDATA;
-    readonly name: "SVC_CLIENTDATA";
-  };
+  readonly id: MessageType.SVC_CLIENTDATA;
+  readonly name: "SVC_CLIENTDATA";
 
   readonly fields: {
     readonly deltaUpdateMask?: number;
@@ -75,12 +73,13 @@ export const clientData: DemoStateParser<ClientData> = (s) => (i) =>
         )
       ),
 
-      SP.map((fields) => ({
-        type: {
-          id: MessageType.SVC_CLIENTDATA,
-          name: "SVC_CLIENTDATA",
-        } as const,
-        fields,
-      }))
+      SP.map(
+        (fields) =>
+          ({
+            id: MessageType.SVC_CLIENTDATA,
+            name: "SVC_CLIENTDATA",
+            fields,
+          } as const)
+      )
     )(s)
   );

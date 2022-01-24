@@ -4,10 +4,8 @@ import { absurd, pipe } from "fp-ts/lib/function";
 import { MessageType } from "../MessageType";
 
 export type HLTV = {
-  readonly type: {
-    readonly id: MessageType.SVC_HLTV;
-    readonly name: "SVC_HLTV";
-  };
+  readonly id: MessageType.SVC_HLTV;
+  readonly name: "SVC_HLTV";
 
   readonly fields: {
     readonly mode:
@@ -35,7 +33,8 @@ export const hltv: B.BufferParser<HLTV> = pipe(
   P.bindTo("mode"),
 
   P.map((fields) => ({
-    type: { id: MessageType.SVC_HLTV, name: "SVC_HLTV" } as const,
+    id: MessageType.SVC_HLTV,
+    name: "SVC_HLTV",
     fields,
   }))
 );

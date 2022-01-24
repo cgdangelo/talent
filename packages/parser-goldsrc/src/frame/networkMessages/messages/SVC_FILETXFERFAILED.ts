@@ -4,10 +4,8 @@ import { pipe } from "fp-ts/lib/function";
 import { MessageType } from "../MessageType";
 
 export type FileTxferFailed = {
-  readonly type: {
-    readonly id: MessageType.SVC_FILETXFERFAILED;
-    readonly name: "SVC_FILETXFERFAILED";
-  };
+  readonly id: MessageType.SVC_FILETXFERFAILED;
+  readonly name: "SVC_FILETXFERFAILED";
 
   readonly fields: {
     readonly filename: string;
@@ -18,10 +16,8 @@ export const fileTxferFailed: B.BufferParser<FileTxferFailed> = pipe(
   P.struct({ filename: B.ztstr }),
 
   P.map((fields) => ({
-    type: {
-      id: MessageType.SVC_FILETXFERFAILED,
-      name: "SVC_FILETXFERFAILED",
-    } as const,
+    id: MessageType.SVC_FILETXFERFAILED,
+    name: "SVC_FILETXFERFAILED",
     fields,
   }))
 );

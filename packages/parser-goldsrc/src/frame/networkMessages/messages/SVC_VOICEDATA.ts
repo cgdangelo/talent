@@ -4,10 +4,8 @@ import { pipe } from "fp-ts/lib/function";
 import { MessageType } from "../MessageType";
 
 export type VoiceData = {
-  readonly type: {
-    readonly id: MessageType.SVC_VOICEDATA;
-    readonly name: "SVC_VOICEDATA";
-  };
+  readonly id: MessageType.SVC_VOICEDATA;
+  readonly name: "SVC_VOICEDATA";
 
   readonly fields: {
     readonly playerIndex: number;
@@ -21,7 +19,8 @@ export const voiceData: B.BufferParser<VoiceData> = pipe(
   P.bind("data", ({ size }) => pipe(P.manyN(B.uint8_le, size))),
 
   P.map((fields) => ({
-    type: { id: MessageType.SVC_VOICEDATA, name: "SVC_VOICEDATA" } as const,
+    id: MessageType.SVC_VOICEDATA,
+    name: "SVC_VOICEDATA",
     fields,
   }))
 );

@@ -9,10 +9,8 @@ import type { DemoState, DemoStateParser } from "../../../DemoState";
 import { MessageType } from "../MessageType";
 
 export type Event = {
-  readonly type: {
-    readonly id: 3;
-    readonly name: "SVC_EVENT";
-  };
+  readonly id: MessageType.SVC_EVENT;
+  readonly name: "SVC_EVENT";
 
   readonly fields: {
     readonly events: readonly {
@@ -46,10 +44,14 @@ export const event: DemoStateParser<Event> = (s) => (i) =>
         )
       ),
 
-      SP.map((fields) => ({
-        type: { id: MessageType.SVC_EVENT, name: "SVC_EVENT" } as const,
-        fields,
-      }))
+      SP.map(
+        (fields) =>
+          ({
+            id: MessageType.SVC_EVENT,
+            name: "SVC_EVENT",
+            fields,
+          } as const)
+      )
     )(s)
   );
 

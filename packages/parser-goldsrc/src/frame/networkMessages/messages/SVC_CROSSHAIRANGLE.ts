@@ -4,10 +4,8 @@ import { pipe } from "fp-ts/lib/function";
 import { MessageType } from "../MessageType";
 
 export type CrosshairAngle = {
-  readonly type: {
-    readonly id: MessageType.SVC_CROSSHAIRANGLE;
-    readonly name: "SVC_CROSSHAIRANGLE";
-  };
+  readonly id: MessageType.SVC_CROSSHAIRANGLE;
+  readonly name: "SVC_CROSSHAIRANGLE";
 
   readonly fields: {
     readonly pitch: number;
@@ -19,10 +17,8 @@ export const crosshairAngle: B.BufferParser<CrosshairAngle> = pipe(
   P.struct({ pitch: B.int16_le, yaw: B.int16_le }),
 
   P.map((fields) => ({
-    type: {
-      id: MessageType.SVC_CROSSHAIRANGLE,
-      name: "SVC_CROSSHAIRANGLE",
-    } as const,
+    id: MessageType.SVC_CROSSHAIRANGLE,
+    name: "SVC_CROSSHAIRANGLE",
     fields,
   }))
 );

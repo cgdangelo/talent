@@ -4,10 +4,8 @@ import { pipe } from "fp-ts/lib/function";
 import { MessageType } from "../MessageType";
 
 export type DecalName = {
-  readonly type: {
-    readonly id: MessageType.SVC_DECALNAME;
-    readonly name: "SVC_DECALNAME";
-  };
+  readonly id: MessageType.SVC_DECALNAME;
+  readonly name: "SVC_DECALNAME";
 
   readonly fields: {
     readonly positionIndex: number;
@@ -19,7 +17,8 @@ export const decalName: B.BufferParser<DecalName> = pipe(
   P.struct({ positionIndex: B.uint8_le, decalName: B.ztstr }),
 
   P.map((fields) => ({
-    type: { id: MessageType.SVC_DECALNAME, name: "SVC_DECALNAME" } as const,
+    id: MessageType.SVC_DECALNAME,
+    name: "SVC_DECALNAME",
     fields,
   }))
 );

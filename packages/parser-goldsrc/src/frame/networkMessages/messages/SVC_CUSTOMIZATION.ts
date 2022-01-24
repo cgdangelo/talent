@@ -4,10 +4,8 @@ import { pipe } from "fp-ts/lib/function";
 import { MessageType } from "../MessageType";
 
 export type Customization = {
-  readonly type: {
-    readonly id: MessageType.SVC_CUSTOMIZATION;
-    readonly name: "SVC_CUSTOMIZATION";
-  };
+  readonly id: MessageType.SVC_CUSTOMIZATION;
+  readonly name: "SVC_CUSTOMIZATION";
 
   readonly fields: {
     readonly playerIndex: number;
@@ -35,10 +33,8 @@ export const customization: B.BufferParser<Customization> = pipe(
   ),
 
   P.map((fields) => ({
-    type: {
-      id: MessageType.SVC_CUSTOMIZATION,
-      name: "SVC_CUSTOMIZATION",
-    } as const,
+    id: MessageType.SVC_CUSTOMIZATION,
+    name: "SVC_CUSTOMIZATION",
     fields,
   }))
 );

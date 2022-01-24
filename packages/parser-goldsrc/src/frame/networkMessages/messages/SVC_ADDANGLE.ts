@@ -4,10 +4,8 @@ import { pipe } from "fp-ts/lib/function";
 import { MessageType } from "../MessageType";
 
 export type AddAngle = {
-  readonly type: {
-    readonly id: MessageType.SVC_ADDANGLE;
-    readonly name: "SVC_ADDANGLE";
-  };
+  readonly id: MessageType.SVC_ADDANGLE;
+  readonly name: "SVC_ADDANGLE";
 
   readonly fields: {
     readonly angleToAdd: number;
@@ -23,7 +21,8 @@ export const addAngle: B.BufferParser<AddAngle> = pipe(
   }),
 
   P.map((fields) => ({
-    type: { id: MessageType.SVC_ADDANGLE, name: "SVC_ADDANGLE" } as const,
+    id: MessageType.SVC_ADDANGLE,
+    name: "SVC_ADDANGLE",
     fields,
   }))
 );

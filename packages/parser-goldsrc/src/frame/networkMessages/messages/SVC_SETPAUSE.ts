@@ -4,10 +4,8 @@ import { pipe } from "fp-ts/lib/function";
 import { MessageType } from "../MessageType";
 
 export type SetPause = {
-  readonly type: {
-    readonly id: MessageType.SVC_SETPAUSE;
-    readonly name: "SVC_SETPAUSE";
-  };
+  readonly id: MessageType.SVC_SETPAUSE;
+  readonly name: "SVC_SETPAUSE";
 
   readonly fields: {
     readonly isPaused: number;
@@ -18,7 +16,8 @@ export const setPause: B.BufferParser<SetPause> = pipe(
   P.struct({ isPaused: B.int8_le }),
 
   P.map((fields) => ({
-    type: { id: MessageType.SVC_SETPAUSE, name: "SVC_SETPAUSE" } as const,
+    id: MessageType.SVC_SETPAUSE,
+    name: "SVC_SETPAUSE",
     fields,
   }))
 );

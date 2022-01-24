@@ -4,10 +4,8 @@ import { pipe } from "fp-ts/lib/function";
 import { MessageType } from "../MessageType";
 
 export type SendCvarValue = {
-  readonly type: {
-    readonly id: MessageType.SVC_SENDCVARVALUE;
-    readonly name: "SVC_SENDCVARVALUE";
-  };
+  readonly id: MessageType.SVC_SENDCVARVALUE;
+  readonly name: "SVC_SENDCVARVALUE";
 
   readonly fields: {
     readonly name: string;
@@ -19,10 +17,8 @@ export const sendCvarValue: B.BufferParser<SendCvarValue> = pipe(
   P.struct({ name: B.ztstr }),
 
   P.map((fields) => ({
-    type: {
-      id: MessageType.SVC_SENDCVARVALUE,
-      name: "SVC_SENDCVARVALUE",
-    } as const,
+    id: MessageType.SVC_SENDCVARVALUE,
+    name: "SVC_SENDCVARVALUE",
     fields,
   }))
 );

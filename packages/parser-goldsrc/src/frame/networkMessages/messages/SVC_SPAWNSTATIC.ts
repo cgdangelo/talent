@@ -5,10 +5,8 @@ import type { Point } from "../../../Point";
 import { MessageType } from "../MessageType";
 
 export type SpawnStatic = {
-  readonly type: {
-    readonly id: MessageType.SVC_SPAWNSTATIC;
-    readonly name: "SVC_SPAWNSTATIC";
-  };
+  readonly id: MessageType.SVC_SPAWNSTATIC;
+  readonly name: "SVC_SPAWNSTATIC";
 
   readonly fields: {
     readonly modelIndex: number;
@@ -93,7 +91,8 @@ export const spawnStatic: B.BufferParser<SpawnStatic> = pipe(
   ),
 
   P.map((fields) => ({
-    type: { id: MessageType.SVC_SPAWNSTATIC, name: "SVC_SPAWNSTATIC" } as const,
+    id: MessageType.SVC_SPAWNSTATIC,
+    name: "SVC_SPAWNSTATIC",
     fields,
   }))
 );
