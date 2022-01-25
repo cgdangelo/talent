@@ -7,12 +7,12 @@ import type { Point } from "../../Point";
 import { point } from "../../Point";
 import type { FrameHeader } from "../FrameHeader";
 import { frameHeader } from "../FrameHeader";
-import type { MoveVars } from "../MoveVars";
-import { moveVars } from "../MoveVars";
-import type { RefParams } from "../RefParams";
-import { refParams } from "../RefParams";
-import type { UserCmd } from "../UserCmd";
-import { userCmd } from "../UserCmd";
+import type { MoveVars } from "./MoveVars";
+import { moveVars } from "./MoveVars";
+import type { RefParams } from "./RefParams";
+import { refParams } from "./RefParams";
+import type { UserCmd } from "./UserCmd";
+import { userCmd } from "./UserCmd";
 import type { Message } from "./Message";
 import { messages } from "./Message";
 
