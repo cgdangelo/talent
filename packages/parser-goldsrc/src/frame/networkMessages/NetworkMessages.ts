@@ -2,6 +2,7 @@ import { parser as P, statefulParser as SP } from "@talent/parser";
 import { buffer as B } from "@talent/parser-buffer";
 import { pipe } from "fp-ts/lib/function";
 import type { DemoState, DemoStateParser } from "../../DemoState";
+import type { Message } from "./Message";
 import { messages } from "./Message";
 import type { NetworkMessagesInfo } from "./NetworkMessagesInfo";
 import { networkMessagesInfo } from "./NetworkMessagesInfo";
@@ -15,7 +16,7 @@ export type NetworkMessages = {
   readonly outgoingSequence: number;
   readonly reliableSequence: number;
   readonly lastReliableSequence: number;
-  readonly messages: readonly unknown[];
+  readonly messages: readonly Message[];
 };
 
 export type NetworkMessagesFrameType = "Start" | "Normal" | number;
