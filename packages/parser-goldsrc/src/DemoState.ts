@@ -2,7 +2,7 @@ import type { StatefulParser } from "@talent/parser/lib/StatefulParser";
 import { readonlyMap as RM } from "fp-ts";
 import type { DeltaDecoder } from "./delta";
 import { initialDeltaDecoders } from "./delta";
-import type { NewUserMsg } from "./frame/networkMessages/messages";
+import type { NewUserMsg } from "./frame/networkMessages/engine";
 
 export type DemoStateParser<A> = StatefulParser<DemoState, number, A>;
 

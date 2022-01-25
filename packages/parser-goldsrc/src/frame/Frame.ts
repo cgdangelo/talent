@@ -1,120 +1,93 @@
 import { parser as P, statefulParser as SP } from "@talent/parser";
 import { buffer as B } from "@talent/parser-buffer";
 import { pipe } from "fp-ts/lib/function";
-import type { DemoState, DemoStateParser } from "../DemoState";
+import type { DemoStateParser } from "../DemoState";
+import type { ClientData } from "./ClientData";
 import { clientData } from "./ClientData";
+import type { ConsoleCommand } from "./ConsoleCommand";
 import { consoleCommand } from "./ConsoleCommand";
+import type { DemoBuffer } from "./DemoBuffer";
 import { demoBuffer } from "./DemoBuffer";
+import type { Event } from "./Event";
 import { event } from "./Event";
-import type { NetworkMessagesFrameType } from "./networkMessages/NetworkMessages";
-import {
-  networkMessages,
-  networkMessagesFrameType,
-} from "./networkMessages/NetworkMessages";
+import type { FrameHeader } from "./FrameHeader";
+import { frameHeader } from "./FrameHeader";
+import type { NetworkMessages } from "./networkMessages/NetworkMessages";
+import { networkMessages } from "./networkMessages/NetworkMessages";
+import type { Sound } from "./Sound";
 import { sound } from "./Sound";
+import type { WeaponAnimation } from "./WeaponAnimation";
 import { weaponAnimation } from "./WeaponAnimation";
 
-export type Frame = {
-  readonly header: FrameHeader;
-  readonly frameData: unknown;
-};
+export type Frame =
+  | NetworkMessages
+  | ConsoleCommand
+  | ClientData
+  | Event
+  | WeaponAnimation
+  | Sound
+  | DemoBuffer
+  | {
+      readonly header: FrameHeader;
+      readonly type: "DemoStart" | "NextSection";
+    };
 
-export type FrameHeader = {
-  readonly frameType: FrameType;
-  readonly time: number;
-  readonly frame: number;
-};
-
-export type FrameType =
-  | `NetworkMessages-${NetworkMessagesFrameType}`
-  | "DemoStart"
-  | "ConsoleCommand"
-  | "ClientData"
-  | "NextSection"
-  | "Event"
-  | "WeaponAnimation"
-  | "Sound"
-  | "DemoBuffer";
-
-const frameTypeIdToName = (a: number): FrameType => {
-  switch (a) {
-    case 2:
-      return "DemoStart";
-    case 3:
-      return "ConsoleCommand";
-    case 4:
-      return "ClientData";
-    case 5:
-      return "NextSection";
-    case 6:
-      return "Event";
-    case 7:
-      return "WeaponAnimation";
-    case 8:
-      return "Sound";
-    case 9:
-      return "DemoBuffer";
-    default:
-      return `NetworkMessages-${networkMessagesFrameType(a)}`;
-  }
-};
-
-const frameType: B.BufferParser<FrameType> = P.expected(
+const frameType: B.BufferParser<number> = P.expected(
   pipe(
     B.uint8_le,
-    P.filter((a) => a >= 0 && a <= 9),
-    P.map(frameTypeIdToName)
+    P.filter((a) => a >= 0 && a <= 9)
   ),
   "frame type id [0, 9]"
 );
 
-const frameHeader: B.BufferParser<FrameHeader> = P.struct({
-  frameType,
-  time: B.float32_le,
-  frame: B.uint32_le,
-});
-
-const frameData: (frameType: FrameType) => DemoStateParser<unknown> = (
-  frameType
-) => {
-  const noFields: DemoStateParser<Record<never, never>> = SP.of({});
-
+const frame_: (frameType: number) => DemoStateParser<Frame> = (frameType) => {
   switch (frameType) {
-    case "DemoStart":
-      return noFields;
+    case 2:
+      return SP.lift(
+        pipe(
+          frameHeader,
+          P.bindTo("header"),
 
-    case "ConsoleCommand":
+          P.bind("type", () => P.of("DemoStart" as const))
+        )
+      );
+
+    case 3:
       return SP.lift(consoleCommand);
 
-    case "ClientData":
+    case 4:
       return SP.lift(clientData);
 
-    case "NextSection":
-      return noFields;
+    case 5:
+      return SP.lift(
+        pipe(
+          frameHeader,
+          P.bindTo("header"),
 
-    case "Event":
+          P.bind("type", () => P.of("DemoStart" as const))
+        )
+      );
+
+    case 6:
       return SP.lift(event);
 
-    case "WeaponAnimation":
+    case 7:
       return SP.lift(weaponAnimation);
 
-    case "Sound":
+    case 8:
       return SP.lift(sound);
 
-    case "DemoBuffer":
+    case 9:
       return SP.lift(demoBuffer);
 
     default:
-      return frameType.startsWith("NetworkMessages")
-        ? networkMessages
-        : SP.lift(P.fail());
+      return networkMessages;
   }
 };
 
-const frame: DemoStateParser<Frame> = pipe(
-  SP.lift<number, FrameHeader, DemoState>(frameHeader),
-  SP.bindTo("header"),
-  SP.bind("frameData", ({ header: { frameType } }) => frameData(frameType))
+const frame = pipe(
+  SP.lift(frameType) as DemoStateParser<number>,
+  SP.chain(frame_)
 );
 
 export const frames: DemoStateParser<readonly Frame[]> = SP.manyTill(
@@ -122,7 +95,7 @@ export const frames: DemoStateParser<readonly Frame[]> = SP.manyTill(
   SP.lift(
     pipe(
       frameType,
-      P.filter((a) => a === "NextSection")
+      P.filter((a) => a === 5)
     )
   )
 );

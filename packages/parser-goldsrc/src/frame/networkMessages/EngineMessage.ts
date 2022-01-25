@@ -1,7 +1,7 @@
 import { statefulParser as SP } from "@talent/parser";
 import { flow } from "fp-ts/lib/function";
 import type { DemoStateParser } from "../../DemoState";
-import * as M from "./messages";
+import * as M from "./engine";
 import { MessageType } from "./MessageType";
 
 export type EngineMessage =

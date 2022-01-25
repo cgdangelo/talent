@@ -1,7 +1,7 @@
 import { buffer as B } from "@talent/parser-buffer";
 import * as P from "@talent/parser/lib/Parser";
-import type { Point } from "../Point";
-import { point } from "../Point";
+import type { Point } from "../../Point";
+import { point } from "../../Point";
 
 export type RefParams = {
   readonly viewOrigin: Point;
