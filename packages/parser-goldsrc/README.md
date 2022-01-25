@@ -28,7 +28,6 @@ Sources for this information include:
     - [Sound](#sound)
     - [DemoBuffer](#demobuffer)
     - [NetworkMessages](#networkmessages)
-      - [NetworkMessagesInfo](#networkmessagesinfo)
       - [RefParams](#refparams)
       - [UserCmd](#usercmd)
       - [MoveVars](#movevars)
@@ -297,8 +296,6 @@ This frame has no additional fields.
 | buffer       | `Word8` \* bufferLength |             |
 
 ### NetworkMessages
-
-#### NetworkMessagesInfo
 
 | Name           | Type            | Description                                                                  |
 | -------------- | --------------- | ---------------------------------------------------------------------------- |
@@ -1394,6 +1391,12 @@ If the message was not sent in SVC_NEWUSERMSG, or the message was sent with a si
 | `RemainingBits`  | Individual bits of padding until the next byte boundary.                     |
 
 ## Changelog
+
+v4 (2022-01-25)
+
+- Condensed `NetworkMessagesInfo` into `NetworkMessages`.
+
+---
 
 v3 (2022-01-21)
 

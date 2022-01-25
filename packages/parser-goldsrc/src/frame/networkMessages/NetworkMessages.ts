@@ -1,14 +1,26 @@
-import { parser as P, statefulParser as SP } from "@talent/parser";
+import { statefulParser as SP } from "@talent/parser";
 import { buffer as B } from "@talent/parser-buffer";
+import * as P from "@talent/parser/lib/Parser";
 import { pipe } from "fp-ts/lib/function";
 import type { DemoState, DemoStateParser } from "../../DemoState";
+import type { Point } from "../../Point";
+import { point } from "../../Point";
+import type { MoveVars } from "../MoveVars";
+import { moveVars } from "../MoveVars";
+import type { RefParams } from "../RefParams";
+import { refParams } from "../RefParams";
+import type { UserCmd } from "../UserCmd";
+import { userCmd } from "../UserCmd";
 import type { Message } from "./Message";
 import { messages } from "./Message";
-import type { NetworkMessagesInfo } from "./NetworkMessagesInfo";
-import { networkMessagesInfo } from "./NetworkMessagesInfo";
 
 export type NetworkMessages = {
-  readonly info: NetworkMessagesInfo;
+  readonly timestamp: number;
+  readonly refParams: RefParams;
+  readonly userCmd: UserCmd;
+  readonly moveVars: MoveVars;
+  readonly view: Point;
+  readonly viewModel: number;
   readonly incomingSequence: number;
   readonly incomingAcknowledged: number;
   readonly incomingReliableAcknowledged: number;
@@ -45,7 +57,12 @@ const messagesLength: B.BufferParser<number> = P.expected(
 export const networkMessages: DemoStateParser<NetworkMessages> = pipe(
   SP.lift<number, Omit<NetworkMessages, "messages">, DemoState>(
     P.struct({
-      info: networkMessagesInfo,
+      timestamp: B.float32_le,
+      refParams,
+      userCmd,
+      moveVars,
+      view: point,
+      viewModel: B.int32_le,
       incomingSequence: B.int32_le,
       incomingAcknowledged: B.int32_le,
       incomingReliableAcknowledged: B.int32_le,
