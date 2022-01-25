@@ -4,10 +4,8 @@ import { pipe } from "fp-ts/lib/function";
 import { MessageType } from "../MessageType";
 
 export type VoiceInit = {
-  readonly type: {
-    readonly id: MessageType.SVC_VOICEINIT;
-    readonly name: "SVC_VOICEINIT";
-  };
+  readonly id: MessageType.SVC_VOICEINIT;
+  readonly name: "SVC_VOICEINIT";
 
   readonly fields: {
     readonly codecName: string;
@@ -19,7 +17,8 @@ export const voiceInit: B.BufferParser<VoiceInit> = pipe(
   P.struct({ codecName: B.ztstr, quality: B.int8_le }),
 
   P.map((fields) => ({
-    type: { id: MessageType.SVC_VOICEINIT, name: "SVC_VOICEINIT" } as const,
+    id: MessageType.SVC_VOICEINIT,
+    name: "SVC_VOICEINIT",
     fields,
   }))
 );

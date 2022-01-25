@@ -4,10 +4,8 @@ import { pipe } from "fp-ts/lib/function";
 import { MessageType } from "../MessageType";
 
 export type Director = {
-  readonly type: {
-    readonly id: MessageType.SVC_DIRECTOR;
-    readonly name: "SVC_DIRECTOR";
-  };
+  readonly id: MessageType.SVC_DIRECTOR;
+  readonly name: "SVC_DIRECTOR";
 
   readonly fields: {
     readonly flag: number;
@@ -26,7 +24,8 @@ export const director: B.BufferParser<Director> = pipe(
   ),
 
   P.map((fields) => ({
-    type: { id: MessageType.SVC_DIRECTOR, name: "SVC_DIRECTOR" } as const,
+    id: MessageType.SVC_DIRECTOR,
+    name: "SVC_DIRECTOR",
     fields,
   }))
 );

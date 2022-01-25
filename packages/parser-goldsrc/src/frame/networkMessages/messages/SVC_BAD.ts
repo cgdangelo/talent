@@ -3,10 +3,8 @@ import * as P from "@talent/parser/lib/Parser";
 import type { MessageType } from "../MessageType";
 
 export type Bad = {
-  readonly type: {
-    readonly id: MessageType.SVC_BAD;
-    readonly name: "SVC_BAD";
-  };
+  readonly id: MessageType.SVC_BAD;
+  readonly name: "SVC_BAD";
 
   readonly fields: never;
 };

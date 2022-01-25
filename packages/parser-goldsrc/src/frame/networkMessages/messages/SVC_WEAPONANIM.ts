@@ -4,10 +4,8 @@ import { pipe } from "fp-ts/lib/function";
 import { MessageType } from "../MessageType";
 
 export type WeaponAnim = {
-  readonly type: {
-    readonly id: MessageType.SVC_WEAPONANIM;
-    readonly name: "SVC_WEAPONANIM";
-  };
+  readonly id: MessageType.SVC_WEAPONANIM;
+  readonly name: "SVC_WEAPONANIM";
 
   readonly fields: {
     readonly sequenceNumber: number;
@@ -19,7 +17,8 @@ export const weaponAnim: B.BufferParser<WeaponAnim> = pipe(
   P.struct({ sequenceNumber: B.int8_le, weaponModelBodyGroup: B.int8_le }),
 
   P.map((fields) => ({
-    type: { id: MessageType.SVC_WEAPONANIM, name: "SVC_WEAPONANIM" } as const,
+    id: MessageType.SVC_WEAPONANIM,
+    name: "SVC_WEAPONANIM",
     fields,
   }))
 );

@@ -6,10 +6,8 @@ import { pipe } from "fp-ts/lib/function";
 import { MessageType } from "../MessageType";
 
 export type Pings = {
-  readonly type: {
-    readonly id: MessageType.SVC_PINGS;
-    readonly name: "SVC_PINGS";
-  };
+  readonly id: MessageType.SVC_PINGS;
+  readonly name: "SVC_PINGS";
 
   readonly fields: {
     readonly pings: readonly {
@@ -43,7 +41,8 @@ export const pings: B.BufferParser<Pings> = (i) =>
       BB.nextByte,
 
       P.map((fields) => ({
-        type: { id: MessageType.SVC_PINGS, name: "SVC_PINGS" } as const,
+        id: MessageType.SVC_PINGS,
+        name: "SVC_PINGS",
         fields,
       }))
     )

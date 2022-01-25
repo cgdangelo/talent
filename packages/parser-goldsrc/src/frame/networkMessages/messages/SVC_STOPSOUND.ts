@@ -4,10 +4,8 @@ import { pipe } from "fp-ts/lib/function";
 import { MessageType } from "../MessageType";
 
 export type StopSound = {
-  readonly type: {
-    readonly id: MessageType.SVC_STOPSOUND;
-    readonly name: "SVC_STOPSOUND";
-  };
+  readonly id: MessageType.SVC_STOPSOUND;
+  readonly name: "SVC_STOPSOUND";
 
   readonly fields: {
     readonly entityIndex: number;
@@ -18,7 +16,8 @@ export const stopSound: B.BufferParser<StopSound> = pipe(
   P.struct({ entityIndex: B.int16_le }),
 
   P.map((fields) => ({
-    type: { id: MessageType.SVC_STOPSOUND, name: "SVC_STOPSOUND" } as const,
+    id: MessageType.SVC_STOPSOUND,
+    name: "SVC_STOPSOUND",
     fields,
   }))
 );

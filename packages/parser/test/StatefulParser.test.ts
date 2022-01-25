@@ -176,6 +176,16 @@ describe("StatefulParser", () => {
       ).toStrictEqual(success(["that", "s"], stream([]), stream([])));
     });
 
+    test("altW", () => {
+      expect(
+        _.altW(() => _.of(123))(_.of("ma"))("s")(stream([]))
+      ).toStrictEqual(success(["ma", "s"], stream([]), stream([])));
+
+      expect(_.altW(() => _.of(123))(_.fail())("s")(stream([]))).toStrictEqual(
+        success([123, "s"], stream([]), stream([]))
+      );
+    });
+
     test("chain", () => {
       expect(
         pipe(

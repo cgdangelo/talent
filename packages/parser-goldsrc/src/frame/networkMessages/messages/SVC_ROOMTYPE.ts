@@ -4,11 +4,10 @@ import { absurd, pipe } from "fp-ts/lib/function";
 import { MessageType } from "../MessageType";
 
 export type RoomType = {
-  readonly type: {
-    readonly id: MessageType.SVC_ROOMTYPE;
-    readonly name: "SVC_ROOMTYPE";
-  };
+  readonly id: MessageType.SVC_ROOMTYPE;
+  readonly name: "SVC_ROOMTYPE";
 
+  // TODO fix type fields
   readonly fields: {
     readonly type:
       | { readonly id: 0; readonly name: "Normal" }
@@ -113,7 +112,8 @@ export const roomType: B.BufferParser<RoomType> = pipe(
   P.bindTo("type"),
 
   P.map((fields) => ({
-    type: { id: MessageType.SVC_ROOMTYPE, name: "SVC_ROOMTYPE" } as const,
+    id: MessageType.SVC_ROOMTYPE,
+    name: "SVC_ROOMTYPE",
     fields,
   }))
 );

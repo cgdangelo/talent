@@ -16,10 +16,8 @@ type PacketEntity = {
 };
 
 export type PacketEntities = {
-  readonly type: {
-    readonly id: MessageType.SVC_PACKETENTITIES;
-    readonly name: "SVC_PACKETENTITIES";
-  };
+  readonly id: MessageType.SVC_PACKETENTITIES;
+  readonly name: "SVC_PACKETENTITIES";
 
   readonly fields: {
     readonly entityCount: number;
@@ -130,12 +128,13 @@ export const packetEntities: DemoStateParser<PacketEntities> = (s) => (i) =>
         )
       ),
 
-      SP.map((fields) => ({
-        type: {
-          id: MessageType.SVC_PACKETENTITIES,
-          name: "SVC_PACKETENTITIES",
-        } as const,
-        fields,
-      }))
+      SP.map(
+        (fields) =>
+          ({
+            id: MessageType.SVC_PACKETENTITIES,
+            name: "SVC_PACKETENTITIES",
+            fields,
+          } as const)
+      )
     )(s)
   );

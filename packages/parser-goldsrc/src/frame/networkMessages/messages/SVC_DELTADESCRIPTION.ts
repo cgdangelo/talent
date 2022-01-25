@@ -10,10 +10,8 @@ import type { DemoState, DemoStateParser } from "../../../DemoState";
 import { MessageType } from "../MessageType";
 
 export type DeltaDescription = {
-  readonly type: {
-    readonly id: MessageType.SVC_DELTADESCRIPTION;
-    readonly name: "SVC_DELTADESCRIPTION";
-  };
+  readonly id: MessageType.SVC_DELTADESCRIPTION;
+  readonly name: "SVC_DELTADESCRIPTION";
 
   readonly fields: {
     readonly name: string;
@@ -68,10 +66,8 @@ export const deltaDescription: DemoStateParser<DeltaDescription> = pipe(
   ),
 
   SP.map((fields) => ({
-    type: {
-      id: MessageType.SVC_DELTADESCRIPTION,
-      name: "SVC_DELTADESCRIPTION",
-    } as const,
+    id: MessageType.SVC_DELTADESCRIPTION,
+    name: "SVC_DELTADESCRIPTION",
     fields,
   }))
 );

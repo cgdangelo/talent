@@ -6,10 +6,8 @@ import { pointBy } from "../../../Point";
 import { MessageType } from "../MessageType";
 
 export type SpawnStaticSound = {
-  readonly type: {
-    readonly id: MessageType.SVC_SPAWNSTATICSOUND;
-    readonly name: "SVC_SPAWNSTATICSOUND";
-  };
+  readonly id: MessageType.SVC_SPAWNSTATICSOUND;
+  readonly name: "SVC_SPAWNSTATICSOUND";
 
   readonly fields: {
     readonly origin: Point;
@@ -50,10 +48,8 @@ export const spawnStaticSound: B.BufferParser<SpawnStaticSound> = pipe(
   }),
 
   P.map((fields) => ({
-    type: {
-      id: MessageType.SVC_SPAWNSTATICSOUND,
-      name: "SVC_SPAWNSTATICSOUND",
-    } as const,
+    id: MessageType.SVC_SPAWNSTATICSOUND,
+    name: "SVC_SPAWNSTATICSOUND",
     fields,
   }))
 );

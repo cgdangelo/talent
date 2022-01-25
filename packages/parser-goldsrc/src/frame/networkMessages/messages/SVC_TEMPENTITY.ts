@@ -5,11 +5,10 @@ import type { Point } from "../../../Point";
 import { MessageType } from "../MessageType";
 
 export type TempEntity = {
-  readonly type: {
-    readonly id: MessageType.SVC_TEMPENTITY;
-    readonly name: "SVC_TEMPENTITY";
-  };
+  readonly id: MessageType.SVC_TEMPENTITY;
+  readonly name: "SVC_TEMPENTITY";
 
+  // TODO fix type fields
   readonly fields:
     | {
         // #define TE_BEAMPOINTS  0  // beam effect between two points
@@ -1223,10 +1222,8 @@ export const tempEntity: B.BufferParser<TempEntity> = pipe(
   P.map(
     (fields) =>
       ({
-        type: {
-          id: MessageType.SVC_TEMPENTITY,
-          name: "SVC_TEMPENTITY",
-        } as const,
+        id: MessageType.SVC_TEMPENTITY,
+        name: "SVC_TEMPENTITY",
         fields,
 
         // TODO add parsing of entity types

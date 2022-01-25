@@ -4,10 +4,8 @@ import { pipe } from "fp-ts/lib/function";
 import { MessageType } from "../MessageType";
 
 export type SetAngle = {
-  readonly type: {
-    readonly id: MessageType.SVC_SETANGLE;
-    readonly name: "SVC_SETANGLE";
-  };
+  readonly id: MessageType.SVC_SETANGLE;
+  readonly name: "SVC_SETANGLE";
 
   readonly fields: {
     readonly pitch: number;
@@ -25,7 +23,8 @@ export const setAngle: B.BufferParser<SetAngle> = pipe(
   P.map(([pitch, yaw, roll]) => ({ pitch, yaw, roll })),
 
   P.map((fields) => ({
-    type: { id: MessageType.SVC_SETANGLE, name: "SVC_SETANGLE" } as const,
+    id: MessageType.SVC_SETANGLE,
+    name: "SVC_SETANGLE",
     fields,
   }))
 );

@@ -4,10 +4,8 @@ import { pipe } from "fp-ts/lib/function";
 import { MessageType } from "../MessageType";
 
 export type LightStyle = {
-  readonly type: {
-    readonly id: MessageType.SVC_LIGHTSTYLE;
-    readonly name: "SVC_LIGHTSTYLE";
-  };
+  readonly id: MessageType.SVC_LIGHTSTYLE;
+  readonly name: "SVC_LIGHTSTYLE";
 
   readonly fields: {
     readonly index: number;
@@ -20,7 +18,8 @@ export const lightStyle: B.BufferParser<LightStyle> = pipe(
   P.struct({ index: B.uint8_le, lightInfo: B.ztstr }),
 
   P.map((fields) => ({
-    type: { id: MessageType.SVC_LIGHTSTYLE, name: "SVC_LIGHTSTYLE" } as const,
+    id: MessageType.SVC_LIGHTSTYLE,
+    name: "SVC_LIGHTSTYLE",
     fields,
   }))
 );

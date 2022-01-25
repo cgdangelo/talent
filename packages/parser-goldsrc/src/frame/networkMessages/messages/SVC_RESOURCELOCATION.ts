@@ -4,10 +4,8 @@ import { pipe } from "fp-ts/lib/function";
 import { MessageType } from "../MessageType";
 
 export type ResourceLocation = {
-  readonly type: {
-    readonly id: MessageType.SVC_RESOURCELOCATION;
-    readonly name: "SVC_RESOURCELOCATION";
-  };
+  readonly id: MessageType.SVC_RESOURCELOCATION;
+  readonly name: "SVC_RESOURCELOCATION";
 
   readonly fields: {
     readonly sv_downloadurl: string;
@@ -18,10 +16,8 @@ export const resourceLocation: B.BufferParser<ResourceLocation> = pipe(
   P.struct({ sv_downloadurl: B.ztstr }),
 
   P.map((fields) => ({
-    type: {
-      id: MessageType.SVC_RESOURCELOCATION,
-      name: "SVC_RESOURCELOCATION",
-    } as const,
+    id: MessageType.SVC_RESOURCELOCATION,
+    name: "SVC_RESOURCELOCATION",
     fields,
   }))
 );

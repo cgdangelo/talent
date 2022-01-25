@@ -10,10 +10,8 @@ import type { DemoState, DemoStateParser } from "../../../DemoState";
 import { MessageType } from "../MessageType";
 
 export type SpawnBaseline = {
-  readonly type: {
-    readonly id: MessageType.SVC_SPAWNBASELINE;
-    readonly name: "SVC_SPAWNBASELINE";
-  };
+  readonly id: MessageType.SVC_SPAWNBASELINE;
+  readonly name: "SVC_SPAWNBASELINE";
 
   readonly fields: {
     readonly entities: readonly {
@@ -94,12 +92,13 @@ export const spawnBaseline: DemoStateParser<SpawnBaseline> = (s) => (i) =>
         )
       ),
 
-      SP.map((fields) => ({
-        type: {
-          id: MessageType.SVC_SPAWNBASELINE,
-          name: "SVC_SPAWNBASELINE",
-        } as const,
-        fields,
-      }))
+      SP.map(
+        (fields) =>
+          ({
+            id: MessageType.SVC_SPAWNBASELINE,
+            name: "SVC_SPAWNBASELINE",
+            fields,
+          } as const)
+      )
     )(s)
   );

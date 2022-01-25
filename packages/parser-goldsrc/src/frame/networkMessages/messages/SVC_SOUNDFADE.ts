@@ -4,10 +4,8 @@ import { pipe } from "fp-ts/lib/function";
 import { MessageType } from "../MessageType";
 
 export type SoundFade = {
-  readonly type: {
-    readonly id: MessageType.SVC_SOUNDFADE;
-    readonly name: "SVC_SOUNDFADE";
-  };
+  readonly id: MessageType.SVC_SOUNDFADE;
+  readonly name: "SVC_SOUNDFADE";
 
   readonly fields: {
     readonly initialPercent: number;
@@ -26,7 +24,8 @@ export const soundFade: B.BufferParser<SoundFade> = pipe(
   }),
 
   P.map((fields) => ({
-    type: { id: MessageType.SVC_SOUNDFADE, name: "SVC_SOUNDFADE" } as const,
+    id: MessageType.SVC_SOUNDFADE,
+    name: "SVC_SOUNDFADE",
     fields,
   }))
 );

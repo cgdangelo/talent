@@ -8,10 +8,8 @@ import { MessageType } from "../MessageType";
 // TODO sky stuff is at the bottom unlike moveVars parser unfortunately, but
 // structure is the same.
 export type NewMoveVars = {
-  readonly type: {
-    readonly id: MessageType.SVC_NEWMOVEVARS;
-    readonly name: "SVC_NEWMOVEVARS";
-  };
+  readonly id: MessageType.SVC_NEWMOVEVARS;
+  readonly name: "SVC_NEWMOVEVARS";
 
   readonly fields: MoveVars;
 };
@@ -46,7 +44,8 @@ export const newMoveVars: B.BufferParser<NewMoveVars> = pipe(
   }),
 
   P.map((fields) => ({
-    type: { id: MessageType.SVC_NEWMOVEVARS, name: "SVC_NEWMOVEVARS" } as const,
+    id: MessageType.SVC_NEWMOVEVARS,
+    name: "SVC_NEWMOVEVARS",
     fields,
   }))
 );

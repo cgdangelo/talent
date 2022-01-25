@@ -6,10 +6,8 @@ import type { DemoState, DemoStateParser } from "../../../DemoState";
 import { MessageType } from "../MessageType";
 
 export type NewUserMsg = {
-  readonly type: {
-    readonly id: MessageType.SVC_NEWUSERMSG;
-    readonly name: "SVC_NEWUSERMSG";
-  };
+  readonly id: MessageType.SVC_NEWUSERMSG;
+  readonly name: "SVC_NEWUSERMSG";
 
   readonly fields: {
     readonly index: number;
@@ -40,7 +38,8 @@ export const newUserMsg: DemoStateParser<NewUserMsg> = pipe(
   ),
 
   SP.map((fields) => ({
-    type: { id: MessageType.SVC_NEWUSERMSG, name: "SVC_NEWUSERMSG" } as const,
+    id: MessageType.SVC_NEWUSERMSG,
+    name: "SVC_NEWUSERMSG",
     fields,
   }))
 );

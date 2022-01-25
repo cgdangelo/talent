@@ -4,10 +4,8 @@ import { pipe } from "fp-ts/lib/function";
 import { MessageType } from "../MessageType";
 
 export type ResourceRequest = {
-  readonly type: {
-    readonly id: MessageType.SVC_RESOURCEREQUEST;
-    readonly name: "SVC_RESOURCEREQUEST";
-  };
+  readonly id: MessageType.SVC_RESOURCEREQUEST;
+  readonly name: "SVC_RESOURCEREQUEST";
 
   readonly fields: {
     readonly spawnCount: number;
@@ -19,10 +17,8 @@ export const resourceRequest: B.BufferParser<ResourceRequest> = pipe(
   P.apFirst(P.skip(4)),
 
   P.map((fields) => ({
-    type: {
-      id: MessageType.SVC_RESOURCEREQUEST,
-      name: "SVC_RESOURCEREQUEST",
-    } as const,
+    id: MessageType.SVC_RESOURCEREQUEST,
+    name: "SVC_RESOURCEREQUEST",
     fields,
   }))
 );

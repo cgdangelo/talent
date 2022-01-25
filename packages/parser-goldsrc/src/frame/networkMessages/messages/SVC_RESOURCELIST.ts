@@ -6,10 +6,8 @@ import { pipe } from "fp-ts/lib/function";
 import { MessageType } from "../MessageType";
 
 export type ResourceList = {
-  readonly type: {
-    readonly id: MessageType.SVC_RESOURCELIST;
-    readonly name: "SVC_RESOURCELIST";
-  };
+  readonly id: MessageType.SVC_RESOURCELIST;
+  readonly name: "SVC_RESOURCELIST";
 
   readonly fields: {
     readonly resources: readonly {
@@ -70,10 +68,8 @@ export const resourceList: B.BufferParser<ResourceList> = (i) =>
       BB.nextByte,
 
       P.map((fields) => ({
-        type: {
-          id: MessageType.SVC_RESOURCELIST,
-          name: "SVC_RESOURCELIST",
-        } as const,
+        id: MessageType.SVC_RESOURCELIST,
+        name: "SVC_RESOURCELIST",
         fields,
       }))
     )

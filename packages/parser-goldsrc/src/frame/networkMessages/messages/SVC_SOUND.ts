@@ -4,13 +4,11 @@ import * as P from "@talent/parser/lib/Parser";
 import { stream } from "@talent/parser/lib/Stream";
 import { pipe } from "fp-ts/lib/function";
 import type { Point } from "../../../Point";
-import type { MessageType } from "../MessageType";
+import { MessageType } from "../MessageType";
 
 export type Sound = {
-  readonly type: {
-    readonly id: MessageType.SVC_SOUND;
-    readonly name: "SVC_SOUND";
-  };
+  readonly id: MessageType.SVC_SOUND;
+  readonly name: "SVC_SOUND";
 
   readonly fields: {
     readonly volume?: number;
@@ -120,7 +118,8 @@ export const sound: B.BufferParser<Sound> = (i) =>
       BB.nextByte,
 
       P.map((fields) => ({
-        type: { id: 5, name: "SVC_SOUND" } as const,
+        id: MessageType.SVC_SOUND,
+        name: "SVC_SOUND",
         fields,
       }))
     )

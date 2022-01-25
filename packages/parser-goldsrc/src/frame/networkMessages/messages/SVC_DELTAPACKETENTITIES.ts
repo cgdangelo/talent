@@ -15,10 +15,8 @@ type DeltaPacketEntity = {
 };
 
 export type DeltaPacketEntities = {
-  readonly type: {
-    readonly id: MessageType.SVC_DELTAPACKETENTITIES;
-    readonly name: "SVC_DELTAPACKETENTITIES";
-  };
+  readonly id: MessageType.SVC_DELTAPACKETENTITIES;
+  readonly name: "SVC_DELTAPACKETENTITIES";
 
   readonly fields: {
     readonly entityCount: number;
@@ -127,12 +125,13 @@ export const deltaPacketEntities: DemoStateParser<DeltaPacketEntities> =
           )
         ),
 
-        SP.map((fields) => ({
-          type: {
-            id: MessageType.SVC_DELTAPACKETENTITIES,
-            name: "SVC_DELTAPACKETENTITIES",
-          } as const,
-          fields,
-        }))
+        SP.map(
+          (fields) =>
+            ({
+              id: MessageType.SVC_DELTAPACKETENTITIES,
+              name: "SVC_DELTAPACKETENTITIES",
+              fields,
+            } as const)
+        )
       )(s)
     );

@@ -229,11 +229,18 @@ const map_: Functor3<URI>["map"] = (fa, fab) => pipe(fa, map(fab));
 // pipeables
 // -----------------------------------------------------------------------------
 
+export const altW: <S, I, B>(
+  that: Lazy<StatefulParser<S, I, B>>
+) => <A>(ma: StatefulParser<S, I, A>) => StatefulParser<S, I, A | B> =
+  (that) => (ma) => (s) => (i) =>
+    pipe(
+      ma(s)(i),
+      E.altW(() => that()(s)(i))
+    );
+
 export const alt: <S, I, A>(
   that: Lazy<StatefulParser<S, I, A>>
-) => (ma: StatefulParser<S, I, A>) => StatefulParser<S, I, A> =
-  (that) => (ma) =>
-    alt_(ma, that);
+) => (ma: StatefulParser<S, I, A>) => StatefulParser<S, I, A> = altW;
 
 export const ap: <S, I, A>(
   ma: StatefulParser<S, I, A>
