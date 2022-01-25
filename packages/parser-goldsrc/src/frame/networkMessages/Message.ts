@@ -1,13 +1,15 @@
 import { parser as P, statefulParser as SP } from "@talent/parser";
 import { buffer as B } from "@talent/parser-buffer";
-import { number, option as O, readonlyMap as RM } from "fp-ts";
 import { pipe } from "fp-ts/lib/function";
-import type { DemoState, DemoStateParser } from "../../DemoState";
+import type { DemoStateParser } from "../../DemoState";
 import type { EngineMessage } from "./EngineMessage";
 import { engineMessage } from "./EngineMessage";
-import { MessageType } from "./MessageType";
+import type { UserMessage } from "./UserMessage";
+import { userMessage } from "./UserMessage";
 
-export type Message = void | EngineMessage;
+export type Message =
+  | { readonly type: "engine"; readonly message: EngineMessage }
+  | { readonly type: "user"; readonly message: UserMessage };
 
 export const messages: (
   messagesLength: number
@@ -42,37 +44,17 @@ export const messages: (
   );
 
 const message: DemoStateParser<Message> = pipe(
-  SP.lift<number, number, DemoState>(B.uint8_le),
-
-  SP.chain((messageId) =>
-    pipe(
-      engineMessage(messageId),
-
-      SP.altW(() => skipUserMessage(messageId)),
-
-      // TODO Can remove SVC_NOP, deprecated messages, but NOT messages that
-      // have no arguments.
-      SP.filter(() => messageId !== MessageType.SVC_NOP)
-    )
+  SP.lift(B.uint8_le) as DemoStateParser<number>,
+  SP.chain(
+    (messageId): DemoStateParser<Message> =>
+      messageId >= 64
+        ? pipe(
+            userMessage(messageId),
+            SP.map((message) => ({ type: "user", message }))
+          )
+        : pipe(
+            engineMessage(messageId),
+            SP.map((message) => ({ type: "engine", message }))
+          )
   )
 );
-
-const skipUserMessage: (messageId: number) => DemoStateParser<void> = (
-  messageId
-) =>
-  pipe(
-    SP.get<number, DemoState>(),
-    SP.chain(({ userMessages }) =>
-      pipe(
-        userMessages,
-        RM.lookup(number.Eq)(messageId),
-        O.chain(O.fromPredicate(({ size }) => size > -1)),
-        O.fold(
-          () => SP.lift(B.uint8_le),
-          ({ size }) => SP.of(size)
-        )
-      )
-    ),
-
-    SP.chain((customMessageSize) => SP.lift(P.skip(customMessageSize)))
-  );

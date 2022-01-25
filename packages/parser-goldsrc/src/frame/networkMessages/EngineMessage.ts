@@ -1,5 +1,5 @@
-import { parser as P, statefulParser as SP } from "@talent/parser";
-import { pipe } from "fp-ts/lib/function";
+import { statefulParser as SP } from "@talent/parser";
+import { flow } from "fp-ts/lib/function";
 import type { DemoStateParser } from "../../DemoState";
 import * as M from "./messages";
 import { MessageType } from "./MessageType";
@@ -65,7 +65,7 @@ export type EngineMessage =
   | M.SendCvarValue
   | M.SendCvarValue2;
 
-export const engineMessage: (
+const engineMessage_: (
   messageId: MessageType
 ) => DemoStateParser<EngineMessage> = (messageId) => {
   // TODO Replace with Option?
@@ -248,6 +248,13 @@ export const engineMessage: (
       return SP.lift(M.sendCvarValue2);
 
     default:
-      return SP.lift(pipe(P.fail(), P.cut)) as DemoStateParser<never>;
+      return SP.fail();
   }
 };
+
+export const engineMessage: (
+  messageId: MessageType
+) => DemoStateParser<EngineMessage> = flow(
+  engineMessage_,
+  SP.filter(({ name }) => name !== "SVC_NOP")
+);
