@@ -31,21 +31,6 @@ export type NetworkMessages = {
   readonly messages: readonly Message[];
 };
 
-export type NetworkMessagesFrameType = "Start" | "Normal" | number;
-
-export const networkMessagesFrameType = (
-  a: number
-): NetworkMessagesFrameType => {
-  switch (a) {
-    case 0:
-      return "Start";
-    case 1:
-      return "Normal";
-    default:
-      return a;
-  }
-};
-
 const messagesLength: B.BufferParser<number> = P.expected(
   pipe(
     B.uint32_le,

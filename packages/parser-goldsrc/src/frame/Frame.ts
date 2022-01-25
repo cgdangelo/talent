@@ -6,11 +6,7 @@ import { clientData } from "./ClientData";
 import { consoleCommand } from "./ConsoleCommand";
 import { demoBuffer } from "./DemoBuffer";
 import { event } from "./Event";
-import type { NetworkMessagesFrameType } from "./networkMessages/NetworkMessages";
-import {
-  networkMessages,
-  networkMessagesFrameType,
-} from "./networkMessages/NetworkMessages";
+import { networkMessages } from "./networkMessages/NetworkMessages";
 import { sound } from "./Sound";
 import { weaponAnimation } from "./WeaponAnimation";
 
@@ -26,7 +22,7 @@ export type FrameHeader = {
 };
 
 export type FrameType =
-  | `NetworkMessages-${NetworkMessagesFrameType}`
+  | "NetworkMessages"
   | "DemoStart"
   | "ConsoleCommand"
   | "ClientData"
@@ -55,7 +51,7 @@ const frameTypeIdToName = (a: number): FrameType => {
     case 9:
       return "DemoBuffer";
     default:
-      return `NetworkMessages-${networkMessagesFrameType(a)}`;
+      return "NetworkMessages";
   }
 };
 
