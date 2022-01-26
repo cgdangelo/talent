@@ -29,6 +29,7 @@
       - [SequenceInfo](#sequenceinfo)
       - [Message](#message)
         - [UserMessage](#usermessage)
+          - [Unknown or unsized message](#unknown-or-unsized-message)
         - [EngineMessage](#enginemessage)
           - [SVC_BAD (0)](#svc_bad-0)
           - [SVC_NOP (1)](#svc_nop-1)
@@ -101,6 +102,9 @@ Sources for this information include:
 
 - https://github.com/skyrim/hlviewer.js
 - https://github.com/YaLTeR/hldemo-rs
+- https://wiki.alliedmods.net/Half-Life_1_Engine_Messages
+- https://wiki.alliedmods.net/Half-Life_1_Game_Events
+- https://wiki.alliedmods.net/Temp_Entity_Events_(Half-Life_1)
 - https://github.com/jpcy/coldemoplayer/
 
 ## Data types
@@ -445,12 +449,12 @@ Any message with an id of 64 or greater is a user message. That message id corre
 
 If the message was not sent in SVC_NEWUSERMSG, or the message was sent with a size field value of -1, read a single `Word8` to obtain the message length, then read that number of `Word8` values.
 
+###### Unknown or unsized message
+
 | Name      | Type              | Description                                     |
 | --------- | ----------------- | ----------------------------------------------- |
 | length    | `Word8`           | Total size of data sent with this user message. |
 | _unknown_ | `Word8` \* length |                                                 |
-
-<!-- TODO Add user message examplse? -->
 
 ##### EngineMessage
 
@@ -1199,9 +1203,9 @@ This message has no fields.
 | hasCustomDelta        | `Flag (Bits (1))`                 |                                                                                                                                          |
 | hasBaselineIndex      | `Flag (Bits (1))`                 |                                                                                                                                          |
 | baselineIndex         | `? Bits (6)`                      | Only sent if hasBaselineIndex is set.                                                                                                    |
-| delta                 | `? Delta (entity_state_player_t)` | Only entityIndex is between 0 and the server's maxClients.                                                                               |
-| delta                 | `? Delta (entity_state_t)`        | Only sent entityIndex is not between 0 and the server's maxClients, and hasCustomDelta is not set.                                       |
-| delta                 | `? Delta (custom_entity_state_t)` | Only sent entityIndex is not between 0 and the server's maxClients, and hasCustomDelta is set.                                           |
+| delta                 | `? Delta (entity_state_player_t)` | Only sent if entityIndex is between 0 and the server's maxClients.                                                                       |
+| delta                 | `? Delta (entity_state_t)`        | Only sent if entityIndex is not between 0 and the server's maxClients, and hasCustomDelta is not set.                                    |
+| delta                 | `? Delta (custom_entity_state_t)` | Only sent if entityIndex is not between 0 and the server's maxClients, and hasCustomDelta is set.                                        |
 |                       | `RemainingBits`                   |                                                                                                                                          |
 
 ###### SVC_DELTAPACKETENTITIES (41)
