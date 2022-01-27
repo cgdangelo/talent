@@ -23,12 +23,12 @@ export const seek =
       ? error(i, undefined, true)
       : success(undefined, i, stream(i.buffer, cursor));
 
-export const manyN = <I, A>(
+export const manyN1 = <I, A>(
   parser: P.Parser<I, A>,
   n: number
-): P.Parser<I, readonly A[]> =>
+): P.Parser<I, RNEA.ReadonlyNonEmptyArray<A>> =>
   n === 0
-    ? P.of([])
+    ? P.fail()
     : pipe(
         parser,
 
@@ -45,8 +45,19 @@ export const manyN = <I, A>(
               )
             )
           )
-        )
+        ),
+
+        P.filter((a) => a.length > 0)
       );
+
+export const manyN = <I, A>(
+  parser: P.Parser<I, A>,
+  n: number
+): P.Parser<I, readonly A[]> =>
+  pipe(
+    manyN1(parser, n),
+    P.alt(() => P.of<I, readonly A[]>([]))
+  );
 
 export const take = <I>(length: number): P.Parser<I, I[]> =>
   pipe(
