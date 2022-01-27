@@ -232,16 +232,16 @@ Sources for this information include:
 | framesCount  | `Word32`          | Total frames in the entry.                           |
 | framesOffset | `Word32`          | Byte position where the entry's frames start.        |
 | fileLength   | `Word32`          | Length of the entry.                                 |
-| frames       | `Frame`           | Continue reading until reaching a NextSection frame. |
+| frames       | `Frame` \* N      | Continue reading until reaching a NextSection frame. |
 
 ## Frame
 
-| Name      | Type      | Description                            |
-| --------- | --------- | -------------------------------------- |
-| frameType | `Word8`   | Frame type id.                         |
-| time      | `Float`   | Time in seconds since recording began. |
-| frame     | `Word32`  | Frame index.                           |
-| frameData | `Message` | Engine message or user message.        |
+| Name      | Type     | Description                                    |
+| --------- | -------- | ---------------------------------------------- |
+| frameType | `Word8`  | Frame type id.                                 |
+| time      | `Float`  | Time in seconds since recording began.         |
+| frame     | `Word32` | Frame index.                                   |
+| frameData |          | See [Frame type mapping](#frame-type-mapping). |
 
 ### Frame type mapping
 
