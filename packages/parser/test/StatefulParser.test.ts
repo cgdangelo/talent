@@ -143,13 +143,13 @@ describe("StatefulParser", () => {
       );
     });
 
-    test("manyN", () => {
+    test("manyN1", () => {
       const p = pipe(
         _.item<string, string>(),
         _.chainFirst((a) => _.modify((s) => s.concat(a.toUpperCase())))
       );
 
-      expect(_.manyN(p, 3)("")(stream(["a", "b", "c"]))).toStrictEqual(
+      expect(_.manyN1(p, 3)("")(stream(["a", "b", "c"]))).toStrictEqual(
         success(
           [["a", "b", "c"], "ABC"],
           stream(["a", "b", "c"]),
@@ -157,11 +157,11 @@ describe("StatefulParser", () => {
         )
       );
 
-      expect(_.manyN(p, 6)("")(stream(["a", "b", "c"]))).toStrictEqual(
+      expect(_.manyN1(p, 6)("")(stream(["a", "b", "c"]))).toStrictEqual(
         error(stream(["a", "b", "c"], 3))
       );
 
-      expect(_.manyN(p, 3)("")(stream([]))).toStrictEqual(error(stream([])));
+      expect(_.manyN1(p, 3)("")(stream([]))).toStrictEqual(error(stream([])));
     });
   });
 

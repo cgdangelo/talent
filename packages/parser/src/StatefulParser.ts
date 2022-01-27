@@ -56,13 +56,13 @@ export const succeed: <S, I, A>(a: A) => StatefulParser<S, I, A> = (a) =>
 // -----------------------------------------------------------------------------
 
 export const filter: {
-  <A>(f: Predicate<A>): <S, I>(
-    p: StatefulParser<S, I, A>
-  ) => StatefulParser<S, I, A>;
-
   <A, B extends A>(f: Refinement<A, B>): <S, I>(
     p: StatefulParser<S, I, A>
   ) => StatefulParser<S, I, B>;
+
+  <A>(f: Predicate<A>): <S, I>(
+    p: StatefulParser<S, I, A>
+  ) => StatefulParser<S, I, A>;
 } =
   <A>(f: Predicate<A>) =>
   <S, I>(p: StatefulParser<S, I, A>): StatefulParser<S, I, A> =>
@@ -130,12 +130,12 @@ export const manyTill = <S, I, A, B>(
     alt<S, I, ReadonlyArray<A>>(() => many1Till(parser, terminator))
   );
 
-export const manyN = <S, I, A>(
+export const manyN1 = <S, I, A>(
   parser: StatefulParser<S, I, A>,
   n: number
-): StatefulParser<S, I, readonly A[]> =>
+): StatefulParser<S, I, RNEA.ReadonlyNonEmptyArray<A>> =>
   n === 0
-    ? of([])
+    ? fail()
     : pipe(
         parser,
 
@@ -160,6 +160,15 @@ export const manyN = <S, I, A>(
         )
       );
 
+export const manyN = <S, I, A>(
+  parser: StatefulParser<S, I, A>,
+  n: number
+): StatefulParser<S, I, readonly A[]> =>
+  pipe(
+    manyN1(parser, n),
+    alt(() => of<readonly A[], S, I>([]))
+  );
+
 export const seek: <S, I>(cursor: number) => StatefulParser<S, I, void> = (
   cursor
 ) => lift(P.seek(cursor));
@@ -170,7 +179,8 @@ export const skip: <S, I>(offset: number) => StatefulParser<S, I, void> = (
 
 export const take: <S, I>(
   length: number
-) => StatefulParser<S, I, readonly I[]> = (length) => lift(P.take(length));
+) => StatefulParser<S, I, RNEA.ReadonlyNonEmptyArray<I>> = (length) =>
+  lift(P.take(length));
 
 // -----------------------------------------------------------------------------
 // non-pipeables
@@ -349,6 +359,7 @@ export const execute: <S>(
 export const lift: <I, A, S>(p: P.Parser<I, A>) => StatefulParser<S, I, A> =
   ST.fromF(P.Functor);
 
+/* istanbul ignore next: Util function, don't care */
 export const log: <S, I, A>(
   ma: StatefulParser<S, I, A>
 ) => StatefulParser<S, I, A> = (ma) => (s) =>
