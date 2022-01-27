@@ -1,5 +1,6 @@
 import {
   either as E,
+  option as O,
   readonlyArray as RA,
   readonlyNonEmptyArray as RNEA,
 } from "fp-ts";
@@ -20,7 +21,7 @@ export const seek =
   <I>(cursor: number): P.Parser<I, void> =>
   (i) =>
     cursor < 0 || cursor > i.buffer.length
-      ? error(i, undefined, true)
+      ? error(i)
       : success(undefined, i, stream(i.buffer, cursor));
 
 export const manyN1 = <I, A>(
@@ -59,29 +60,45 @@ export const manyN = <I, A>(
     P.alt(() => P.of<I, readonly A[]>([]))
   );
 
-export const take = <I>(length: number): P.Parser<I, I[]> =>
+export const take = <I>(
+  length: number
+): P.Parser<I, RNEA.ReadonlyNonEmptyArray<I>> =>
   pipe(
-    P.withStart(P.of<I, number>(length)),
-    P.map(([length, i]) => i.buffer.slice(i.cursor, i.cursor + length)),
+    P.withStart(P.of<I, void>(undefined)),
+
+    // Check for overflow
+    P.filter(
+      ([, { buffer, cursor }]) => length > 0 && cursor + length <= buffer.length
+    ),
+
+    P.map(([, { buffer, cursor }]) => buffer.slice(cursor, cursor + length)),
+    P.map(RNEA.fromReadonlyArray),
+    P.chain(
+      O.fold(
+        /* istanbul ignore next: Can't happen */
+        () => P.fail(),
+        (a) => P.succeed(a)
+      )
+    ),
+
     P.apFirst(skip(length))
-  );
-
-export const log: <I, A>(fa: P.Parser<I, A>) => P.Parser<I, A> = (fa) => (i) =>
-  pipe(
-    fa(i),
-    E.map((a) => {
-      console.log(
-        `result: ${
-          typeof a.value === "object" && a.value != null
-            ? JSON.stringify(a.value)
-            : a.value
-        }, before: ${i.cursor}, after: ${a.next.cursor}`
-      );
-
-      return a;
-    })
   );
 
 export const struct = sequenceS(P.Applicative);
 
 export const tuple = sequenceT(P.Applicative);
+
+/* istanbul ignore next: Util function, don't care */
+export const log: <I, A>(fa: P.Parser<I, A>) => P.Parser<I, A> = (fa) => (i) =>
+  pipe(
+    fa(i),
+    E.map((a) => {
+      console.log(
+        `result: ${JSON.stringify(a.value)}, before: ${i.cursor}, after: ${
+          a.next.cursor
+        }`
+      );
+
+      return a;
+    })
+  );
