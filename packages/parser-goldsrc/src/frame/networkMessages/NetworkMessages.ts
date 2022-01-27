@@ -2,19 +2,19 @@ import { statefulParser as SP } from "@talent/parser";
 import { buffer as B } from "@talent/parser-buffer";
 import * as P from "@talent/parser/lib/Parser";
 import { pipe } from "fp-ts/lib/function";
-import type { DemoState, DemoStateParser } from "../../DemoState";
+import * as DS from "../../DemoState";
 import type { Point } from "../../Point";
 import { point } from "../../Point";
 import type { FrameHeader } from "../FrameHeader";
 import { frameHeader } from "../FrameHeader";
+import type { Message } from "./Message";
+import { messages } from "./Message";
 import type { MoveVars } from "./MoveVars";
 import { moveVars } from "./MoveVars";
 import type { RefParams } from "./RefParams";
 import { refParams } from "./RefParams";
 import type { UserCmd } from "./UserCmd";
 import { userCmd } from "./UserCmd";
-import type { Message } from "./Message";
-import { messages } from "./Message";
 
 export type NetworkMessages = {
   readonly header: FrameHeader;
@@ -45,15 +45,15 @@ const messagesLength: B.BufferParser<number> = P.expected(
   "message length [0, 65_536]"
 );
 
-export const networkMessages: DemoStateParser<NetworkMessages> = pipe(
-  SP.lift(frameHeader) as DemoStateParser<FrameHeader>,
+export const networkMessages: DS.DemoStateParser<NetworkMessages> = pipe(
+  DS.lift(frameHeader),
   SP.bindTo("header"),
 
   SP.bind("type", () => SP.of("NetworkMessages" as const)),
 
   SP.bind("frameData", () =>
     pipe(
-      SP.lift(
+      DS.lift(
         P.struct({
           timestamp: B.float32_le,
           refParams,
@@ -69,13 +69,10 @@ export const networkMessages: DemoStateParser<NetworkMessages> = pipe(
           reliableSequence: B.int32_le,
           lastReliableSequence: B.int32_le,
         })
-      ) as DemoStateParser<Omit<NetworkMessages["frameData"], "messages">>,
+      ),
 
       SP.bind("messages", () =>
-        pipe(
-          SP.lift<number, number, DemoState>(messagesLength),
-          SP.chain(messages)
-        )
+        pipe(DS.lift(messagesLength), SP.chain(messages))
       )
     )
   )

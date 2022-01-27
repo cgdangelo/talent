@@ -5,7 +5,7 @@ import { stream } from "@talent/parser/lib/Stream";
 import { pipe } from "fp-ts/lib/function";
 import type { Delta } from "../../../delta";
 import { readDelta } from "../../../delta";
-import type { DemoState, DemoStateParser } from "../../../DemoState";
+import * as DS from "../../../DemoState";
 import { MessageType } from "../MessageType";
 
 export type Event = {
@@ -22,13 +22,15 @@ export type Event = {
   };
 };
 
-export const event: DemoStateParser<Event> = (s) => (i) =>
+export const event: DS.DemoStateParser<Event> = (s) => (i) =>
   pipe(
     stream(i.buffer, i.cursor * 8),
 
     pipe(
-      SP.lift<number, number, DemoState>(BB.ubits(5)),
+      DS.lift(BB.ubits(5)),
+
       SP.chain((eventCount) => SP.manyN(event_, eventCount)),
+
       SP.bindTo("events"),
 
       SP.chain((a) =>
@@ -56,7 +58,7 @@ export const event: DemoStateParser<Event> = (s) => (i) =>
   );
 
 const event_ = pipe(
-  SP.lift<number, { eventIndex: number; packetIndex?: number }, DemoState>(
+  DS.lift(
     P.struct({
       eventIndex: BB.ubits(10),
       packetIndex: BB.bitFlagged(() => BB.ubits(11)),
@@ -66,7 +68,7 @@ const event_ = pipe(
   SP.bind("delta", ({ packetIndex }) =>
     packetIndex != null
       ? pipe(
-          SP.lift<number, number, DemoState>(BB.ubits(1)),
+          DS.lift(BB.ubits(1)),
           SP.chain((hasDelta) =>
             hasDelta !== 0 ? readDelta("event_t") : SP.of(undefined)
           )
@@ -74,9 +76,5 @@ const event_ = pipe(
       : SP.of(undefined)
   ),
 
-  SP.bind("fireTime", () =>
-    SP.lift<number, number | undefined, DemoState>(
-      BB.bitFlagged(() => BB.ubits(16))
-    )
-  )
+  SP.bind("fireTime", () => SP.lift(BB.bitFlagged(() => BB.ubits(16))))
 );

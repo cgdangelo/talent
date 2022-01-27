@@ -13,7 +13,7 @@ export type Demo = {
 };
 
 export const demo_: DS.DemoStateParser<Demo> = pipe(
-  SP.lift(header) as DS.DemoStateParser<DemoHeader>,
+  DS.lift(header),
   SP.bindTo("header"),
   SP.chainFirst(({ header: { networkProtocol } }) =>
     SP.modify((s) => ({ ...s, networkProtocol }))

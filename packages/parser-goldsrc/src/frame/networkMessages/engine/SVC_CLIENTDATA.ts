@@ -6,7 +6,7 @@ import { stream } from "@talent/parser/lib/Stream";
 import { pipe } from "fp-ts/lib/function";
 import type { Delta } from "../../../delta";
 import { readDelta } from "../../../delta";
-import type { DemoState, DemoStateParser } from "../../../DemoState";
+import * as DS from "../../../DemoState";
 import { MessageType } from "../MessageType";
 
 export type ClientData = {
@@ -26,20 +26,20 @@ export type ClientData = {
 const deltaUpdateMask: B.BufferParser<number | undefined> = BB.bitFlagged(() =>
   BB.ubits(8)
 );
-const hasWeaponData: DemoStateParser<number> = SP.lift(
+const hasWeaponData: DS.DemoStateParser<number> = SP.lift(
   pipe(
     BB.ubits(1),
     P.filter((hasWeaponData) => hasWeaponData !== 0)
   )
 );
 
-const weaponData: DemoStateParser<ClientData["fields"]["weaponData"]> = pipe(
+const weaponData: DS.DemoStateParser<ClientData["fields"]["weaponData"]> = pipe(
   SP.many(
     pipe(
       hasWeaponData,
       SP.chain(() =>
         pipe(
-          SP.lift<number, number, DemoState>(BB.ubits(6)),
+          DS.lift(BB.ubits(6)),
           SP.bindTo("weaponIndex"),
           SP.bind("weaponData", () => readDelta("weapon_data_t"))
         )
@@ -50,14 +50,16 @@ const weaponData: DemoStateParser<ClientData["fields"]["weaponData"]> = pipe(
   SP.chainFirst(() => SP.lift(P.skip(1)))
 );
 
-export const clientData: DemoStateParser<ClientData> = (s) => (i) =>
+export const clientData: DS.DemoStateParser<ClientData> = (s) => (i) =>
   pipe(
     stream(i.buffer, i.cursor * 8),
 
     pipe(
-      SP.lift<number, number | undefined, DemoState>(deltaUpdateMask),
+      DS.lift(deltaUpdateMask),
       SP.bindTo("deltaUpdateMask"),
+
       SP.bind("clientData", () => readDelta("clientdata_t")),
+
       SP.bind("weaponData", () => weaponData),
 
       SP.chain((a) =>
