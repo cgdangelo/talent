@@ -2,7 +2,7 @@ import { parser as P, statefulParser as SP } from "@talent/parser";
 import { buffer as B } from "@talent/parser-buffer";
 import { number, readonlyMap as RM } from "fp-ts";
 import { pipe } from "fp-ts/lib/function";
-import type { DemoState, DemoStateParser } from "../../../DemoState";
+import * as DS from "../../../DemoState";
 import { MessageType } from "../MessageType";
 
 export type NewUserMsg = {
@@ -18,8 +18,8 @@ export type NewUserMsg = {
 
 const addUserMessage = RM.upsertAt(number.Eq);
 
-export const newUserMsg: DemoStateParser<NewUserMsg> = pipe(
-  SP.lift<number, NewUserMsg["fields"], DemoState>(
+export const newUserMsg: DS.DemoStateParser<NewUserMsg> = pipe(
+  DS.lift(
     P.struct({
       index: B.uint8_le,
       size: B.uint8_le,

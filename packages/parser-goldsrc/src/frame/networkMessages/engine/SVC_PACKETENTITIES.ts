@@ -6,7 +6,7 @@ import { stream } from "@talent/parser/lib/Stream";
 import { pipe } from "fp-ts/lib/function";
 import type { Delta } from "../../../delta";
 import { readDelta } from "../../../delta";
-import type { DemoState, DemoStateParser } from "../../../DemoState";
+import * as DS from "../../../DemoState";
 import { MessageType } from "../MessageType";
 
 type PacketEntity = {
@@ -25,11 +25,11 @@ export type PacketEntities = {
   };
 };
 
-const entityState: (entityIndex: number) => DemoStateParser<PacketEntity> = (
+const entityState: (entityIndex: number) => DS.DemoStateParser<PacketEntity> = (
   entityIndex
 ) =>
   pipe(
-    SP.lift<number, number, DemoState>(BB.ubits(1)),
+    DS.lift(BB.ubits(1)),
     SP.bindTo("hasCustomDelta"),
     SP.bind("baselineIndex", () => SP.lift(BB.bitFlagged(() => BB.ubits(6)))),
     SP.chain(({ hasCustomDelta, baselineIndex }) =>
@@ -80,12 +80,12 @@ const nextEntityIndex: () => B.BufferParser<number> = () => {
   );
 };
 
-const entityStates: () => DemoStateParser<
+const entityStates: () => DS.DemoStateParser<
   PacketEntities["fields"]["entityStates"]
 > = () =>
   SP.many(
     pipe(
-      SP.lift<number, number, DemoState>(
+      DS.lift(
         pipe(
           // Check footer before continuing
           P.lookAhead(
@@ -106,15 +106,19 @@ const entityStates: () => DemoStateParser<
   );
 
 // TODO Refactor this + SVC_DELTAPACKETENTITIES
-export const packetEntities: DemoStateParser<PacketEntities> = (s) => (i) =>
+export const packetEntities: DS.DemoStateParser<PacketEntities> = (s) => (i) =>
   pipe(
     stream(i.buffer, i.cursor * 8),
 
     pipe(
-      SP.lift<number, number, DemoState>(BB.ubits(16)),
+      DS.lift(BB.ubits(16)),
+
       SP.bindTo("entityCount"),
+
       SP.bind("entityStates", () => entityStates()),
+
       SP.chainFirst(() => SP.lift(P.skip(16))),
+
       SP.chain((a) =>
         SP.lift((o) =>
           success(

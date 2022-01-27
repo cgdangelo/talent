@@ -6,7 +6,7 @@ import { number, ord, readonlyArray as RA } from "fp-ts";
 import { pipe } from "fp-ts/lib/function";
 import type { Delta } from "../../../delta";
 import { readDelta } from "../../../delta";
-import type { DemoState, DemoStateParser } from "../../../DemoState";
+import * as DS from "../../../DemoState";
 import { MessageType } from "../MessageType";
 
 export type SpawnBaseline = {
@@ -23,16 +23,19 @@ export type SpawnBaseline = {
   };
 };
 
-export const spawnBaseline: DemoStateParser<SpawnBaseline> = (s) => (i) =>
+export const spawnBaseline: DS.DemoStateParser<SpawnBaseline> = (s) => (i) =>
   pipe(
     stream(i.buffer, i.cursor * 8),
 
     pipe(
       SP.manyTill(
         pipe(
-          SP.lift<number, number, DemoState>(BB.ubits(11)),
+          DS.lift(BB.ubits(11)),
+
           SP.bindTo("index"),
+
           SP.bind("type", () => SP.lift(BB.ubits(2))),
+
           SP.bind("delta", ({ index, type }) =>
             readDelta(
               (type & 1) !== 0
@@ -74,7 +77,7 @@ export const spawnBaseline: DemoStateParser<SpawnBaseline> = (s) => (i) =>
 
       SP.bind("extraData", () =>
         pipe(
-          SP.lift<number, number, DemoState>(BB.ubits(6)),
+          DS.lift(BB.ubits(6)),
           SP.chain((n) => SP.manyN(readDelta("entity_state_t"), n))
         )
       ),

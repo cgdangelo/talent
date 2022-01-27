@@ -5,7 +5,7 @@ import { stream } from "@talent/parser/lib/Stream";
 import { pipe } from "fp-ts/lib/function";
 import type { Delta } from "../../../delta";
 import { readDelta } from "../../../delta";
-import type { DemoState, DemoStateParser } from "../../../DemoState";
+import * as DS from "../../../DemoState";
 import { MessageType } from "../MessageType";
 
 export type EventReliable = {
@@ -21,14 +21,16 @@ export type EventReliable = {
 
 const fireTime = BB.bitFlagged(() => BB.ubits(16));
 
-export const eventReliable: DemoStateParser<EventReliable> = (s) => (i) =>
+export const eventReliable: DS.DemoStateParser<EventReliable> = (s) => (i) =>
   pipe(
     stream(i.buffer, i.cursor * 8),
 
     pipe(
-      SP.lift<number, number, DemoState>(BB.ubits(10)),
+      DS.lift(BB.ubits(10)),
       SP.bindTo("eventIndex"),
+
       SP.bind("eventArgs", () => readDelta("event_args_t")),
+
       SP.bind("fireTime", () => SP.lift(fireTime)),
 
       SP.chain((a) =>

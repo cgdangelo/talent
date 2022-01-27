@@ -1,7 +1,7 @@
 import { parser as P, statefulParser as SP } from "@talent/parser";
 import { buffer as B } from "@talent/parser-buffer";
 import { pipe } from "fp-ts/lib/function";
-import type { DemoStateParser } from "../DemoState";
+import * as DS from "../DemoState";
 import type { ClientData } from "./ClientData";
 import { clientData } from "./ClientData";
 import type { ConsoleCommand } from "./ConsoleCommand";
@@ -32,15 +32,19 @@ export type Frame =
       readonly type: "DemoStart" | "NextSection";
     };
 
-const frameType: B.BufferParser<number> = P.expected(
-  pipe(
-    B.uint8_le,
-    P.filter((a) => a >= 0 && a <= 9)
-  ),
-  "frame type id [0, 9]"
+const frameType = DS.lift(
+  P.expected(
+    pipe(
+      B.uint8_le,
+      P.filter((a) => a >= 0 && a <= 9)
+    ),
+    "frame type id [0, 9]"
+  )
 );
 
-const frame_: (frameType: number) => DemoStateParser<Frame> = (frameType) => {
+const frame_: (frameType: number) => DS.DemoStateParser<Frame> = (
+  frameType
+) => {
   switch (frameType) {
     case 2:
       return SP.lift(
@@ -85,17 +89,13 @@ const frame_: (frameType: number) => DemoStateParser<Frame> = (frameType) => {
   }
 };
 
-const frame = pipe(
-  SP.lift(frameType) as DemoStateParser<number>,
-  SP.chain(frame_)
-);
+const frame = pipe(frameType, SP.chain(frame_));
 
-export const frames: DemoStateParser<readonly Frame[]> = SP.manyTill(
+export const frames: DS.DemoStateParser<readonly Frame[]> = SP.manyTill(
   frame,
-  SP.lift(
-    pipe(
-      frameType,
-      P.filter((a) => a === 5)
-    )
+
+  pipe(
+    frameType,
+    SP.filter((a) => a === 5)
   )
 );

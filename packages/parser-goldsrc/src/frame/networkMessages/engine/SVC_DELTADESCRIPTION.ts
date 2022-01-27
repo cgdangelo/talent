@@ -6,7 +6,7 @@ import { readonlyMap as RM, string } from "fp-ts";
 import { pipe } from "fp-ts/lib/function";
 import type { DeltaFieldDecoder } from "../../../delta";
 import { readDelta } from "../../../delta";
-import type { DemoState, DemoStateParser } from "../../../DemoState";
+import * as DS from "../../../DemoState";
 import { MessageType } from "../MessageType";
 
 export type DeltaDescription = {
@@ -21,12 +21,13 @@ export type DeltaDescription = {
 
 const addDeltaDecoder = RM.upsertAt(string.Eq);
 
-export const deltaDescription: DemoStateParser<DeltaDescription> = pipe(
-  SP.lift<number, string, DemoState>(B.ztstr),
+export const deltaDescription: DS.DemoStateParser<DeltaDescription> = pipe(
+  DS.lift(B.ztstr),
   SP.bindTo("name"),
+
   SP.bind("fields", () =>
     pipe(
-      SP.lift<number, number, DemoState>(B.uint16_le),
+      DS.lift(B.uint16_le),
       SP.chain(
         (fieldCount) => (s) => (i) =>
           pipe(
