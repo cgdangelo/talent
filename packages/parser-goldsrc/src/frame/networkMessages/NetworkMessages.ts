@@ -40,7 +40,7 @@ export type NetworkMessages = {
 const messagesLength: B.BufferParser<number> = P.expected(
   pipe(
     B.uint32_le,
-    P.filter((a) => a > 0 && a < 65_536)
+    P.filter((a) => a >= 0 && a <= 65_536)
   ),
   "message length [0, 65_536]"
 );
