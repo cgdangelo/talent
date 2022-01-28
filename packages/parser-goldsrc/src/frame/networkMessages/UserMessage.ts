@@ -26,10 +26,10 @@ export const userMessage: (
         O.map(({ index: id, name, size }) =>
           pipe(
             size > -1
-              ? // If we have an unsized message, read the length first
-                B.uint8_le
-              : // If we have a sized message, return the size
-                P.of(size),
+              ? // If we have a sized message, return the size
+                P.of(size)
+              : // If we have an unsized message, read the length first
+                B.uint8_le,
 
             DS.lift,
 
