@@ -27,7 +27,7 @@ export const userMessage: (
           pipe(
             size > -1
               ? // If we have an unsized message, read the length first
-                B.uint32_le
+                B.uint8_le
               : // If we have a sized message, return the size
                 P.of(size),
 
