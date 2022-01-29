@@ -19,7 +19,7 @@ export const messages: (
 
     pipe(
       SP.manyTill(
-        SP.log(message),
+        message,
 
         SP.lift(
           pipe(
