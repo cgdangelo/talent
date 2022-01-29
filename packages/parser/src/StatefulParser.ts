@@ -3,6 +3,7 @@ import {
   readonlyArray as RA,
   readonlyNonEmptyArray as RNEA,
   stateT as ST,
+  option as O,
 } from "fp-ts";
 import type { Alt3 } from "fp-ts/lib/Alt";
 import type { Alternative3 } from "fp-ts/lib/Alternative";
@@ -74,21 +75,37 @@ export const filter: {
 
 export const item = <S, I>(): StatefulParser<S, I, I> => lift(P.item<I>());
 
-export const many1 = <S, I, A>(
-  ma: StatefulParser<S, I, A>
-): StatefulParser<S, I, RNEA.ReadonlyNonEmptyArray<A>> =>
-  pipe(
-    ma,
-    chain((head) =>
-      chainRec_(RNEA.of(head), (acc) =>
-        pipe(
-          ma,
-          map((a) => E.left(RNEA.snoc(acc, a))),
-          alt(() => of(E.right(acc)))
-        )
+export const many1 =
+  <S, I, A>(
+    ma: StatefulParser<S, I, A>
+  ): StatefulParser<S, I, RNEA.ReadonlyNonEmptyArray<A>> =>
+  (s) =>
+  (i) => {
+    let state = s;
+    let next = i;
+
+    const results: A[] = [];
+
+    // eslint-disable-next-line no-constant-condition
+    while (1) {
+      const result = ma(state)(next);
+
+      if (E.isLeft(result)) break;
+
+      results.push(result.right.value[0]);
+
+      state = result.right.value[1];
+      next = result.right.next;
+    }
+
+    return pipe(
+      RNEA.fromArray(results),
+      O.fold(
+        () => error(i),
+        (a) => success([a, state], i, next)
       )
-    )
-  );
+    );
+  };
 
 export const many = <S, I, A>(
   ma: StatefulParser<S, I, A>
@@ -98,27 +115,45 @@ export const many = <S, I, A>(
     alt(() => of<readonly A[], S, I>([]))
   );
 
-export const many1Till = <S, I, A, B>(
-  parser: StatefulParser<S, I, A>,
-  terminator: StatefulParser<S, I, B>
-): StatefulParser<S, I, RNEA.ReadonlyNonEmptyArray<A>> =>
-  pipe(
-    parser,
-    chain((x) =>
-      chainRec_(RNEA.of(x), (acc) =>
-        pipe(
-          terminator,
-          map(() => E.right(acc)),
-          alt(() =>
-            pipe(
-              parser,
-              map((a) => E.left(RNEA.snoc(acc, a)))
-            )
-          )
-        )
+export const many1Till =
+  <S, I, A, B>(
+    parser: StatefulParser<S, I, A>,
+    terminator: StatefulParser<S, I, B>
+  ): StatefulParser<S, I, RNEA.ReadonlyNonEmptyArray<A>> =>
+  (s) =>
+  (i) => {
+    let state = s;
+    let next = i;
+
+    const results: A[] = [];
+
+    // eslint-disable-next-line no-constant-condition
+    while (1) {
+      const terminated = terminator(state)(next);
+
+      if (E.isRight(terminated)) {
+        next = terminated.right.next;
+        break;
+      }
+
+      const result = parser(state)(next);
+
+      if (E.isLeft(result)) return error(i);
+
+      results.push(result.right.value[0]);
+
+      state = result.right.value[1];
+      next = result.right.next;
+    }
+
+    return pipe(
+      RNEA.fromArray(results),
+      O.fold(
+        () => error(i),
+        (a) => success([a, state], i, next)
       )
-    )
-  );
+    );
+  };
 
 export const manyTill = <S, I, A, B>(
   parser: StatefulParser<S, I, A>,
@@ -136,29 +171,31 @@ export const manyN1 = <S, I, A>(
 ): StatefulParser<S, I, RNEA.ReadonlyNonEmptyArray<A>> =>
   n === 0
     ? fail()
-    : pipe(
-        parser,
+    : (s) => (i) => {
+        let state = s;
+        let next = i;
 
-        chain((x) =>
-          chainRec_(RNEA.of(x), (acc) =>
-            pipe(
-              lift<I, E.Either<never, RNEA.ReadonlyNonEmptyArray<A>>, S>(
-                pipe(
-                  acc.length === n ? P.succeed(undefined) : P.fail<I>(),
-                  P.map(() => E.right(acc))
-                )
-              ),
+        const results: A[] = [];
 
-              alt(() =>
-                pipe(
-                  parser,
-                  map((a) => E.left(RA.append(a)(acc)))
-                )
-              )
-            )
+        for (let times = 0; times < n; times++) {
+          const result = parser(state)(next);
+
+          if (E.isLeft(result)) return error(i);
+
+          results.push(result.right.value[0]);
+
+          state = result.right.value[1];
+          next = result.right.next;
+        }
+
+        return pipe(
+          RNEA.fromArray(results),
+          O.fold(
+            () => error(i),
+            (a) => success([a, state], i, next)
           )
-        )
-      );
+        );
+      };
 
 export const manyN = <S, I, A>(
   parser: StatefulParser<S, I, A>,
