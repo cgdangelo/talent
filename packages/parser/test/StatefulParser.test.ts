@@ -115,32 +115,30 @@ describe("StatefulParser", () => {
 
     test("manyTill", () => {
       const p = pipe(
-        _.item<string[], string>(),
+        _.item<string, string>(),
+        _.filter((a) => a === "a"),
         _.chainFirst((a) => _.modify((s) => s.concat(a.toUpperCase())))
       );
 
       const term = pipe(
-        _.item<string[], string>(),
-        _.filter((a) => a === "b")
+        _.item<string, string>(),
+        _.filter((a) => a === "x")
       );
 
-      expect(_.manyTill(p, term)([])(stream(["a", "a", "b"]))).toStrictEqual(
+      expect(
+        _.manyTill(p, term)("")(stream(["a", "a", "b", "x"]))
+      ).toStrictEqual(error(stream(["a", "a", "b", "x"])));
+
+      expect(_.manyTill(p, term)("")(stream(["x"]))).toStrictEqual(
+        success([[], ""], stream(["x"]), stream(["x"], 1))
+      );
+
+      expect(_.manyTill(p, term)("")(stream(["a", "a", "x"]))).toStrictEqual(
         success(
-          [
-            ["a", "a"],
-            ["A", "A"],
-          ],
-          stream(["a", "a", "b"]),
-          stream(["a", "a", "b"], 3)
+          [["a", "a"], "AA"],
+          stream(["a", "a", "x"]),
+          stream(["a", "a", "x"], 3)
         )
-      );
-
-      expect(_.manyTill(p, term)([])(stream(["b"]))).toStrictEqual(
-        success([[], []], stream(["b"]), stream(["b"], 1))
-      );
-
-      expect(_.manyTill(p, term)([])(stream(["a", "a", "a"]))).toStrictEqual(
-        error(stream(["a", "a", "a"], 3))
       );
     });
 
@@ -150,19 +148,15 @@ describe("StatefulParser", () => {
         _.chainFirst((a) => _.modify((s) => s.concat(a.toUpperCase())))
       );
 
-      expect(_.manyN1(p, 3)("")(stream(["a", "b", "c"]))).toStrictEqual(
-        success(
-          [["a", "b", "c"], "ABC"],
-          stream(["a", "b", "c"]),
-          stream(["a", "b", "c"], 3)
-        )
+      expect(_.manyN1(p, 2)("")(stream([]))).toStrictEqual(error(stream([])));
+
+      expect(_.manyN1(p, 4)("")(stream(["a", "a", "a"]))).toStrictEqual(
+        error(stream(["a", "a", "a"]))
       );
 
-      expect(_.manyN1(p, 6)("")(stream(["a", "b", "c"]))).toStrictEqual(
-        error(stream(["a", "b", "c"], 3))
+      expect(_.manyN1(p, 2)("")(stream(["a", "a"]))).toStrictEqual(
+        success([["a", "a"], "AA"], stream(["a", "a"]), stream(["a", "a"], 2))
       );
-
-      expect(_.manyN1(p, 3)("")(stream([]))).toStrictEqual(error(stream([])));
     });
   });
 

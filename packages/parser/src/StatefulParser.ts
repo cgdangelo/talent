@@ -180,7 +180,7 @@ export const manyN1 = <S, I, A>(
         for (let times = 0; times < n; times++) {
           const result = parser(state)(next);
 
-          if (E.isLeft(result)) break;
+          if (E.isLeft(result)) return error(i);
 
           results.push(result.right.value[0]);
 
