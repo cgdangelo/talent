@@ -12,17 +12,13 @@ import { stream } from "./Stream";
 
 export * from "parser-ts/lib/Parser";
 
-export const skip =
-  <I>(offset: number): P.Parser<I, void> =>
-  (i) =>
-    pipe(i, seek(i.cursor + offset));
+export const skip: <I>(offset: number) => P.Parser<I, void> = (offset) => (i) =>
+  pipe(i, seek(i.cursor + offset));
 
-export const seek =
-  <I>(cursor: number): P.Parser<I, void> =>
-  (i) =>
-    cursor < 0 || cursor > i.buffer.length
-      ? error(i)
-      : success(undefined, i, stream(i.buffer, cursor));
+export const seek: <I>(cursor: number) => P.Parser<I, void> = (cursor) => (i) =>
+  cursor < 0 || cursor > i.buffer.length
+    ? error(i)
+    : success(undefined, i, stream(i.buffer, cursor));
 
 export const manyN1 = <I, A>(
   parser: P.Parser<I, A>,
