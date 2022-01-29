@@ -104,6 +104,10 @@ describe("StatefulParser", () => {
         error(stream(["x"]))
       );
 
+      expect(_.many1Till(p, term)("")(stream(["a", "a", "a"]))).toStrictEqual(
+        error(stream(["a", "a", "a"]))
+      );
+
       expect(_.many1Till(p, term)("")(stream(["a", "a", "x"]))).toStrictEqual(
         success(
           [["a", "a"], "AA"],
@@ -131,6 +135,10 @@ describe("StatefulParser", () => {
 
       expect(_.manyTill(p, term)("")(stream(["x"]))).toStrictEqual(
         success([[], ""], stream(["x"]), stream(["x"], 1))
+      );
+
+      expect(_.manyTill(p, term)("")(stream(["a", "a", "a"]))).toStrictEqual(
+        error(stream(["a", "a", "a"]))
       );
 
       expect(_.manyTill(p, term)("")(stream(["a", "a", "x"]))).toStrictEqual(
