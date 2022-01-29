@@ -98,13 +98,13 @@ export const many1 =
       next = result.right.next;
     }
 
-    return results.length > 0
-      ? success(
-          [results as unknown as RNEA.ReadonlyNonEmptyArray<A>, state],
-          i,
-          next
-        )
-      : error(i);
+    return pipe(
+      RNEA.fromArray(results),
+      O.fold(
+        () => error(i),
+        (a) => success([a, state], i, next)
+      )
+    );
   };
 
 export const many = <S, I, A>(
@@ -183,13 +183,13 @@ export const manyN1 = <S, I, A>(
           next = result.right.next;
         }
 
-        return results.length > 0
-          ? success(
-              [results as unknown as RNEA.ReadonlyNonEmptyArray<A>, state],
-              i,
-              next
-            )
-          : error(i);
+        return pipe(
+          RNEA.fromArray(results),
+          O.fold(
+            () => error(i),
+            (a) => success([a, state], i, next)
+          )
+        );
       };
 
 export const manyN = <S, I, A>(
