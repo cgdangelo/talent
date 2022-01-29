@@ -129,11 +129,16 @@ export const many1Till =
 
     // eslint-disable-next-line no-constant-condition
     while (1) {
-      if (E.isRight(terminator(state)(next))) break;
+      const terminated = terminator(state)(next);
+
+      if (E.isRight(terminated)) {
+        next = terminated.right.next;
+        break;
+      }
 
       const result = parser(state)(next);
 
-      if (E.isLeft(result)) return error(next);
+      if (E.isLeft(result)) return error(i);
 
       results.push(result.right.value[0]);
 

@@ -87,28 +87,29 @@ describe("StatefulParser", () => {
     test("many1Till", () => {
       const p = pipe(
         _.item<string, string>(),
+        _.filter((a) => a === "a"),
         _.chainFirst((a) => _.modify((s) => s.concat(a.toUpperCase())))
       );
 
       const term = pipe(
         _.item<string, string>(),
-        _.filter((a) => a !== "a")
+        _.filter((a) => a === "x")
       );
 
-      expect(_.many1Till(p, term)("")(stream(["a", "a", "b"]))).toStrictEqual(
+      expect(
+        _.many1Till(p, term)("")(stream(["a", "a", "b", "x"]))
+      ).toStrictEqual(error(stream(["a", "a", "b", "x"])));
+
+      expect(_.many1Till(p, term)("")(stream(["x"]))).toStrictEqual(
+        error(stream(["x"]))
+      );
+
+      expect(_.many1Till(p, term)("")(stream(["a", "a", "x"]))).toStrictEqual(
         success(
           [["a", "a"], "AA"],
-          stream(["a", "a", "b"]),
-          stream(["a", "a", "b"], 3)
+          stream(["a", "a", "x"]),
+          stream(["a", "a", "x"], 3)
         )
-      );
-
-      expect(_.many1Till(p, term)("")(stream(["b"]))).toStrictEqual(
-        error(stream(["b"], 1))
-      );
-
-      expect(_.many1Till(p, term)("")(stream([]))).toStrictEqual(
-        error(stream([]))
       );
     });
 
