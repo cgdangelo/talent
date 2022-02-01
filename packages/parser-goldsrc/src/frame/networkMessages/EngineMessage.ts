@@ -1,5 +1,4 @@
 import { statefulParser as SP } from "@talent/parser";
-import { flow } from "fp-ts/lib/function";
 import type { DemoStateParser } from "../../DemoState";
 import * as M from "./engine";
 import { MessageType } from "./MessageType";
@@ -65,7 +64,7 @@ export type EngineMessage =
   | M.SendCvarValue
   | M.SendCvarValue2;
 
-const engineMessage_: (
+export const engineMessage: (
   messageId: MessageType
 ) => DemoStateParser<EngineMessage> = (messageId) => {
   // TODO Replace with Option?
@@ -251,10 +250,3 @@ const engineMessage_: (
       return SP.fail();
   }
 };
-
-export const engineMessage: (
-  messageId: MessageType
-) => DemoStateParser<EngineMessage> = flow(
-  engineMessage_,
-  SP.filter(({ name }) => name !== "SVC_NOP")
-);
