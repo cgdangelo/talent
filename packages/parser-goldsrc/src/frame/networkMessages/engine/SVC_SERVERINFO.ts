@@ -1,7 +1,8 @@
 import { buffer as B } from "@talent/parser-buffer";
-import * as P from "@talent/parser/lib/Parser";
+import { parser as P, statefulParser as SP } from "@talent/parser";
 import { pipe } from "fp-ts/lib/function";
 import { MessageType } from "../MessageType";
+import * as DS from "../../../DemoState";
 
 export type ServerInfo = {
   readonly id: MessageType.SVC_SERVERINFO;
@@ -22,7 +23,7 @@ export type ServerInfo = {
   };
 };
 
-export const serverInfo: B.BufferParser<ServerInfo> = pipe(
+const serverInfo_: B.BufferParser<ServerInfo> = pipe(
   P.struct({
     protocol: B.int32_le,
     spawnCount: B.int32_le,
@@ -51,4 +52,11 @@ export const serverInfo: B.BufferParser<ServerInfo> = pipe(
     name: "SVC_SERVERINFO",
     fields,
   }))
+);
+
+export const serverInfo: DS.DemoStateParser<ServerInfo> = pipe(
+  DS.lift(serverInfo_),
+  SP.chainFirst(({ fields: { maxPlayers } }) =>
+    pipe(SP.modify((s) => ({ ...s, maxClients: maxPlayers })))
+  )
 );
