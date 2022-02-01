@@ -58,7 +58,10 @@ export const take = <I>(length: number): P.Parser<I, readonly I[]> =>
     P.withStart(P.of<I, void>(undefined)),
 
     // Check for overflow
-    P.filter(([, { buffer, cursor }]) => cursor + length <= buffer.length),
+    P.filter(
+      ([, { buffer, cursor }]) =>
+        length >= 0 && cursor + length <= buffer.length
+    ),
 
     P.map(([, { buffer, cursor }]) => buffer.slice(cursor, cursor + length)),
 
