@@ -30,15 +30,6 @@ export const messages: (
             )
           )
         )
-      ),
-
-      SP.alt(() =>
-        SP.lift(
-          pipe(
-            P.of<number, readonly Message[]>([]),
-            P.apFirst(P.seek(i.cursor + messagesLength))
-          )
-        )
       )
     )(s)
   );

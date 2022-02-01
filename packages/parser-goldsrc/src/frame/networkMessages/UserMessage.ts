@@ -1,6 +1,5 @@
 import { parser as P, statefulParser as SP } from "@talent/parser";
 import { buffer as B } from "@talent/parser-buffer";
-import type { readonlyNonEmptyArray as RNEA } from "fp-ts";
 import { number, option as O, readonlyMap as RM } from "fp-ts";
 import { pipe } from "fp-ts/lib/function";
 import * as DS from "../../DemoState";
@@ -8,7 +7,7 @@ import * as DS from "../../DemoState";
 export type UserMessage = {
   readonly id: number;
   readonly name: string;
-  readonly data: RNEA.ReadonlyNonEmptyArray<number>;
+  readonly data: readonly number[];
 };
 
 const lookupUserMessage = RM.lookup(number.Eq);

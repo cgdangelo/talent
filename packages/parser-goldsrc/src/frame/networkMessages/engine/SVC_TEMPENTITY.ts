@@ -1004,109 +1004,98 @@ enum TempEntityType {
   TE_USERTRACER = 127,
 }
 
-const mapTypeIdToType: (typeId: number) => TempEntity["fields"]["type"] = (
-  typeId
-) =>
-  ({
-    id: typeId,
-    name: TempEntityType[typeId],
-  } as TempEntity["fields"]["type"]); // HACK
-
 export const tempEntity: B.BufferParser<TempEntity> = pipe(
   B.uint8_le,
-  P.map(mapTypeIdToType),
   P.chainFirst((type) =>
     pipe(
       ((): P.Parser<number, number> => {
-        switch (type.name) {
-          case "TE_BEAMPOINTS":
+        switch (type) {
+          case TempEntityType.TE_BEAMPOINTS:
             return P.of(24);
 
-          case "TE_BEAMENTPOINT":
+          case TempEntityType.TE_BEAMENTPOINT:
             return P.of(20);
 
-          case "TE_GUNSHOT":
+          case TempEntityType.TE_GUNSHOT:
             return P.of(6);
 
-          case "TE_EXPLOSION":
+          case TempEntityType.TE_EXPLOSION:
             return P.of(11);
 
-          case "TE_TAREXPLOSION":
+          case TempEntityType.TE_TAREXPLOSION:
             return P.of(6);
 
-          case "TE_SMOKE":
+          case TempEntityType.TE_SMOKE:
             return P.of(10);
 
-          case "TE_TRACER":
+          case TempEntityType.TE_TRACER:
             return P.of(12);
 
-          case "TE_LIGHTNING":
+          case TempEntityType.TE_LIGHTNING:
             return P.of(17);
 
-          case "TE_BEAMENTS":
+          case TempEntityType.TE_BEAMENTS:
             return P.of(16);
 
-          case "TE_SPARKS":
+          case TempEntityType.TE_SPARKS:
             return P.of(6);
 
-          case "TE_LAVASPLASH":
+          case TempEntityType.TE_LAVASPLASH:
             return P.of(6);
 
-          case "TE_TELEPORT":
+          case TempEntityType.TE_TELEPORT:
             return P.of(6);
 
-          case "TE_EXPLOSION2":
+          case TempEntityType.TE_EXPLOSION2:
             return P.of(8);
 
-          case "TE_BSPDECAL":
+          case TempEntityType.TE_BSPDECAL:
             return pipe(
               P.skip<number>(8),
               P.apSecond(B.int16_le),
-              P.filter((entityIndex) => entityIndex !== 0),
-              P.map(() => 2),
-              P.alt(() => P.of(0))
+              P.map((entityIndex) => (entityIndex !== 0 ? 2 : 0))
             );
 
-          case "TE_IMPLOSION":
+          case TempEntityType.TE_IMPLOSION:
             return P.of(9);
 
-          case "TE_SPRITETRAIL":
+          case TempEntityType.TE_SPRITETRAIL:
             return P.of(19);
 
-          case "TE_SPRITE":
+          case TempEntityType.TE_SPRITE:
             return P.of(10);
 
-          case "TE_BEAMSPRITE":
+          case TempEntityType.TE_BEAMSPRITE:
             return P.of(16);
 
-          case "TE_BEAMTORUS":
+          case TempEntityType.TE_BEAMTORUS:
             return P.of(24);
 
-          case "TE_BEAMDISK":
+          case TempEntityType.TE_BEAMDISK:
             return P.of(24);
 
-          case "TE_BEAMCYLINDER":
+          case TempEntityType.TE_BEAMCYLINDER:
             return P.of(24);
 
-          case "TE_BEAMFOLLOW":
+          case TempEntityType.TE_BEAMFOLLOW:
             return P.of(10);
 
-          case "TE_GLOWSPRITE":
+          case TempEntityType.TE_GLOWSPRITE:
             return P.of(11);
 
-          case "TE_BEAMRING":
+          case TempEntityType.TE_BEAMRING:
             return P.of(16);
 
-          case "TE_STREAK_SPLASH":
+          case TempEntityType.TE_STREAK_SPLASH:
             return P.of(19);
 
-          case "TE_DLIGHT":
+          case TempEntityType.TE_DLIGHT:
             return P.of(12);
 
-          case "TE_ELIGHT":
+          case TempEntityType.TE_ELIGHT:
             return P.of(16);
 
-          case "TE_TEXTMESSAGE":
+          case TempEntityType.TE_TEXTMESSAGE:
             return pipe(
               P.skip<number>(8 + 16 + 16),
               P.apSecond(B.int8_le),
@@ -1118,97 +1107,97 @@ export const tempEntity: B.BufferParser<TempEntity> = pipe(
               P.map(() => 0)
             );
 
-          case "TE_LINE":
+          case TempEntityType.TE_LINE:
             return P.of(17);
 
-          case "TE_BOX":
+          case TempEntityType.TE_BOX:
             return P.of(17);
 
-          case "TE_KILLBEAM":
+          case TempEntityType.TE_KILLBEAM:
             return P.of(2);
 
-          case "TE_LARGEFUNNEL":
+          case TempEntityType.TE_LARGEFUNNEL:
             return P.of(10);
 
-          case "TE_BLOODSTREAM":
+          case TempEntityType.TE_BLOODSTREAM:
             return P.of(14);
 
-          case "TE_SHOWLINE":
+          case TempEntityType.TE_SHOWLINE:
             return P.of(12);
 
-          case "TE_BLOOD":
+          case TempEntityType.TE_BLOOD:
             return P.of(14);
 
-          case "TE_DECAL":
+          case TempEntityType.TE_DECAL:
             return P.of(9);
 
-          case "TE_FIZZ":
+          case TempEntityType.TE_FIZZ:
             return P.of(5);
 
-          case "TE_MODEL":
+          case TempEntityType.TE_MODEL:
             return P.of(17);
 
-          case "TE_EXPLODEMODEL":
+          case TempEntityType.TE_EXPLODEMODEL:
             return P.of(13);
 
-          case "TE_BREAKMODEL":
+          case TempEntityType.TE_BREAKMODEL:
             return P.of(24);
 
-          case "TE_GUNSHOTDECAL":
+          case TempEntityType.TE_GUNSHOTDECAL:
             return P.of(9);
 
-          case "TE_SPRITE_SPRAY":
+          case TempEntityType.TE_SPRITE_SPRAY:
             return P.of(17);
 
-          case "TE_ARMOR_RICOCHET":
+          case TempEntityType.TE_ARMOR_RICOCHET:
             return P.of(7);
 
-          case "TE_PLAYERDECAL":
+          case TempEntityType.TE_PLAYERDECAL:
             return P.of(10);
 
-          case "TE_BUBBLES":
+          case TempEntityType.TE_BUBBLES:
             return P.of(19);
 
-          case "TE_BUBBLETRAIL":
+          case TempEntityType.TE_BUBBLETRAIL:
             return P.of(19);
 
-          case "TE_BLOODSPRITE":
+          case TempEntityType.TE_BLOODSPRITE:
             return P.of(12);
 
-          case "TE_WORLDDECAL":
+          case TempEntityType.TE_WORLDDECAL:
             return P.of(7);
 
-          case "TE_WORLDDECALHIGH":
+          case TempEntityType.TE_WORLDDECALHIGH:
             return P.of(7);
 
-          case "TE_DECALHIGH":
+          case TempEntityType.TE_DECALHIGH:
             return P.of(9);
 
-          case "TE_PROJECTILE":
+          case TempEntityType.TE_PROJECTILE:
             return P.of(16);
 
-          case "TE_SPRAY":
+          case TempEntityType.TE_SPRAY:
             return P.of(18);
 
-          case "TE_PLAYERSPRITES":
+          case TempEntityType.TE_PLAYERSPRITES:
             return P.of(5);
 
-          case "TE_PARTICLEBURST":
+          case TempEntityType.TE_PARTICLEBURST:
             return P.of(10);
 
-          case "TE_FIREFIELD":
+          case TempEntityType.TE_FIREFIELD:
             return P.of(9);
 
-          case "TE_PLAYERATTACHMENT":
+          case TempEntityType.TE_PLAYERATTACHMENT:
             return P.of(7);
 
-          case "TE_KILLPLAYERATTACHMENTS":
+          case TempEntityType.TE_KILLPLAYERATTACHMENTS:
             return P.of(1);
 
-          case "TE_MULTIGUNSHOT":
+          case TempEntityType.TE_MULTIGUNSHOT:
             return P.of(18);
 
-          case "TE_USERTRACER":
+          case TempEntityType.TE_USERTRACER:
             return P.of(15);
 
           default:

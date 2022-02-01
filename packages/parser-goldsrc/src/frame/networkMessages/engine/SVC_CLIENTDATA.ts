@@ -1,6 +1,5 @@
-import { parser as P, statefulParser as SP } from "@talent/parser";
+import { statefulParser as SP } from "@talent/parser";
 import * as BB from "@talent/parser-bitbuffer";
-import type { buffer as B } from "@talent/parser-buffer";
 import { success } from "@talent/parser/lib/ParseResult";
 import { stream } from "@talent/parser/lib/Stream";
 import { pipe } from "fp-ts/lib/function";
@@ -23,44 +22,35 @@ export type ClientData = {
   };
 };
 
-const deltaUpdateMask: B.BufferParser<number | undefined> = BB.bitFlagged(() =>
-  BB.ubits(8)
-);
-const hasWeaponData: DS.DemoStateParser<number> = SP.lift(
-  pipe(
-    BB.ubits(1),
-    P.filter((hasWeaponData) => hasWeaponData !== 0)
-  )
-);
-
-const weaponData: DS.DemoStateParser<ClientData["fields"]["weaponData"]> = pipe(
-  SP.many(
-    pipe(
-      hasWeaponData,
-      SP.chain(() =>
-        pipe(
-          DS.lift(BB.ubits(6)),
-          SP.bindTo("weaponIndex"),
-          SP.bind("weaponData", () => readDelta("weapon_data_t"))
-        )
-      )
-    )
-  ),
-
-  SP.chainFirst(() => SP.lift(P.skip(1)))
-);
-
 export const clientData: DS.DemoStateParser<ClientData> = (s) => (i) =>
   pipe(
     stream(i.buffer, i.cursor * 8),
 
     pipe(
-      DS.lift(deltaUpdateMask),
+      DS.lift(BB.bitFlagged(() => BB.ubits(8))),
       SP.bindTo("deltaUpdateMask"),
 
       SP.bind("clientData", () => readDelta("clientdata_t")),
 
-      SP.bind("weaponData", () => weaponData),
+      SP.bind("weaponData", () => {
+        const weaponDatum = pipe(
+          DS.lift(BB.ubits(1)),
+          SP.chain((hasWeaponData) =>
+            hasWeaponData !== 0
+              ? pipe(
+                  DS.lift(BB.ubits(6)),
+                  SP.bindTo("weaponIndex"),
+                  SP.bind("weaponData", () => readDelta("weapon_data_t"))
+                )
+              : SP.fail()
+          )
+        );
+
+        return pipe(
+          SP.many(weaponDatum),
+          SP.chainFirst(() => SP.skip(1))
+        );
+      }),
 
       SP.chain((a) =>
         SP.lift((o) =>

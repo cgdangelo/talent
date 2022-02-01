@@ -33,22 +33,27 @@ const entityState: (
 
     SP.chain((hasCustomDelta) =>
       pipe(
-        readDelta(
-          entityIndex > 0 && entityIndex < 33
-            ? "entity_state_player_t"
-            : hasCustomDelta !== 0
-            ? "custom_entity_state_t"
-            : "entity_state_t"
-        ),
-
-        SP.map((entityState) => ({ entityIndex, entityState }))
+        SP.get<number, DS.DemoState>(),
+        SP.chain(({ maxClients }) =>
+          pipe(
+            readDelta(
+              entityIndex > 0 && entityIndex <= maxClients
+                ? "entity_state_player_t"
+                : hasCustomDelta !== 0
+                ? "custom_entity_state_t"
+                : "entity_state_t"
+            ),
+            SP.map((entityState) => ({ entityIndex, entityState }))
+          )
+        )
       )
     )
   );
 
-const nextEntityIndex: () => B.BufferParser<number> = () => {
-  let currentEntityIndex = 0;
+// HACK
+let currentEntityIndex = 0;
 
+const nextEntityIndex: () => B.BufferParser<number> = () => {
   return pipe(
     BB.ubits(1),
 
@@ -131,13 +136,14 @@ export const deltaPacketEntities: DS.DemoStateParser<DeltaPacketEntities> =
           )
         ),
 
-        SP.map(
-          (fields) =>
-            ({
-              id: MessageType.SVC_DELTAPACKETENTITIES,
-              name: "SVC_DELTAPACKETENTITIES",
-              fields,
-            } as const)
-        )
+        SP.map((fields) => {
+          currentEntityIndex = 0;
+
+          return {
+            id: MessageType.SVC_DELTAPACKETENTITIES,
+            name: "SVC_DELTAPACKETENTITIES",
+            fields,
+          } as const;
+        })
       )(s)
     );

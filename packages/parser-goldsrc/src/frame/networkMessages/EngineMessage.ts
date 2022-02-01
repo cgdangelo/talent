@@ -104,7 +104,7 @@ const engineMessage_: (
       return SP.lift(M.setAngle);
 
     case MessageType.SVC_SERVERINFO: // 11
-      return SP.lift(M.serverInfo);
+      return M.serverInfo;
 
     case MessageType.SVC_LIGHTSTYLE: // 12
       return SP.lift(M.lightStyle);

@@ -1,13 +1,12 @@
 import {
   either as E,
-  option as O,
   readonlyArray as RA,
   readonlyNonEmptyArray as RNEA,
 } from "fp-ts";
 import { sequenceS, sequenceT } from "fp-ts/lib/Apply";
 import { pipe } from "fp-ts/lib/function";
 import * as P from "parser-ts/lib/Parser";
-import { error, success } from "./ParseResult";
+import { success } from "./ParseResult";
 import { stream } from "./Stream";
 
 export * from "parser-ts/lib/Parser";
@@ -16,9 +15,7 @@ export const skip: <I>(offset: number) => P.Parser<I, void> = (offset) => (i) =>
   pipe(i, seek(i.cursor + offset));
 
 export const seek: <I>(cursor: number) => P.Parser<I, void> = (cursor) => (i) =>
-  cursor < 0 || cursor > i.buffer.length
-    ? error(i)
-    : success(undefined, i, stream(i.buffer, cursor));
+  success(undefined, i, stream(i.buffer, cursor));
 
 export const manyN1 = <I, A>(
   parser: P.Parser<I, A>,
@@ -56,26 +53,17 @@ export const manyN = <I, A>(
     P.alt(() => P.of<I, readonly A[]>([]))
   );
 
-export const take = <I>(
-  length: number
-): P.Parser<I, RNEA.ReadonlyNonEmptyArray<I>> =>
+export const take = <I>(length: number): P.Parser<I, readonly I[]> =>
   pipe(
     P.withStart(P.of<I, void>(undefined)),
 
     // Check for overflow
     P.filter(
-      ([, { buffer, cursor }]) => length > 0 && cursor + length <= buffer.length
+      ([, { buffer, cursor }]) =>
+        length >= 0 && cursor + length <= buffer.length
     ),
 
     P.map(([, { buffer, cursor }]) => buffer.slice(cursor, cursor + length)),
-    P.map(RNEA.fromReadonlyArray),
-    P.chain(
-      O.fold(
-        /* istanbul ignore next: Can't happen */
-        () => P.fail(),
-        (a) => P.succeed(a)
-      )
-    ),
 
     P.apFirst(skip(length))
   );
