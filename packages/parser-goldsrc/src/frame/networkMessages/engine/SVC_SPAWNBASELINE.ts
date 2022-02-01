@@ -37,12 +37,17 @@ export const spawnBaseline: DS.DemoStateParser<SpawnBaseline> = (s) => (i) =>
           SP.bind("type", () => SP.lift(BB.ubits(2))),
 
           SP.bind("delta", ({ index, type }) =>
-            readDelta(
-              (type & 1) !== 0
-                ? index > 0 && index < 33
-                  ? "entity_state_player_t"
-                  : "entity_state_t"
-                : "custom_entity_state_t"
+            pipe(
+              SP.get<number, DS.DemoState>(),
+              SP.chain(({ maxClients }) =>
+                readDelta(
+                  (type & 1) !== 0
+                    ? index > 0 && index <= maxClients
+                      ? "entity_state_player_t"
+                      : "entity_state_t"
+                    : "custom_entity_state_t"
+                )
+              )
             )
           )
         ),
