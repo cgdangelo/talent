@@ -29,7 +29,7 @@ export const eventReliable: DS.DemoStateParser<EventReliable> = (s) => (i) =>
       DS.lift(BB.ubits(10)),
       SP.bindTo("eventIndex"),
 
-      SP.bind("eventArgs", () => readDelta("event_args_t")),
+      SP.bind("eventArgs", () => readDelta("event_t")),
 
       SP.bind("fireTime", () => SP.lift(fireTime)),
 
