@@ -216,8 +216,7 @@ export const skip: <S, I>(offset: number) => StatefulParser<S, I, void> = (
 
 export const take: <S, I>(
   length: number
-) => StatefulParser<S, I, RNEA.ReadonlyNonEmptyArray<I>> = (length) =>
-  lift(P.take(length));
+) => StatefulParser<S, I, readonly I[]> = (length) => lift(P.take(length));
 
 // -----------------------------------------------------------------------------
 // non-pipeables

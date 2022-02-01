@@ -1,6 +1,5 @@
 import {
   either as E,
-  option as O,
   readonlyArray as RA,
   readonlyNonEmptyArray as RNEA,
 } from "fp-ts";
@@ -56,26 +55,14 @@ export const manyN = <I, A>(
     P.alt(() => P.of<I, readonly A[]>([]))
   );
 
-export const take = <I>(
-  length: number
-): P.Parser<I, RNEA.ReadonlyNonEmptyArray<I>> =>
+export const take = <I>(length: number): P.Parser<I, readonly I[]> =>
   pipe(
     P.withStart(P.of<I, void>(undefined)),
 
     // Check for overflow
-    P.filter(
-      ([, { buffer, cursor }]) => length > 0 && cursor + length <= buffer.length
-    ),
+    P.filter(([, { buffer, cursor }]) => cursor + length <= buffer.length),
 
     P.map(([, { buffer, cursor }]) => buffer.slice(cursor, cursor + length)),
-    P.map(RNEA.fromReadonlyArray),
-    P.chain(
-      O.fold(
-        /* istanbul ignore next: Can't happen */
-        () => P.fail(),
-        (a) => P.succeed(a)
-      )
-    ),
 
     P.apFirst(skip(length))
   );
