@@ -1,5 +1,9 @@
+import { parser as P } from "@talent/parser";
+import type { buffer as B } from "@talent/parser-buffer";
+import { pipe } from "fp-ts/lib/function";
 import type { Point } from "../../../../Point";
-import type { TempEntityType } from "./TempEntityType";
+import { coordPoint } from "./SVC_TEMPENTITY";
+import { TempEntityType } from "./TempEntityType";
 
 export type TE_TELEPORT = {
   readonly id: TempEntityType.TE_TELEPORT;
@@ -8,3 +12,13 @@ export type TE_TELEPORT = {
     readonly position: Point;
   };
 };
+
+export const teleport: B.BufferParser<TE_TELEPORT> = pipe(
+  P.struct({ position: coordPoint }),
+
+  P.map((fields) => ({
+    id: TempEntityType.TE_TELEPORT,
+    name: "TE_TELEPORT",
+    fields,
+  }))
+);

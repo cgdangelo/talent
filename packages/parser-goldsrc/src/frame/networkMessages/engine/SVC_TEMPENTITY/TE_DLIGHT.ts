@@ -1,5 +1,9 @@
+import { parser as P } from "@talent/parser";
+import { buffer as B } from "@talent/parser-buffer";
+import { pipe } from "fp-ts/lib/function";
 import type { Point } from "../../../../Point";
-import type { TempEntityType } from "./TempEntityType";
+import { coordPoint } from "./SVC_TEMPENTITY";
+import { TempEntityType } from "./TempEntityType";
 
 export type TE_DLIGHT = {
   readonly id: TempEntityType.TE_DLIGHT;
@@ -16,3 +20,23 @@ export type TE_DLIGHT = {
     readonly decayRate: number;
   };
 };
+
+export const dLight: B.BufferParser<TE_DLIGHT> = pipe(
+  P.struct({
+    position: coordPoint,
+    radius: B.uint8_le,
+    color: P.struct({
+      r: B.uint8_le,
+      g: B.uint8_le,
+      b: B.uint8_le,
+    }),
+    life: B.uint8_le,
+    decayRate: B.uint8_le,
+  }),
+
+  P.map((fields) => ({
+    id: TempEntityType.TE_DLIGHT,
+    name: "TE_DLIGHT",
+    fields,
+  }))
+);

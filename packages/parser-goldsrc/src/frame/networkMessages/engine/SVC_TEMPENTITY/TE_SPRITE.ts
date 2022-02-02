@@ -1,5 +1,9 @@
+import { parser as P } from "@talent/parser";
+import { buffer as B } from "@talent/parser-buffer";
+import { pipe } from "fp-ts/lib/function";
 import type { Point } from "../../../../Point";
-import type { TempEntityType } from "./TempEntityType";
+import { coordPoint } from "./SVC_TEMPENTITY";
+import { TempEntityType } from "./TempEntityType";
 
 export type TE_SPRITE = {
   readonly id: TempEntityType.TE_SPRITE;
@@ -11,3 +15,18 @@ export type TE_SPRITE = {
     readonly brightness: number;
   };
 };
+
+export const sprite: B.BufferParser<TE_SPRITE> = pipe(
+  P.struct({
+    position: coordPoint,
+    spriteIndex: B.int16_le,
+    scale: B.uint8_le,
+    brightness: B.uint8_le,
+  }),
+
+  P.map((fields) => ({
+    id: TempEntityType.TE_SPRITE,
+    name: "TE_SPRITE",
+    fields,
+  }))
+);

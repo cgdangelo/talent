@@ -1,5 +1,9 @@
+import { parser as P } from "@talent/parser";
+import { buffer as B } from "@talent/parser-buffer";
+import { pipe } from "fp-ts/lib/function";
 import type { Point } from "../../../../Point";
-import type { TempEntityType } from "./TempEntityType";
+import { coordPoint } from "./SVC_TEMPENTITY";
+import { TempEntityType } from "./TempEntityType";
 
 export type TE_LARGEFUNNEL = {
   readonly id: TempEntityType.TE_LARGEFUNNEL;
@@ -10,3 +14,17 @@ export type TE_LARGEFUNNEL = {
     readonly flags: number;
   };
 };
+
+export const largeFunnel: B.BufferParser<TE_LARGEFUNNEL> = pipe(
+  P.struct({
+    position: coordPoint,
+    modelIndex: B.int16_le,
+    flags: B.int16_le,
+  }),
+
+  P.map((fields) => ({
+    id: TempEntityType.TE_LARGEFUNNEL,
+    name: "TE_LARGEFUNNEL",
+    fields,
+  }))
+);

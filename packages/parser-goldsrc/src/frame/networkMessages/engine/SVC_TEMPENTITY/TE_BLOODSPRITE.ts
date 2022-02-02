@@ -1,5 +1,9 @@
+import { parser as P } from "@talent/parser";
+import { buffer as B } from "@talent/parser-buffer";
+import { pipe } from "fp-ts/lib/function";
 import type { Point } from "../../../../Point";
-import type { TempEntityType } from "./TempEntityType";
+import { coordPoint } from "../SVC_TEMPENTITY";
+import { TempEntityType } from "./TempEntityType";
 
 export type TE_BLOODSPRITE = {
   readonly id: TempEntityType.TE_BLOODSPRITE;
@@ -12,3 +16,19 @@ export type TE_BLOODSPRITE = {
     readonly scale: number;
   };
 };
+
+export const bloodSprite: B.BufferParser<TE_BLOODSPRITE> = pipe(
+  P.struct({
+    position: coordPoint,
+    modelIndex: B.int16_le,
+    decalIndex: B.int16_le,
+    color: B.uint8_le,
+    scale: B.uint8_le,
+  }),
+
+  P.map((fields) => ({
+    id: TempEntityType.TE_BLOODSPRITE,
+    name: "TE_BLOODSPRITE",
+    fields,
+  }))
+);

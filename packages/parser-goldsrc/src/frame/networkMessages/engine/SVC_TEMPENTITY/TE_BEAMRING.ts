@@ -1,4 +1,7 @@
-import type { TempEntityType } from "./TempEntityType";
+import { parser as P } from "@talent/parser";
+import { buffer as B } from "@talent/parser-buffer";
+import { pipe } from "fp-ts/lib/function";
+import { TempEntityType } from "./TempEntityType";
 
 export type TE_BEAMRING = {
   readonly id: TempEntityType.TE_BEAMRING;
@@ -21,3 +24,29 @@ export type TE_BEAMRING = {
     readonly speed: number;
   };
 };
+
+export const beamRing: B.BufferParser<TE_BEAMRING> = pipe(
+  P.struct({
+    startEntity: B.int16_le,
+    endEntity: B.int16_le,
+    spriteIndex: B.int16_le,
+    startFrame: B.uint8_le,
+    frameRate: B.uint8_le,
+    life: B.uint8_le,
+    width: B.uint8_le,
+    noise: B.uint8_le,
+    color: P.struct({
+      r: B.uint8_le,
+      g: B.uint8_le,
+      b: B.uint8_le,
+      a: B.uint8_le,
+    }),
+    speed: B.uint8_le,
+  }),
+
+  P.map((fields) => ({
+    id: TempEntityType.TE_BEAMRING,
+    name: "TE_BEAMRING",
+    fields,
+  }))
+);

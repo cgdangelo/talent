@@ -1,5 +1,9 @@
+import { parser as P } from "@talent/parser";
+import { buffer as B } from "@talent/parser-buffer";
+import { pipe } from "fp-ts/lib/function";
 import type { Point } from "../../../../Point";
-import type { TempEntityType } from "./TempEntityType";
+import { coordPoint } from "../SVC_TEMPENTITY";
+import { TempEntityType } from "./TempEntityType";
 
 export type TE_PLAYERDECAL = {
   readonly id: TempEntityType.TE_PLAYERDECAL;
@@ -11,3 +15,20 @@ export type TE_PLAYERDECAL = {
     readonly decalIndex: number;
   };
 };
+
+export const playerDecal: B.BufferParser<TE_PLAYERDECAL> = pipe(
+  P.struct({
+    playerIndex: B.uint8_le,
+    position: coordPoint,
+    entityIndex: B.int16_le,
+    decalIndex: B.uint8_le,
+    // [optional] short (model index???)
+    // modelIndex: B.int16_le,
+  }),
+
+  P.map((fields) => ({
+    id: TempEntityType.TE_PLAYERDECAL,
+    name: "TE_PLAYERDECAL",
+    fields,
+  }))
+);

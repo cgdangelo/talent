@@ -1,5 +1,9 @@
+import { parser as P } from "@talent/parser";
+import { buffer as B } from "@talent/parser-buffer";
+import { pipe } from "fp-ts/lib/function";
 import type { Point } from "../../../../Point";
-import type { TempEntityType } from "./TempEntityType";
+import { coordPoint } from "./SVC_TEMPENTITY";
+import { TempEntityType } from "./TempEntityType";
 
 export type TE_GLOWSPRITE = {
   readonly id: TempEntityType.TE_GLOWSPRITE;
@@ -12,3 +16,19 @@ export type TE_GLOWSPRITE = {
     readonly brightness: number;
   };
 };
+
+export const glowSprite: B.BufferParser<TE_GLOWSPRITE> = pipe(
+  P.struct({
+    position: coordPoint,
+    modelIndex: B.int16_le,
+    scale: B.uint8_le,
+    size: B.uint8_le,
+    brightness: B.uint8_le,
+  }),
+
+  P.map((fields) => ({
+    id: TempEntityType.TE_GLOWSPRITE,
+    name: "TE_GLOWSPRITE",
+    fields,
+  }))
+);

@@ -1,5 +1,9 @@
+import { parser as P } from "@talent/parser";
+import { buffer as B } from "@talent/parser-buffer";
+import { pipe } from "fp-ts/lib/function";
 import type { Point } from "../../../../Point";
-import type { TempEntityType } from "./TempEntityType";
+import { coordPoint } from "./SVC_TEMPENTITY";
+import { TempEntityType } from "./TempEntityType";
 
 export type TE_BOX = {
   readonly id: TempEntityType.TE_BOX;
@@ -15,3 +19,18 @@ export type TE_BOX = {
     };
   };
 };
+
+export const box: B.BufferParser<TE_BOX> = pipe(
+  P.struct({
+    startPosition: coordPoint,
+    endPosition: coordPoint,
+    life: B.int16_le,
+    color: P.struct({
+      r: B.uint8_le,
+      g: B.uint8_le,
+      b: B.uint8_le,
+    }),
+  }),
+
+  P.map((fields) => ({ id: TempEntityType.TE_BOX, name: "TE_BOX", fields }))
+);

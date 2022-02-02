@@ -1,5 +1,9 @@
+import { parser as P } from "@talent/parser";
+import { buffer as B } from "@talent/parser-buffer";
+import { pipe } from "fp-ts/lib/function";
 import type { Point } from "../../../../Point";
-import type { TempEntityType } from "./TempEntityType";
+import { coordPoint } from "../SVC_TEMPENTITY";
+import { TempEntityType } from "./TempEntityType";
 
 export type TE_WORLDDECALHIGH = {
   readonly id: TempEntityType.TE_WORLDDECALHIGH;
@@ -9,3 +13,16 @@ export type TE_WORLDDECALHIGH = {
     readonly decalIndex: number;
   };
 };
+
+export const worldDecalHigh: B.BufferParser<TE_WORLDDECALHIGH> = pipe(
+  P.struct({
+    position: coordPoint,
+    decalIndex: B.uint8_le,
+  }),
+
+  P.map((fields) => ({
+    id: TempEntityType.TE_WORLDDECALHIGH,
+    name: "TE_WORLDDECALHIGH",
+    fields,
+  }))
+);

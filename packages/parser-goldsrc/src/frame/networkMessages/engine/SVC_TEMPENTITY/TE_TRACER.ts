@@ -1,5 +1,9 @@
+import { parser as P } from "@talent/parser";
+import type { buffer as B } from "@talent/parser-buffer";
+import { pipe } from "fp-ts/lib/function";
 import type { Point } from "../../../../Point";
-import type { TempEntityType } from "./TempEntityType";
+import { coordPoint } from "./SVC_TEMPENTITY";
+import { TempEntityType } from "./TempEntityType";
 
 export type TE_TRACER = {
   readonly id: TempEntityType.TE_TRACER;
@@ -9,3 +13,16 @@ export type TE_TRACER = {
     readonly endPosition: Point;
   };
 };
+
+export const tracer: B.BufferParser<TE_TRACER> = pipe(
+  P.struct({
+    startPosition: coordPoint,
+    endPosition: coordPoint,
+  }),
+
+  P.map((fields) => ({
+    id: TempEntityType.TE_TRACER,
+    name: "TE_TRACER",
+    fields,
+  }))
+);

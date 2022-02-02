@@ -1,5 +1,9 @@
+import { parser as P } from "@talent/parser";
+import { buffer as B } from "@talent/parser-buffer";
+import { pipe } from "fp-ts/lib/function";
 import type { Point } from "../../../../Point";
-import type { TempEntityType } from "./TempEntityType";
+import { coordPoint } from "./SVC_TEMPENTITY";
+import { TempEntityType } from "./TempEntityType";
 
 export type TE_BSPDECAL = {
   readonly id: TempEntityType.TE_BSPDECAL;
@@ -11,3 +15,21 @@ export type TE_BSPDECAL = {
     readonly modelIndex?: number;
   };
 };
+
+export const bspDecal: B.BufferParser<TE_BSPDECAL> = pipe(
+  P.struct({
+    position: coordPoint,
+    decalIndex: B.int16_le,
+    entityIndex: B.int16_le,
+  }),
+
+  P.bind("modelIndex", ({ entityIndex }) =>
+    entityIndex !== 0 ? B.int16_le : P.of(undefined)
+  ),
+
+  P.map((fields) => ({
+    id: TempEntityType.TE_BSPDECAL,
+    name: "TE_BSPDECAL",
+    fields,
+  }))
+);
