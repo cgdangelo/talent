@@ -22,7 +22,7 @@ export const newUserMsg: DS.DemoStateParser<NewUserMsg> = pipe(
   DS.lift(
     P.struct({
       index: B.uint8_le,
-      size: B.uint8_le,
+      size: B.int8_le,
 
       // TODO "Name can be represented as an array of 4 "longs"." ???
       // https://wiki.alliedmods.net/Half-Life_1_Engine_Messages#SVC_NEWUSERMSG
