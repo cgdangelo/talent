@@ -3,7 +3,7 @@ import { buffer as B } from "@talent/parser-buffer";
 import { pipe } from "fp-ts/lib/function";
 import { TempEntityType } from "./TempEntityType";
 
-export type TE_FIZZ = {
+export type Fizz = {
   readonly id: TempEntityType.TE_FIZZ;
   readonly name: "TE_FIZZ";
   readonly fields: {
@@ -13,7 +13,7 @@ export type TE_FIZZ = {
   };
 };
 
-export const fizz: B.BufferParser<TE_FIZZ> = pipe(
+export const fizz: B.BufferParser<Fizz> = pipe(
   P.struct({
     entityIndex: B.int16_le,
     modelIndex: B.int16_le,

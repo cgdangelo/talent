@@ -5,7 +5,7 @@ import type { Point } from "../../../../Point";
 import { coord, coordPoint } from "../SVC_TEMPENTITY";
 import { TempEntityType } from "./TempEntityType";
 
-export type TE_BUBBLES = {
+export type Bubbles = {
   readonly id: TempEntityType.TE_BUBBLES;
   readonly name: "TE_BUBBLES";
   readonly fields: {
@@ -18,7 +18,7 @@ export type TE_BUBBLES = {
   };
 };
 
-export const bubbles: B.BufferParser<TE_BUBBLES> = pipe(
+export const bubbles: B.BufferParser<Bubbles> = pipe(
   P.struct({
     minStartPosition: coordPoint,
     maxStartPosition: coordPoint,

@@ -5,7 +5,7 @@ import type { Point } from "../../../../Point";
 import { coordPoint } from "../SVC_TEMPENTITY";
 import { TempEntityType } from "./TempEntityType";
 
-export type TE_PARTICLEBURST = {
+export type ParticleBurst = {
   readonly id: TempEntityType.TE_PARTICLEBURST;
   readonly name: "TE_PARTICLEBURST";
   readonly fields: {
@@ -16,7 +16,7 @@ export type TE_PARTICLEBURST = {
   };
 };
 
-export const particleBurst: B.BufferParser<TE_PARTICLEBURST> = pipe(
+export const particleBurst: B.BufferParser<ParticleBurst> = pipe(
   P.struct({
     origin: coordPoint,
     scale: B.int16_le,

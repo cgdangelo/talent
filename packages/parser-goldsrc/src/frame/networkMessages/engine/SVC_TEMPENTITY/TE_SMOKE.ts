@@ -5,7 +5,7 @@ import type { Point } from "../../../../Point";
 import { coordPoint } from "./SVC_TEMPENTITY";
 import { TempEntityType } from "./TempEntityType";
 
-export type TE_SMOKE = {
+export type Smoke = {
   readonly id: TempEntityType.TE_SMOKE;
   readonly name: "TE_SMOKE";
   readonly fields: {
@@ -16,7 +16,7 @@ export type TE_SMOKE = {
   };
 };
 
-export const smoke: B.BufferParser<TE_SMOKE> = pipe(
+export const smoke: B.BufferParser<Smoke> = pipe(
   P.struct({
     position: coordPoint,
     spriteIndex: B.int16_le,

@@ -5,7 +5,7 @@ import type { Point } from "../../../../Point";
 import { coordPoint } from "../SVC_TEMPENTITY";
 import { TempEntityType } from "./TempEntityType";
 
-export type TE_SPRAY = {
+export type Spray = {
   readonly id: TempEntityType.TE_SPRAY;
   readonly name: "TE_SPRAY";
   readonly fields: {
@@ -19,7 +19,7 @@ export type TE_SPRAY = {
   };
 };
 
-export const spray: B.BufferParser<TE_SPRAY> = pipe(
+export const spray: B.BufferParser<Spray> = pipe(
   P.struct({
     position: coordPoint,
     direction: coordPoint,

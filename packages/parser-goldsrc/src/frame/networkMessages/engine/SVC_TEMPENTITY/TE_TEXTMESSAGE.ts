@@ -9,7 +9,7 @@ enum TE_TEXTMESSAGE_FX {
   WriteOut = 1 << 1,
 }
 
-export type TE_TEXTMESSAGE = {
+export type TextMessage = {
   readonly id: TempEntityType.TE_TEXTMESSAGE;
   readonly name: "TE_TEXTMESSAGE";
   readonly fields: {
@@ -39,7 +39,7 @@ export type TE_TEXTMESSAGE = {
   };
 };
 
-export const textMessage: B.BufferParser<TE_TEXTMESSAGE> = pipe(
+export const textMessage: B.BufferParser<TextMessage> = pipe(
   P.struct({
     channel: B.uint8_le,
     position: P.struct({

@@ -5,7 +5,7 @@ import type { Point } from "../../../../Point";
 import { coordPoint } from "../SVC_TEMPENTITY";
 import { TempEntityType } from "./TempEntityType";
 
-export type TE_ARMOR_RICOCHET = {
+export type ArmorRicochet = {
   readonly id: TempEntityType.TE_ARMOR_RICOCHET;
   readonly name: "TE_ARMOR_RICOCHET";
   readonly fields: {
@@ -14,7 +14,7 @@ export type TE_ARMOR_RICOCHET = {
   };
 };
 
-export const armorRicochet: B.BufferParser<TE_ARMOR_RICOCHET> = pipe(
+export const armorRicochet: B.BufferParser<ArmorRicochet> = pipe(
   P.struct({
     position: coordPoint,
     scale: B.uint8_le,

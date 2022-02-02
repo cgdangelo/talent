@@ -5,7 +5,7 @@ import type { Point } from "../../../../Point";
 import { coordPoint } from "../SVC_TEMPENTITY";
 import { TempEntityType } from "./TempEntityType";
 
-export type TE_PLAYERDECAL = {
+export type PlayerDecal = {
   readonly id: TempEntityType.TE_PLAYERDECAL;
   readonly name: "TE_PLAYERDECAL";
   readonly fields: {
@@ -16,7 +16,7 @@ export type TE_PLAYERDECAL = {
   };
 };
 
-export const playerDecal: B.BufferParser<TE_PLAYERDECAL> = pipe(
+export const playerDecal: B.BufferParser<PlayerDecal> = pipe(
   P.struct({
     playerIndex: B.uint8_le,
     position: coordPoint,

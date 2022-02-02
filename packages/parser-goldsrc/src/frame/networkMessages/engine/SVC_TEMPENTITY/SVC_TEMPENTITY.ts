@@ -4,72 +4,72 @@ import { absurd, pipe } from "fp-ts/lib/function";
 import type { Point } from "../../../../Point";
 import { pointBy } from "../../../../Point";
 import { MessageType } from "../../MessageType";
-import * as TE from "./TempEntity";
+import * as TENT from "./TempEntity";
 import { TempEntityType } from "./TempEntityType";
 
 export type TempEntity = {
   readonly id: MessageType.SVC_TEMPENTITY;
   readonly name: "SVC_TEMPENTITY";
   readonly fields:
-    | TE.TE_BEAMPOINTS
-    | TE.TE_BEAMENTPOINT
-    | TE.TE_GUNSHOT
-    | TE.TE_EXPLOSION
-    | TE.TE_TAREXPLOSION
-    | TE.TE_SMOKE
-    | TE.TE_TRACER
-    | TE.TE_LIGHTNING
-    | TE.TE_BEAMENTS
-    | TE.TE_SPARKS
-    | TE.TE_LAVASPLASH
-    | TE.TE_TELEPORT
-    | TE.TE_EXPLOSION2
-    | TE.TE_BSPDECAL
-    | TE.TE_IMPLOSION
-    | TE.TE_SPRITETRAIL
-    | TE.TE_SPRITE
-    | TE.TE_BEAMSPRITE
-    | TE.TE_BEAMTORUS
-    | TE.TE_BEAMDISK
-    | TE.TE_BEAMCYLINDER
-    | TE.TE_BEAMFOLLOW
-    | TE.TE_GLOWSPRITE
-    | TE.TE_BEAMRING
-    | TE.TE_STREAK_SPLASH
-    | TE.TE_DLIGHT
-    | TE.TE_ELIGHT
-    | TE.TE_TEXTMESSAGE
-    | TE.TE_LINE
-    | TE.TE_BOX
-    | TE.TE_KILLBEAM
-    | TE.TE_LARGEFUNNEL
-    | TE.TE_BLOODSTREAM
-    | TE.TE_SHOWLINE
-    | TE.TE_BLOOD
-    | TE.TE_DECAL
-    | TE.TE_FIZZ
-    | TE.TE_MODEL
-    | TE.TE_EXPLODEMODEL
-    | TE.TE_BREAKMODEL
-    | TE.TE_GUNSHOTDECAL
-    | TE.TE_SPRITE_SPRAY
-    | TE.TE_ARMOR_RICOCHET
-    | TE.TE_PLAYERDECAL
-    | TE.TE_BUBBLES
-    | TE.TE_BUBBLETRAIL
-    | TE.TE_BLOODSPRITE
-    | TE.TE_WORLDDECAL
-    | TE.TE_WORLDDECALHIGH
-    | TE.TE_DECALHIGH
-    | TE.TE_PROJECTILE
-    | TE.TE_SPRAY
-    | TE.TE_PLAYERSPRITES
-    | TE.TE_PARTICLEBURST
-    | TE.TE_FIREFIELD
-    | TE.TE_PLAYERATTACHMENT
-    | TE.TE_KILLPLAYERATTACHMENTS
-    | TE.TE_MULTIGUNSHOT
-    | TE.TE_USERTRACER;
+    | TENT.BeamPoints
+    | TENT.BeamEntPoint
+    | TENT.Gunshot
+    | TENT.Explosion
+    | TENT.TarExplosion
+    | TENT.Smoke
+    | TENT.Tracer
+    | TENT.Lightning
+    | TENT.BeamEnts
+    | TENT.Sparks
+    | TENT.LavaSplash
+    | TENT.Teleport
+    | TENT.Explosion2
+    | TENT.BSPDecal
+    | TENT.Implosion
+    | TENT.SpriteTrail
+    | TENT.Sprite
+    | TENT.BeamSprite
+    | TENT.BeamToRus
+    | TENT.BeamDisk
+    | TENT.BeamCylinder
+    | TENT.BeamFollow
+    | TENT.GlowSprite
+    | TENT.BeamRing
+    | TENT.StreakSplash
+    | TENT.DLight
+    | TENT.ELight
+    | TENT.TextMessage
+    | TENT.Line
+    | TENT.Box
+    | TENT.KillBeam
+    | TENT.LargeFunnel
+    | TENT.Bloodstream
+    | TENT.ShowLine
+    | TENT.Blood
+    | TENT.Decal
+    | TENT.Fizz
+    | TENT.Model
+    | TENT.ExplodeModel
+    | TENT.BreakModel
+    | TENT.GunshotDecal
+    | TENT.SpriteSpray
+    | TENT.ArmorRicochet
+    | TENT.PlayerDecal
+    | TENT.Bubbles
+    | TENT.BubbleTrail
+    | TENT.BloodSprite
+    | TENT.WorldDecal
+    | TENT.WorldDecalHigh
+    | TENT.DecalHigh
+    | TENT.Projectile
+    | TENT.Spray
+    | TENT.PlayerSprites
+    | TENT.ParticleBurst
+    | TENT.FireField
+    | TENT.PlayerAttachment
+    | TENT.KillPlayerAttachments
+    | TENT.MultiGunshot
+    | TENT.UserTracer;
 };
 
 export const coord: B.BufferParser<number> = pipe(
@@ -86,181 +86,181 @@ export const tempEntity: B.BufferParser<TempEntity> = pipe(
   P.chain((id): B.BufferParser<TempEntity["fields"]> => {
     switch (id) {
       case TempEntityType.TE_BEAMPOINTS: // 0
-        return TE.beamPoints;
+        return TENT.beamPoints;
 
       case TempEntityType.TE_BEAMENTPOINT: // 1
-        return TE.beamEntPoint;
+        return TENT.beamEntPoint;
 
       case TempEntityType.TE_GUNSHOT: // 2
-        return TE.gunshot;
+        return TENT.gunshot;
 
       case TempEntityType.TE_EXPLOSION: // 3
-        return TE.explosion;
+        return TENT.explosion;
 
       case TempEntityType.TE_TAREXPLOSION: // 4
-        return TE.tarExplosion;
+        return TENT.tarExplosion;
 
       case TempEntityType.TE_SMOKE: // 5
-        return TE.smoke;
+        return TENT.smoke;
 
       case TempEntityType.TE_TRACER: // 6
-        return TE.tracer;
+        return TENT.tracer;
 
       case TempEntityType.TE_LIGHTNING: // 7
-        return TE.lightning;
+        return TENT.lightning;
 
       case TempEntityType.TE_BEAMENTS: // 8
-        return TE.beamEnts;
+        return TENT.beamEnts;
 
       case TempEntityType.TE_SPARKS: // 9
-        return TE.sparks;
+        return TENT.sparks;
 
       case TempEntityType.TE_LAVASPLASH: // 10
-        return TE.lavasplash;
+        return TENT.lavaSplash;
 
       case TempEntityType.TE_TELEPORT: // 11
-        return TE.teleport;
+        return TENT.teleport;
 
       case TempEntityType.TE_EXPLOSION2: // 12
-        return TE.explosion2;
+        return TENT.explosion2;
 
       case TempEntityType.TE_BSPDECAL: // 13
-        return TE.bspDecal;
+        return TENT.bspDecal;
 
       case TempEntityType.TE_IMPLOSION: // 14
-        return TE.implosion;
+        return TENT.implosion;
 
       case TempEntityType.TE_SPRITETRAIL: // 15
-        return TE.spriteTrail;
+        return TENT.spriteTrail;
 
       case TempEntityType.TE_SPRITE: // 17
-        return TE.sprite;
+        return TENT.sprite;
 
       case TempEntityType.TE_BEAMSPRITE: // 18
-        return TE.beamSprite;
+        return TENT.beamSprite;
 
       case TempEntityType.TE_BEAMTORUS: // 19
-        return TE.beamToRus;
+        return TENT.beamToRus;
 
       case TempEntityType.TE_BEAMDISK: // 20
-        return TE.beamDisk;
+        return TENT.beamDisk;
 
       case TempEntityType.TE_BEAMCYLINDER: // 21
-        return TE.beamCylinder;
+        return TENT.beamCylinder;
 
       case TempEntityType.TE_BEAMFOLLOW: // 22
-        return TE.beamFollow;
+        return TENT.beamFollow;
 
       case TempEntityType.TE_GLOWSPRITE: // 23
-        return TE.glowSprite;
+        return TENT.glowSprite;
 
       case TempEntityType.TE_BEAMRING: // 24
-        return TE.beamRing;
+        return TENT.beamRing;
 
       case TempEntityType.TE_STREAK_SPLASH: // 25
-        return TE.streakSplash;
+        return TENT.streakSplash;
 
       case TempEntityType.TE_DLIGHT: // 27
-        return TE.dLight;
+        return TENT.dLight;
 
       case TempEntityType.TE_ELIGHT: // 28
-        return TE.eLight;
+        return TENT.eLight;
 
       case TempEntityType.TE_TEXTMESSAGE: // 29
-        return TE.textMessage;
+        return TENT.textMessage;
 
       case TempEntityType.TE_LINE: // 30
-        return TE.line;
+        return TENT.line;
 
       case TempEntityType.TE_BOX: // 31
-        return TE.box;
+        return TENT.box;
 
       case TempEntityType.TE_KILLBEAM: // 99
-        return TE.killBeam;
+        return TENT.killBeam;
 
       case TempEntityType.TE_LARGEFUNNEL: // 100
-        return TE.largeFunnel;
+        return TENT.largeFunnel;
 
       case TempEntityType.TE_BLOODSTREAM: // 101
-        return TE.bloodStream;
+        return TENT.bloodstream;
 
       case TempEntityType.TE_SHOWLINE: // 102
-        return TE.showLine;
+        return TENT.showLine;
 
       case TempEntityType.TE_BLOOD: // 103
-        return TE.blood;
+        return TENT.blood;
 
       case TempEntityType.TE_DECAL: // 104
-        return TE.decal;
+        return TENT.decal;
 
       case TempEntityType.TE_FIZZ: // 105
-        return TE.fizz;
+        return TENT.fizz;
 
       case TempEntityType.TE_MODEL: // 106
-        return TE.model;
+        return TENT.model;
 
       case TempEntityType.TE_EXPLODEMODEL: // 107
-        return TE.explodeModel;
+        return TENT.explodeModel;
 
       case TempEntityType.TE_BREAKMODEL: // 108
-        return TE.breakModel;
+        return TENT.breakModel;
 
       case TempEntityType.TE_GUNSHOTDECAL: // 109
-        return TE.gunshotDecal;
+        return TENT.gunshotDecal;
 
       case TempEntityType.TE_SPRITE_SPRAY: // 110
-        return TE.spriteSpray;
+        return TENT.spriteSpray;
 
       case TempEntityType.TE_ARMOR_RICOCHET: // 111
-        return TE.armorRicochet;
+        return TENT.armorRicochet;
 
       case TempEntityType.TE_PLAYERDECAL: // 112
-        return TE.playerDecal;
+        return TENT.playerDecal;
 
       case TempEntityType.TE_BUBBLES: // 113
-        return TE.bubbles;
+        return TENT.bubbles;
 
       case TempEntityType.TE_BUBBLETRAIL: // 114
-        return TE.bubbleTrail;
+        return TENT.bubbleTrail;
 
       case TempEntityType.TE_BLOODSPRITE: // 115
-        return TE.bloodSprite;
+        return TENT.bloodSprite;
 
       case TempEntityType.TE_WORLDDECAL: // 116
-        return TE.worldDecal;
+        return TENT.worldDecal;
 
       case TempEntityType.TE_WORLDDECALHIGH: // 117
-        return TE.worldDecalHigh;
+        return TENT.worldDecalHigh;
 
       case TempEntityType.TE_DECALHIGH: // 118
-        return TE.decalHigh;
+        return TENT.decalHigh;
 
       case TempEntityType.TE_PROJECTILE: // 119
-        return TE.projectile;
+        return TENT.projectile;
 
       case TempEntityType.TE_SPRAY: // 120
-        return TE.spray;
+        return TENT.spray;
 
       case TempEntityType.TE_PLAYERSPRITES: // 121
-        return TE.playerSprites;
+        return TENT.playerSprites;
 
       case TempEntityType.TE_PARTICLEBURST: // 122
-        return TE.particleBurst;
+        return TENT.particleBurst;
 
       case TempEntityType.TE_FIREFIELD: // 123
-        return TE.fireField;
+        return TENT.fireField;
 
       case TempEntityType.TE_PLAYERATTACHMENT: // 124
-        return TE.playerAttachment;
+        return TENT.playerAttachment;
 
       case TempEntityType.TE_KILLPLAYERATTACHMENTS: // 125
-        return TE.killPlayerAttachments;
+        return TENT.killPlayerAttachments;
 
       case TempEntityType.TE_MULTIGUNSHOT: // 126
-        return TE.multiGunshot;
+        return TENT.multiGunshot;
 
       case TempEntityType.TE_USERTRACER: // 127
-        return TE.userTracer;
+        return TENT.userTracer;
 
       default:
         absurd(id);

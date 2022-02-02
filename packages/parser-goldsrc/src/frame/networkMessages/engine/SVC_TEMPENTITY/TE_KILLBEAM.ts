@@ -3,7 +3,7 @@ import { buffer as B } from "@talent/parser-buffer";
 import { pipe } from "fp-ts/lib/function";
 import { TempEntityType } from "./TempEntityType";
 
-export type TE_KILLBEAM = {
+export type KillBeam = {
   readonly id: TempEntityType.TE_KILLBEAM;
   readonly name: "TE_KILLBEAM";
   readonly fields: {
@@ -11,7 +11,7 @@ export type TE_KILLBEAM = {
   };
 };
 
-export const killBeam: B.BufferParser<TE_KILLBEAM> = pipe(
+export const killBeam: B.BufferParser<KillBeam> = pipe(
   P.struct({ entityIndex: B.int16_le }),
 
   P.map((fields) => ({

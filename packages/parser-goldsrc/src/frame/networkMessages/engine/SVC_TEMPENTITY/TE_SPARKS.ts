@@ -5,7 +5,7 @@ import type { Point } from "../../../../Point";
 import { coordPoint } from "./SVC_TEMPENTITY";
 import { TempEntityType } from "./TempEntityType";
 
-export type TE_SPARKS = {
+export type Sparks = {
   readonly id: TempEntityType.TE_SPARKS;
   readonly name: "TE_SPARKS";
   readonly fields: {
@@ -13,7 +13,7 @@ export type TE_SPARKS = {
   };
 };
 
-export const sparks: B.BufferParser<TE_SPARKS> = pipe(
+export const sparks: B.BufferParser<Sparks> = pipe(
   P.struct({ position: coordPoint }),
 
   P.map((fields) => ({

@@ -3,7 +3,7 @@ import { buffer as B } from "@talent/parser-buffer";
 import { pipe } from "fp-ts/lib/function";
 import { TempEntityType } from "./TempEntityType";
 
-export type TE_BEAMENTS = {
+export type BeamEnts = {
   readonly id: TempEntityType.TE_BEAMENTS;
   readonly name: "TE_BEAMENTS";
   readonly fields: {
@@ -25,7 +25,7 @@ export type TE_BEAMENTS = {
   };
 };
 
-export const beamEnts: B.BufferParser<TE_BEAMENTS> = pipe(
+export const beamEnts: B.BufferParser<BeamEnts> = pipe(
   P.struct({
     startEntity: B.int16_le,
     endEntity: B.int16_le,

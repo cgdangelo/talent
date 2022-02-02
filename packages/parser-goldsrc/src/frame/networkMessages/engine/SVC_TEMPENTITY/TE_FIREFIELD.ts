@@ -5,7 +5,7 @@ import type { Point } from "../../../../Point";
 import { coordPoint } from "../SVC_TEMPENTITY";
 import { TempEntityType } from "./TempEntityType";
 
-export type TE_FIREFIELD = {
+export type FireField = {
   readonly id: TempEntityType.TE_FIREFIELD;
   readonly name: "TE_FIREFIELD";
   readonly fields: {
@@ -18,7 +18,7 @@ export type TE_FIREFIELD = {
   };
 };
 
-export const fireField: B.BufferParser<TE_FIREFIELD> = pipe(
+export const fireField: B.BufferParser<FireField> = pipe(
   P.struct({
     origin: coordPoint,
     scale: B.int16_le,

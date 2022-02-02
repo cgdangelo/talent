@@ -5,7 +5,7 @@ import type { Point } from "../../../../Point";
 import { coordPoint } from "./SVC_TEMPENTITY";
 import { TempEntityType } from "./TempEntityType";
 
-export type TE_STREAK_SPLASH = {
+export type StreakSplash = {
   readonly id: TempEntityType.TE_STREAK_SPLASH;
   readonly name: "TE_STREAK_SPLASH";
   readonly fields: {
@@ -18,7 +18,7 @@ export type TE_STREAK_SPLASH = {
   };
 };
 
-export const streakSplash: B.BufferParser<TE_STREAK_SPLASH> = pipe(
+export const streakSplash: B.BufferParser<StreakSplash> = pipe(
   P.struct({
     startPosition: coordPoint,
     vector: coordPoint,

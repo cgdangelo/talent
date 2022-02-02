@@ -5,7 +5,7 @@ import type { Point } from "../../../../Point";
 import { coordPoint } from "./SVC_TEMPENTITY";
 import { TempEntityType } from "./TempEntityType";
 
-export type TE_SPRITETRAIL = {
+export type SpriteTrail = {
   readonly id: TempEntityType.TE_SPRITETRAIL;
   readonly name: "TE_SPRITETRAIL";
   readonly fields: {
@@ -20,7 +20,7 @@ export type TE_SPRITETRAIL = {
   };
 };
 
-export const spriteTrail: B.BufferParser<TE_SPRITETRAIL> = pipe(
+export const spriteTrail: B.BufferParser<SpriteTrail> = pipe(
   P.struct({
     startPosition: coordPoint,
     endPosition: coordPoint,

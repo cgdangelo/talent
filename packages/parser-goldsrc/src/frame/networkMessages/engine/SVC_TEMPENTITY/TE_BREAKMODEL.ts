@@ -5,7 +5,7 @@ import type { Point } from "../../../../Point";
 import { coordPoint } from "../SVC_TEMPENTITY";
 import { TempEntityType } from "./TempEntityType";
 
-export type TE_BREAKMODEL = {
+export type BreakModel = {
   readonly id: TempEntityType.TE_BREAKMODEL;
   readonly name: "TE_BREAKMODEL";
   readonly fields: {
@@ -20,7 +20,7 @@ export type TE_BREAKMODEL = {
   };
 };
 
-export const breakModel: B.BufferParser<TE_BREAKMODEL> = pipe(
+export const breakModel: B.BufferParser<BreakModel> = pipe(
   P.struct({
     position: coordPoint,
     size: coordPoint,

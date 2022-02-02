@@ -5,7 +5,7 @@ import type { Point } from "../../../../Point";
 import { coordPoint } from "./SVC_TEMPENTITY";
 import { TempEntityType } from "./TempEntityType";
 
-export type TE_BLOOD = {
+export type Blood = {
   readonly id: TempEntityType.TE_BLOOD;
   readonly name: "TE_BLOOD";
   readonly fields: {
@@ -16,7 +16,7 @@ export type TE_BLOOD = {
   };
 };
 
-export const blood: B.BufferParser<TE_BLOOD> = pipe(
+export const blood: B.BufferParser<Blood> = pipe(
   P.struct({
     position: coordPoint,
     vector: coordPoint,

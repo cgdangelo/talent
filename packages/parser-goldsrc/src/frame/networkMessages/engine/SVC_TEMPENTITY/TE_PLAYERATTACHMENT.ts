@@ -4,7 +4,7 @@ import { pipe } from "fp-ts/lib/function";
 import { coord } from "../SVC_TEMPENTITY";
 import { TempEntityType } from "./TempEntityType";
 
-export type TE_PLAYERATTACHMENT = {
+export type PlayerAttachment = {
   readonly id: TempEntityType.TE_PLAYERATTACHMENT;
   readonly name: "TE_PLAYERATTACHMENT";
   readonly fields: {
@@ -15,7 +15,7 @@ export type TE_PLAYERATTACHMENT = {
   };
 };
 
-export const playerAttachment: B.BufferParser<TE_PLAYERATTACHMENT> = pipe(
+export const playerAttachment: B.BufferParser<PlayerAttachment> = pipe(
   P.struct({
     entityIndex: B.uint8_le,
     scale: coord,

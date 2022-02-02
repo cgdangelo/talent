@@ -5,7 +5,7 @@ import type { Point } from "../../../../Point";
 import { coordPoint } from "../SVC_TEMPENTITY";
 import { TempEntityType } from "./TempEntityType";
 
-export type TE_WORLDDECALHIGH = {
+export type WorldDecalHigh = {
   readonly id: TempEntityType.TE_WORLDDECALHIGH;
   readonly name: "TE_WORLDDECALHIGH";
   readonly fields: {
@@ -14,7 +14,7 @@ export type TE_WORLDDECALHIGH = {
   };
 };
 
-export const worldDecalHigh: B.BufferParser<TE_WORLDDECALHIGH> = pipe(
+export const worldDecalHigh: B.BufferParser<WorldDecalHigh> = pipe(
   P.struct({
     position: coordPoint,
     decalIndex: B.uint8_le,

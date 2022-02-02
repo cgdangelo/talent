@@ -5,7 +5,7 @@ import type { Point } from "../../../../Point";
 import { coordPoint } from "./SVC_TEMPENTITY";
 import { TempEntityType } from "./TempEntityType";
 
-export type TE_GLOWSPRITE = {
+export type GlowSprite = {
   readonly id: TempEntityType.TE_GLOWSPRITE;
   readonly name: "TE_GLOWSPRITE";
   readonly fields: {
@@ -17,7 +17,7 @@ export type TE_GLOWSPRITE = {
   };
 };
 
-export const glowSprite: B.BufferParser<TE_GLOWSPRITE> = pipe(
+export const glowSprite: B.BufferParser<GlowSprite> = pipe(
   P.struct({
     position: coordPoint,
     modelIndex: B.int16_le,

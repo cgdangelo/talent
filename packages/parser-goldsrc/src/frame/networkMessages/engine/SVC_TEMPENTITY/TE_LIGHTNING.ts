@@ -5,7 +5,7 @@ import type { Point } from "../../../../Point";
 import { coordPoint } from "./SVC_TEMPENTITY";
 import { TempEntityType } from "./TempEntityType";
 
-export type TE_LIGHTNING = {
+export type Lightning = {
   readonly id: TempEntityType.TE_LIGHTNING;
   readonly name: "TE_LIGHTNING";
   readonly fields: {
@@ -18,7 +18,7 @@ export type TE_LIGHTNING = {
   };
 };
 
-export const lightning: B.BufferParser<TE_LIGHTNING> = pipe(
+export const lightning: B.BufferParser<Lightning> = pipe(
   P.struct({
     startPosition: coordPoint,
     endPosition: coordPoint,

@@ -5,7 +5,7 @@ import type { Point } from "../../../../Point";
 import { coordPoint } from "./SVC_TEMPENTITY";
 import { TempEntityType } from "./TempEntityType";
 
-export type TE_BEAMDISK = {
+export type BeamDisk = {
   readonly id: TempEntityType.TE_BEAMDISK;
   readonly name: "TE_BEAMDISK";
   readonly fields: {
@@ -27,7 +27,7 @@ export type TE_BEAMDISK = {
   };
 };
 
-export const beamDisk: B.BufferParser<TE_BEAMDISK> = pipe(
+export const beamDisk: B.BufferParser<BeamDisk> = pipe(
   P.struct({
     position: coordPoint,
     axis: coordPoint,

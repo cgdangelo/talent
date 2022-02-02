@@ -5,7 +5,7 @@ import type { Point } from "../../../../Point";
 import { coordPoint } from "./SVC_TEMPENTITY";
 import { TempEntityType } from "./TempEntityType";
 
-export type TE_BEAMCYLINDER = {
+export type BeamCylinder = {
   readonly id: TempEntityType.TE_BEAMCYLINDER;
   readonly name: "TE_BEAMCYLINDER";
   readonly fields: {
@@ -27,7 +27,7 @@ export type TE_BEAMCYLINDER = {
   };
 };
 
-export const beamCylinder: B.BufferParser<TE_BEAMCYLINDER> = pipe(
+export const beamCylinder: B.BufferParser<BeamCylinder> = pipe(
   P.struct({
     position: coordPoint,
     axis: coordPoint,

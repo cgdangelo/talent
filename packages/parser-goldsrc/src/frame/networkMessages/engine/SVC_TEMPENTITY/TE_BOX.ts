@@ -5,7 +5,7 @@ import type { Point } from "../../../../Point";
 import { coordPoint } from "./SVC_TEMPENTITY";
 import { TempEntityType } from "./TempEntityType";
 
-export type TE_BOX = {
+export type Box = {
   readonly id: TempEntityType.TE_BOX;
   readonly name: "TE_BOX";
   readonly fields: {
@@ -20,7 +20,7 @@ export type TE_BOX = {
   };
 };
 
-export const box: B.BufferParser<TE_BOX> = pipe(
+export const box: B.BufferParser<Box> = pipe(
   P.struct({
     startPosition: coordPoint,
     endPosition: coordPoint,

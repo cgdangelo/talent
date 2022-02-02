@@ -5,7 +5,7 @@ import type { Point } from "../../../../Point";
 import { coordPoint } from "../SVC_TEMPENTITY";
 import { TempEntityType } from "./TempEntityType";
 
-export type TE_GUNSHOTDECAL = {
+export type GunshotDecal = {
   readonly id: TempEntityType.TE_GUNSHOTDECAL;
   readonly name: "TE_GUNSHOTDECAL";
   readonly fields: {
@@ -15,7 +15,7 @@ export type TE_GUNSHOTDECAL = {
   };
 };
 
-export const gunshotDecal: B.BufferParser<TE_GUNSHOTDECAL> = pipe(
+export const gunshotDecal: B.BufferParser<GunshotDecal> = pipe(
   P.struct({
     position: coordPoint,
     entityIndex: B.int16_le,

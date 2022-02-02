@@ -5,7 +5,7 @@ import type { Point } from "../../../../Point";
 import { coordPoint } from "./SVC_TEMPENTITY";
 import { TempEntityType } from "./TempEntityType";
 
-export type TE_LARGEFUNNEL = {
+export type LargeFunnel = {
   readonly id: TempEntityType.TE_LARGEFUNNEL;
   readonly name: "TE_LARGEFUNNEL";
   readonly fields: {
@@ -15,7 +15,7 @@ export type TE_LARGEFUNNEL = {
   };
 };
 
-export const largeFunnel: B.BufferParser<TE_LARGEFUNNEL> = pipe(
+export const largeFunnel: B.BufferParser<LargeFunnel> = pipe(
   P.struct({
     position: coordPoint,
     modelIndex: B.int16_le,

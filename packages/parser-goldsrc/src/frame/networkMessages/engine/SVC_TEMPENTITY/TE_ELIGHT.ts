@@ -5,7 +5,7 @@ import type { Point } from "../../../../Point";
 import { coordPoint } from "./SVC_TEMPENTITY";
 import { TempEntityType } from "./TempEntityType";
 
-export type TE_ELIGHT = {
+export type ELight = {
   readonly id: TempEntityType.TE_ELIGHT;
   readonly name: "TE_ELIGHT";
   readonly fields: {
@@ -22,7 +22,7 @@ export type TE_ELIGHT = {
   };
 };
 
-export const eLight: B.BufferParser<TE_ELIGHT> = pipe(
+export const eLight: B.BufferParser<ELight> = pipe(
   P.struct({
     entityIndex: B.int16_le,
     position: coordPoint,

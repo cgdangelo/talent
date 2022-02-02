@@ -5,7 +5,7 @@ import type { Point } from "../../../../Point";
 import { coordPoint } from "./SVC_TEMPENTITY";
 import { TempEntityType } from "./TempEntityType";
 
-export type TE_LAVASPLASH = {
+export type LavaSplash = {
   readonly id: TempEntityType.TE_LAVASPLASH;
   readonly name: "TE_LAVASPLASH";
   readonly fields: {
@@ -13,7 +13,7 @@ export type TE_LAVASPLASH = {
   };
 };
 
-export const lavasplash: B.BufferParser<TE_LAVASPLASH> = pipe(
+export const lavaSplash: B.BufferParser<LavaSplash> = pipe(
   P.struct({ position: coordPoint }),
 
   P.map((fields) => ({

@@ -5,7 +5,7 @@ import type { Point } from "../../../../Point";
 import { coordPoint } from "../SVC_TEMPENTITY";
 import { TempEntityType } from "./TempEntityType";
 
-export type TE_USERTRACER = {
+export type UserTracer = {
   readonly id: TempEntityType.TE_USERTRACER;
   readonly name: "TE_USERTRACER";
   readonly fields: {
@@ -17,7 +17,7 @@ export type TE_USERTRACER = {
   };
 };
 
-export const userTracer: B.BufferParser<TE_USERTRACER> = pipe(
+export const userTracer: B.BufferParser<UserTracer> = pipe(
   P.struct({
     origin: coordPoint,
     velocity: coordPoint,
