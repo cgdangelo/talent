@@ -2,7 +2,7 @@ import { parser as P } from "@talent/parser";
 import type { buffer as B } from "@talent/parser-buffer";
 import { pipe } from "fp-ts/lib/function";
 import type { Point } from "../../../../Point";
-import { coord, coordPoint } from "../SVC_TEMPENTITY";
+import { coord, coordPoint } from "./coord";
 import { TempEntityType } from "./TempEntityType";
 
 export type MultiGunshot = {

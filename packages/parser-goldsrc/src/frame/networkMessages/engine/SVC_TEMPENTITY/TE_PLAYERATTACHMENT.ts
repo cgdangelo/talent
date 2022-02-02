@@ -1,7 +1,7 @@
 import { parser as P } from "@talent/parser";
 import { buffer as B } from "@talent/parser-buffer";
 import { pipe } from "fp-ts/lib/function";
-import { coord } from "../SVC_TEMPENTITY";
+import { coord } from "./coord";
 import { TempEntityType } from "./TempEntityType";
 
 export type PlayerAttachment = {

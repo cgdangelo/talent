@@ -1,8 +1,6 @@
 import { buffer as B } from "@talent/parser-buffer";
 import * as P from "@talent/parser/lib/Parser";
 import { absurd, pipe } from "fp-ts/lib/function";
-import type { Point } from "../../../../Point";
-import { pointBy } from "../../../../Point";
 import { MessageType } from "../../MessageType";
 import * as TENT from "./TempEntity";
 import { TempEntityType } from "./TempEntityType";
@@ -71,14 +69,6 @@ export type TempEntity = {
     | TENT.MultiGunshot
     | TENT.UserTracer;
 };
-
-export const coord: B.BufferParser<number> = pipe(
-  B.int16_le,
-  P.map((a) => a * 8)
-);
-
-// https://github.com/FWGS/xash3d-fwgs/blob/588dede2a2970477d59e333e97fb9ace4ca0b9e8/engine/common/net_buffer.c#L597-L603
-export const coordPoint: B.BufferParser<Point> = pointBy(coord);
 
 export const tempEntity: B.BufferParser<TempEntity> = pipe(
   B.uint8_le,
