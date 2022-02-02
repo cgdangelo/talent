@@ -1,9 +1,9 @@
 import { buffer as B } from "@talent/parser-buffer";
 import * as P from "@talent/parser/lib/Parser";
 import { absurd, pipe } from "fp-ts/lib/function";
-import type { Point } from "../../../Point";
-import { pointBy } from "../../../Point";
-import { MessageType } from "../MessageType";
+import type { Point } from "../../../../Point";
+import { pointBy } from "../../../../Point";
+import { MessageType } from "../../MessageType";
 
 type TE_BEAMPOINTS = {
   readonly id: TempEntityType.TE_BEAMPOINTS;
