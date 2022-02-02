@@ -4,131 +4,72 @@ import { absurd, pipe } from "fp-ts/lib/function";
 import type { Point } from "../../../../Point";
 import { pointBy } from "../../../../Point";
 import { MessageType } from "../../MessageType";
+import * as TE from "./TempEntity";
 import { TempEntityType } from "./TempEntityType";
-import type { TE_ARMOR_RICOCHET } from "./TE_ARMOR_RICOCHET";
-import type { TE_BEAMCYLINDER } from "./TE_BEAMCYLINDER";
-import type { TE_BEAMDISK } from "./TE_BEAMDISK";
-import type { TE_BEAMENTPOINT } from "./TE_BEAMENTPOINT";
-import type { TE_BEAMENTS } from "./TE_BEAMENTS";
-import type { TE_BEAMFOLLOW } from "./TE_BEAMFOLLOW";
-import type { TE_BEAMPOINTS } from "./TE_BEAMPOINTS";
-import type { TE_BEAMRING } from "./TE_BEAMRING";
-import type { TE_BEAMSPRITE } from "./TE_BEAMSPRITE";
-import type { TE_BEAMTORUS } from "./TE_BEAMTORUS";
-import type { TE_BLOOD } from "./TE_BLOOD";
-import type { TE_BLOODSPRITE } from "./TE_BLOODSPRITE";
-import type { TE_BLOODSTREAM } from "./TE_BLOODSTREAM";
-import type { TE_BOX } from "./TE_BOX";
-import type { TE_BREAKMODEL } from "./TE_BREAKMODEL";
-import type { TE_BSPDECAL } from "./TE_BSPDECAL";
-import type { TE_BUBBLES } from "./TE_BUBBLES";
-import type { TE_BUBBLETRAIL } from "./TE_BUBBLETRAIL";
-import type { TE_DECAL } from "./TE_DECAL";
-import type { TE_DECALHIGH } from "./TE_DECALHIGH";
-import type { TE_DLIGHT } from "./TE_DLIGHT";
-import type { TE_ELIGHT } from "./TE_ELIGHT";
-import type { TE_EXPLODEMODEL } from "./TE_EXPLODEMODEL";
-import type { TE_EXPLOSION } from "./TE_EXPLOSION";
-import type { TE_EXPLOSION2 } from "./TE_EXPLOSION2";
-import type { TE_FIREFIELD } from "./TE_FIREFIELD";
-import type { TE_FIZZ } from "./TE_FIZZ";
-import type { TE_GLOWSPRITE } from "./TE_GLOWSPRITE";
-import type { TE_GUNSHOT } from "./TE_GUNSHOT";
-import type { TE_GUNSHOTDECAL } from "./TE_GUNSHOTDECAL";
-import type { TE_IMPLOSION } from "./TE_IMPLOSION";
-import type { TE_KILLBEAM } from "./TE_KILLBEAM";
-import type { TE_KILLPLAYERATTACHMENTS } from "./TE_KILLPLAYERATTACHMENTS";
-import type { TE_LARGEFUNNEL } from "./TE_LARGEFUNNEL";
-import type { TE_LAVASPLASH } from "./TE_LAVASPLASH";
-import type { TE_LIGHTNING } from "./TE_LIGHTNING";
-import type { TE_LINE } from "./TE_LINE";
-import type { TE_MODEL } from "./TE_MODEL";
-import type { TE_MULTIGUNSHOT } from "./TE_MULTIGUNSHOT";
-import type { TE_PARTICLEBURST } from "./TE_PARTICLEBURST";
-import type { TE_PLAYERATTACHMENT } from "./TE_PLAYERATTACHMENT";
-import type { TE_PLAYERDECAL } from "./TE_PLAYERDECAL";
-import type { TE_PLAYERSPRITES } from "./TE_PLAYERSPRITES";
-import type { TE_PROJECTILE } from "./TE_PROJECTILE";
-import type { TE_SHOWLINE } from "./TE_SHOWLINE";
-import type { TE_SMOKE } from "./TE_SMOKE";
-import type { TE_SPARKS } from "./TE_SPARKS";
-import type { TE_SPRAY } from "./TE_SPRAY";
-import type { TE_SPRITE } from "./TE_SPRITE";
-import type { TE_SPRITETRAIL } from "./TE_SPRITETRAIL";
-import type { TE_SPRITE_SPRAY } from "./TE_SPRITE_SPRAY";
-import type { TE_STREAK_SPLASH } from "./TE_STREAK_SPLASH";
-import type { TE_TAREXPLOSION } from "./TE_TAREXPLOSION";
-import type { TE_TELEPORT } from "./TE_TELEPORT";
-import type { TE_TEXTMESSAGE} from "./TE_TEXTMESSAGE";
-import { TE_TEXTMESSAGE_FX } from "./TE_TEXTMESSAGE";
-import type { TE_TRACER } from "./TE_TRACER";
-import type { TE_USERTRACER } from "./TE_USERTRACER";
-import type { TE_WORLDDECAL } from "./TE_WORLDDECAL";
-import type { TE_WORLDDECALHIGH } from "./TE_WORLDDECALHIGH";
 
 export type TempEntity = {
   readonly id: MessageType.SVC_TEMPENTITY;
   readonly name: "SVC_TEMPENTITY";
   readonly fields:
-    | TE_BEAMPOINTS
-    | TE_BEAMENTPOINT
-    | TE_GUNSHOT
-    | TE_EXPLOSION
-    | TE_TAREXPLOSION
-    | TE_SMOKE
-    | TE_TRACER
-    | TE_LIGHTNING
-    | TE_BEAMENTS
-    | TE_SPARKS
-    | TE_LAVASPLASH
-    | TE_TELEPORT
-    | TE_EXPLOSION2
-    | TE_BSPDECAL
-    | TE_IMPLOSION
-    | TE_SPRITETRAIL
-    | TE_SPRITE
-    | TE_BEAMSPRITE
-    | TE_BEAMTORUS
-    | TE_BEAMDISK
-    | TE_BEAMCYLINDER
-    | TE_BEAMFOLLOW
-    | TE_GLOWSPRITE
-    | TE_BEAMRING
-    | TE_STREAK_SPLASH
-    | TE_DLIGHT
-    | TE_ELIGHT
-    | TE_TEXTMESSAGE
-    | TE_LINE
-    | TE_BOX
-    | TE_KILLBEAM
-    | TE_LARGEFUNNEL
-    | TE_BLOODSTREAM
-    | TE_SHOWLINE
-    | TE_BLOOD
-    | TE_DECAL
-    | TE_FIZZ
-    | TE_MODEL
-    | TE_EXPLODEMODEL
-    | TE_BREAKMODEL
-    | TE_GUNSHOTDECAL
-    | TE_SPRITE_SPRAY
-    | TE_ARMOR_RICOCHET
-    | TE_PLAYERDECAL
-    | TE_BUBBLES
-    | TE_BUBBLETRAIL
-    | TE_BLOODSPRITE
-    | TE_WORLDDECAL
-    | TE_WORLDDECALHIGH
-    | TE_DECALHIGH
-    | TE_PROJECTILE
-    | TE_SPRAY
-    | TE_PLAYERSPRITES
-    | TE_PARTICLEBURST
-    | TE_FIREFIELD
-    | TE_PLAYERATTACHMENT
-    | TE_KILLPLAYERATTACHMENTS
-    | TE_MULTIGUNSHOT
-    | TE_USERTRACER;
+    | TE.TE_BEAMPOINTS
+    | TE.TE_BEAMENTPOINT
+    | TE.TE_GUNSHOT
+    | TE.TE_EXPLOSION
+    | TE.TE_TAREXPLOSION
+    | TE.TE_SMOKE
+    | TE.TE_TRACER
+    | TE.TE_LIGHTNING
+    | TE.TE_BEAMENTS
+    | TE.TE_SPARKS
+    | TE.TE_LAVASPLASH
+    | TE.TE_TELEPORT
+    | TE.TE_EXPLOSION2
+    | TE.TE_BSPDECAL
+    | TE.TE_IMPLOSION
+    | TE.TE_SPRITETRAIL
+    | TE.TE_SPRITE
+    | TE.TE_BEAMSPRITE
+    | TE.TE_BEAMTORUS
+    | TE.TE_BEAMDISK
+    | TE.TE_BEAMCYLINDER
+    | TE.TE_BEAMFOLLOW
+    | TE.TE_GLOWSPRITE
+    | TE.TE_BEAMRING
+    | TE.TE_STREAK_SPLASH
+    | TE.TE_DLIGHT
+    | TE.TE_ELIGHT
+    | TE.TE_TEXTMESSAGE
+    | TE.TE_LINE
+    | TE.TE_BOX
+    | TE.TE_KILLBEAM
+    | TE.TE_LARGEFUNNEL
+    | TE.TE_BLOODSTREAM
+    | TE.TE_SHOWLINE
+    | TE.TE_BLOOD
+    | TE.TE_DECAL
+    | TE.TE_FIZZ
+    | TE.TE_MODEL
+    | TE.TE_EXPLODEMODEL
+    | TE.TE_BREAKMODEL
+    | TE.TE_GUNSHOTDECAL
+    | TE.TE_SPRITE_SPRAY
+    | TE.TE_ARMOR_RICOCHET
+    | TE.TE_PLAYERDECAL
+    | TE.TE_BUBBLES
+    | TE.TE_BUBBLETRAIL
+    | TE.TE_BLOODSPRITE
+    | TE.TE_WORLDDECAL
+    | TE.TE_WORLDDECALHIGH
+    | TE.TE_DECALHIGH
+    | TE.TE_PROJECTILE
+    | TE.TE_SPRAY
+    | TE.TE_PLAYERSPRITES
+    | TE.TE_PARTICLEBURST
+    | TE.TE_FIREFIELD
+    | TE.TE_PLAYERATTACHMENT
+    | TE.TE_KILLPLAYERATTACHMENTS
+    | TE.TE_MULTIGUNSHOT
+    | TE.TE_USERTRACER;
 };
 
 const coord: B.BufferParser<number> = pipe(
@@ -570,7 +511,7 @@ export const tempEntity: B.BufferParser<TempEntity> = pipe(
             effect: pipe(
               B.uint8_le,
               P.filter(
-                (a): a is TE_TEXTMESSAGE_FX => a === 0 || a === 1 || a === 2
+                (a): a is TE.TE_TEXTMESSAGE_FX => a === 0 || a === 1 || a === 2
               )
             ),
             textColor: P.struct({
@@ -597,7 +538,7 @@ export const tempEntity: B.BufferParser<TempEntity> = pipe(
           }),
 
           P.bind("fxTime", ({ effect }) =>
-            effect === TE_TEXTMESSAGE_FX.WriteOut
+            effect === TE.TE_TEXTMESSAGE_FX.WriteOut
               ? pipe(
                   B.int16_le
                   // P.map((a) => a / 256)
