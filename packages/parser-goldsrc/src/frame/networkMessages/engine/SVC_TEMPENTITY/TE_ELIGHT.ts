@@ -2,7 +2,7 @@ import { parser as P } from "@talent/parser";
 import { buffer as B } from "@talent/parser-buffer";
 import { pipe } from "fp-ts/lib/function";
 import type { Point } from "../../../../Point";
-import { coordPoint } from "./coord";
+import { coord, coordPoint } from "./coord";
 import { TempEntityType } from "./TempEntityType";
 
 export type ELight = {
@@ -26,7 +26,7 @@ export const eLight: B.BufferParser<ELight> = pipe(
   P.struct({
     entityIndex: B.int16_le,
     position: coordPoint,
-    radius: B.uint8_le,
+    radius: coord,
     color: P.struct({
       r: B.uint8_le,
       g: B.uint8_le,
