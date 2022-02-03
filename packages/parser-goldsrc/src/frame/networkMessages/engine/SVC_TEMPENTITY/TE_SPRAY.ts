@@ -13,9 +13,8 @@ export type Spray = {
     readonly direction: Point;
     readonly modelIndex: number;
     readonly count: number;
-    readonly speed: number;
-    readonly noise: number;
-    readonly renderMode: number;
+    readonly life: number;
+    readonly owner: number;
   };
 };
 
@@ -25,9 +24,8 @@ export const spray: B.BufferParser<Spray> = pipe(
     direction: coordPoint,
     modelIndex: B.int16_le,
     count: B.uint8_le,
-    speed: B.uint8_le,
-    noise: B.uint8_le,
-    renderMode: B.uint8_le,
+    life: B.uint8_le,
+    owner: B.uint8_le,
   }),
 
   P.map((fields) => ({ id: TempEntityType.TE_SPRAY, name: "TE_SPRAY", fields }))
