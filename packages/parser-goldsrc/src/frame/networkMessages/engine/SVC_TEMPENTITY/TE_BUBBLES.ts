@@ -25,7 +25,7 @@ export const bubbles: B.BufferParser<Bubbles> = pipe(
     scale: coord,
     modelIndex: B.int16_le,
     count: B.uint8_le,
-    speed: B.uint8_le,
+    speed: coord,
   }),
 
   P.map((fields) => ({
