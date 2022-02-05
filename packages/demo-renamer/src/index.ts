@@ -7,7 +7,9 @@ import * as fs from "fs/promises";
 import * as path from "path";
 import * as readline from "readline";
 
-const getNewDemoName = (path: string) =>
+const getNewDemoName: (path: string) => TE.TaskEither<unknown, string> = (
+  path
+) =>
   pipe(
     TE.fromTask(() => fs.readFile(path)),
     TE.chainEitherKW((buffer) =>
@@ -18,7 +20,7 @@ const getNewDemoName = (path: string) =>
     TE.bind("creationDate", () =>
       pipe(
         TE.fromTask(() => fs.stat(path)),
-        TE.map(({ birthtime }) => birthtime)
+        TE.map(({ mtime }) => mtime)
       )
     ),
     TE.map(
