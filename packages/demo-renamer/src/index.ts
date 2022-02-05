@@ -7,6 +7,8 @@ import * as fs from "fs/promises";
 import * as path from "path";
 import * as readline from "readline";
 
+const padNumber: (a: number) => string = (a) => a.toString().padStart(2, "0");
+
 const getNewDemoName: (path: string) => TE.TaskEither<unknown, string> = (
   path
 ) =>
@@ -25,18 +27,11 @@ const getNewDemoName: (path: string) => TE.TaskEither<unknown, string> = (
     ),
     TE.map(
       ({ creationDate, mapName }) =>
-        `${creationDate.getFullYear()}-${(creationDate.getMonth() + 1)
-          .toString()
-          .padStart(2, "0")}-${creationDate
-          .getDate()
-          .toString()
-          .padStart(2, "0")}_${creationDate
-          .getHours()
-          .toString()
-          .padStart(2, "0")}${creationDate
-          .getMinutes()
-          .toString()
-          .padStart(2, "0")}_${mapName}.dem`
+        `${creationDate.getFullYear()}-` +
+        `${padNumber(creationDate.getMonth() + 1)}-` +
+        `${padNumber(creationDate.getDate())}_` +
+        `${padNumber(creationDate.getHours())}` +
+        `${padNumber(creationDate.getMinutes())}_${mapName}.dem`
     )
   );
 
