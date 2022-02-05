@@ -1,8 +1,11 @@
 import { header } from "@talent/parser-goldsrc/lib/DemoHeader";
 import { stream } from "@talent/parser/lib/Stream";
+import type { task as T } from "fp-ts";
 import { console, taskEither as TE } from "fp-ts";
 import { pipe } from "fp-ts/lib/function";
 import * as fs from "fs/promises";
+import * as path from "path";
+import * as readline from "readline";
 
 const getNewDemoName = (path: string) =>
   pipe(
@@ -35,17 +38,46 @@ const getNewDemoName = (path: string) =>
     )
   );
 
-const filenames = process.argv.slice(2);
+const rl = readline.createInterface({
+  input: process.stdin,
+  output: process.stdout,
+});
+
+const question: (query: string) => T.Task<string> = (query) => () =>
+  new Promise((resolve) => rl.question(query, resolve));
+
+const renameFile: (originalFile: string) => (newFile: string) => T.Task<void> =
+  (originalFile) => (newFile) => () =>
+    fs.rename(originalFile, newFile);
 
 const main = pipe(
-  filenames,
-  TE.traverseSeqArray((originalFilename) =>
+  process.argv.slice(2),
+
+  TE.traverseSeqArray((originalFile) =>
     pipe(
-      getNewDemoName(originalFilename),
-      TE.map((filename) => `${originalFilename} -> ${filename}`),
-      TE.chainIOK(console.log)
+      TE.fromTask(() => fs.access(originalFile)),
+      TE.apSecond(getNewDemoName(originalFile)),
+      TE.map((newFile) => path.resolve(path.dirname(originalFile), newFile)),
+      TE.chainFirst((newFile) =>
+        pipe(
+          question(`Rename ${originalFile} -> ${newFile}? [Y/n]: `),
+          TE.fromTask,
+          TE.chainW(
+            TE.fromPredicate(
+              (answer) => answer.trim().toLowerCase() === "y",
+              () => ""
+            )
+          )
+        )
+      ),
+      TE.chainFirstTaskK(renameFile(originalFile)),
+      TE.chainFirstIOK((newFile) =>
+        console.log(`Renamed ${originalFile} -> ${newFile}.`)
+      )
     )
   )
 );
 
-main().then(console.log).catch(console.error);
+main()
+  .catch((e) => console.error(e)())
+  .finally(() => rl.close());
