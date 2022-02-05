@@ -64,16 +64,16 @@ const main = pipe(
           TE.fromTask,
           TE.chainW(
             TE.fromPredicate(
-              (answer) => answer.trim().toLowerCase() === "y",
-              () => ""
+              (answer) => answer.trim().toLowerCase() !== "n",
+              () => `Skipped ${originalFile}.\n`
             )
           )
         )
       ),
       TE.chainFirstTaskK(renameFile(originalFile)),
-      TE.chainFirstIOK((newFile) =>
-        console.log(`Renamed ${originalFile} -> ${newFile}.`)
-      )
+      TE.map((newFile) => `Renamed ${originalFile} -> ${newFile}.\n`),
+      TE.orElse(TE.of),
+      TE.chainIOK(console.log)
     )
   )
 );
