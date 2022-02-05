@@ -1,0 +1,19 @@
+{
+  "name": "@talent/demo-renamer",
+  "version": "0.0.0",
+  "main": "lib/index.js",
+  "directories": {
+    "lib": "lib"
+  },
+  "files": [
+    "lib"
+  ],
+  "dependencies": {
+    "@talent/parser": "workspace:packages/parser",
+    "@talent/parser-goldsrc": "workspace:packages/parser-goldsrc",
+    "fp-ts": "^2.11.1"
+  },
+  "devDependencies": {
+    "@types/node": "^16.11.7"
+  }
+}
