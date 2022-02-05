@@ -9,7 +9,6 @@
     "lib"
   ],
   "dependencies": {
-    "@talent/parser": "workspace:packages/parser",
     "@talent/parser-goldsrc": "workspace:packages/parser-goldsrc",
     "fp-ts": "^2.11.1"
   },
