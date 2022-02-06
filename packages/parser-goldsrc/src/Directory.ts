@@ -2,19 +2,12 @@ import { parser as P, statefulParser as SP } from "@talent/parser";
 import { buffer as B } from "@talent/parser-buffer";
 import { readonlyArray as RA } from "fp-ts";
 import { flow, pipe } from "fp-ts/lib/function";
-import { fst } from "fp-ts/lib/ReadonlyTuple";
 import * as DS from "./DemoState";
 import type { DirectoryEntry } from "./DirectoryEntry";
 import { directoryEntry } from "./DirectoryEntry";
 import { frames } from "./frame/Frame";
 
 export type Directory = readonly DirectoryEntry[];
-
-const directoryOffset: B.BufferParser<number> = pipe(
-  P.withStart(B.uint32_le),
-  P.filter(([a, i]) => a === i.buffer.length - 188),
-  P.map(fst)
-);
 
 const totalEntries: B.BufferParser<number> = P.expected(
   pipe(
@@ -54,7 +47,10 @@ const addFramesToDirectoryEntries: (
   RA.sequence(SP.Applicative)
 );
 
-export const directory: DS.DemoStateParser<Directory> = pipe(
-  DS.lift(pipe(directoryOffset, P.chain(directoryEntriesWithoutFrames))),
+export const directory: (
+  directoryOffset: number
+) => DS.DemoStateParser<Directory> = flow(
+  directoryEntriesWithoutFrames,
+  DS.lift,
   SP.chain(addFramesToDirectoryEntries)
 );

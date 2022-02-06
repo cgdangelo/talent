@@ -1,6 +1,7 @@
 import { buffer as B } from "@talent/parser-buffer";
 import * as P from "@talent/parser/lib/Parser";
 import { pipe } from "fp-ts/lib/function";
+import { fst } from "fp-ts/lib/ReadonlyTuple";
 
 export type DemoHeader = {
   readonly magic: "HLDEMO";
@@ -9,6 +10,7 @@ export type DemoHeader = {
   readonly mapName: string;
   readonly gameDirectory: string;
   readonly mapChecksum: number;
+  readonly directoryOffset: number;
 };
 
 const magic: B.BufferParser<"HLDEMO"> = P.expected(
@@ -27,6 +29,12 @@ export const demoProtocol: B.BufferParser<5> = P.expected(
   "demo protocol 5"
 );
 
+const directoryOffset: B.BufferParser<number> = pipe(
+  P.withStart(B.uint32_le),
+  P.filter(([a, i]) => a === i.buffer.length - 188),
+  P.map(fst)
+);
+
 export const header: B.BufferParser<DemoHeader> = P.struct({
   magic,
   demoProtocol,
@@ -34,4 +42,5 @@ export const header: B.BufferParser<DemoHeader> = P.struct({
   mapName: B.ztstr_padded(260),
   gameDirectory: B.ztstr_padded(260),
   mapChecksum: B.int32_le,
+  directoryOffset,
 });
