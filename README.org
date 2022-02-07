@@ -6,14 +6,16 @@ For now: yet another GoldSrc parser, built with [[https://github.com/gcanti/fp-t
 
 ** Packages
 
-| [[https://github.com/cgdangelo/talent/tree/main/packages/cli][@talent/cli]]            | Runs the demo parser and logs to console.   |
-| [[https://github.com/cgdangelo/talent/tree/main/packages/parser][@talent/parser]]         | General use parser combinators.             |
-| [[https://github.com/cgdangelo/talent/tree/main/packages/parser-buffer][@talent/parser-buffer]]  | Parser combinators for a [[https://nodejs.org/api/buffer.html][Buffer]].            |
-| [[https://github.com/cgdangelo/talent/tree/main/packages/parser-goldsrc][@talent/parser-goldsrc]] | Parser combinators for a GoldSrc demo file. |
+| [[https://github.com/cgdangelo/talent/tree/main/packages/cli][@talent/cli]]              | Runs the demo parser and logs to console.                    |
+| [[https://github.com/cgdangelo/talent/tree/main/packages/demo-renamer][@talent/demo-renamer]]     | Renames a list of demo files to ~YYYY-MM-DD_HHMM_{map}.dem~. |
+| [[https://github.com/cgdangelo/talent/tree/main/packages/parser][@talent/parser]]           | General use parser combinators.                              |
+| [[https://github.com/cgdangelo/talent/tree/main/packages/parser-buffer][@talent/parser-buffer]]    | Parser combinators for a [[https://nodejs.org/api/buffer.html][Buffer]].                             |
+| [[https://github.com/cgdangelo/talent/tree/main/packages/parser-bitbuffer][@talent/parser-bitbuffer]] | Parser combinators for bit-packed fields.                    |
+| [[https://github.com/cgdangelo/talent/tree/main/packages/parser-goldsrc][@talent/parser-goldsrc]]   | Parser combinators for a GoldSrc demo file.                  |
 
 ** What's working?
 
-Demos can be parsed in their entirety, with the exception of most engine messages contained within the [[https://github.com/cgdangelo/talent/tree/main/packages/parser-goldsrc#netmessage][NetMsg bitstream field]].
+Demos can be parsed in their entirety. This includes all frame types, and all ~SVC_~ engine messages contained with a ~NetworkMessages~ frame. User message parsing is limited to returning the message id, name, and raw data. Since the data in a message can vary between mods (e.g., [[https://wiki.alliedmods.net/Half-life_1_game_events#DeathMsg][DeathMsg]]) these parsers may have to reside in mod-specific packages.
 
 ** +What's coming?+ What's maybe coming?
 
@@ -56,7 +58,7 @@ The original goal of this project was to create a GoldSrc demo parser that could
 
   /Half-Life in WebGL./
 
-  Probably the best source of frame data information, especially the custom messages' (messages beyond the bounds of the =SVC_XYZ= engine messages enumeration) data.
+  Probably the best source of frame data information.
 
 - https://wiki.alliedmods.net/Half-Life_1_Engine_Messages
 
