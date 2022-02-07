@@ -2,7 +2,9 @@ import { demo } from "@talent/parser-goldsrc/lib/Demo";
 import type { Stream } from "@talent/parser/lib/Stream";
 import { stream } from "@talent/parser/lib/Stream";
 import {
+  console,
   either as E,
+  json,
   predicate as P,
   string as S,
   taskEither as TE,
@@ -31,9 +33,10 @@ const main = pipe(
   validateDemoPath(process.argv[2]),
   TE.fromEither,
   TE.chain(readFileContents),
-  TE.chainEitherKW(demo)
+  TE.chainEitherKW(demo),
+  TE.map(({ value }) => value),
+  TE.chainEitherK(json.stringify),
+  TE.chainIOK(console.log)
 );
 
-main()
-  .then((a) => console.dir(a, { depth: Infinity }))
-  .catch(console.error);
+main();
