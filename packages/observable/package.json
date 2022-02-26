@@ -1,0 +1,21 @@
+{
+  "name": "@talent/observable",
+  "main": "lib/index.js",
+  "directories": {
+    "lib": "lib"
+  },
+  "files": [
+    "lib"
+  ],
+  "scripts": {
+    "test": "echo \"Error: run tests from root\" && exit 1"
+  },
+  "dependencies": {
+    "@talent/parser": "workspace:packages/parser",
+    "@talent/parser-goldsrc": "workspace:packages/parser-goldsrc",
+    "fp-ts": "^2.11.1"
+  },
+  "devDependencies": {
+    "@types/node": "^16.11.7"
+  }
+}

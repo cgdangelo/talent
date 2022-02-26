@@ -5,6 +5,7 @@
     { "path": "./packages/parser-buffer" },
     { "path": "./packages/parser-bitbuffer" },
     { "path": "./packages/parser-goldsrc" },
+    { "path": "./packages/observable" },
     { "path": "./packages/demo-renamer" }
   ],
   "files": []

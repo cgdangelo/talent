@@ -1945,6 +1945,17 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@talent/observable@workspace:packages/observable":
+  version: 0.0.0-use.local
+  resolution: "@talent/observable@workspace:packages/observable"
+  dependencies:
+    "@talent/parser": "workspace:packages/parser"
+    "@talent/parser-goldsrc": "workspace:packages/parser-goldsrc"
+    "@types/node": ^16.11.7
+    fp-ts: ^2.11.1
+  languageName: unknown
+  linkType: soft
+
 "@talent/parser-bitbuffer@workspace:packages/parser-bitbuffer":
   version: 0.0.0-use.local
   resolution: "@talent/parser-bitbuffer@workspace:packages/parser-bitbuffer"
