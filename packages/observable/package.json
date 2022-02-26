@@ -13,7 +13,8 @@
   "dependencies": {
     "@talent/parser": "workspace:packages/parser",
     "@talent/parser-goldsrc": "workspace:packages/parser-goldsrc",
-    "fp-ts": "^2.11.1"
+    "fp-ts": "^2.11.1",
+    "rxjs": "^7.5.4"
   },
   "devDependencies": {
     "@types/node": "^16.11.7"
