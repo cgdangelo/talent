@@ -7,8 +7,10 @@ import { pipe } from "fp-ts/lib/function";
 import type { Functor1 } from "fp-ts/lib/Functor";
 import type { Monad1 } from "fp-ts/lib/Monad";
 import type { Pointed1 } from "fp-ts/lib/Pointed";
+import type { Predicate } from "fp-ts/lib/Predicate";
+import type { Refinement } from "fp-ts/lib/Refinement";
 import type { Zero1 } from "fp-ts/lib/Zero";
-import { combineLatest, EMPTY, Observable, of as rxOf } from "rxjs";
+import { combineLatest, EMPTY, merge, Observable, of as rxOf } from "rxjs";
 import * as RX from "rxjs/operators";
 
 // -----------------------------------------------------------------------------
@@ -26,6 +28,18 @@ export const of: <A>(a: A) => Observable<A> = rxOf;
 export const zero: <A = never>() => Observable<A> = () => EMPTY;
 
 // -----------------------------------------------------------------------------
+// combinators
+// -----------------------------------------------------------------------------
+
+export const filter: {
+  <A, B extends A>(f: Refinement<A, B>): (fa: Observable<A>) => Observable<B>;
+  <A>(f: Predicate<A>): (fa: Observable<A>) => Observable<A>;
+} =
+  <A>(f: Predicate<A>) =>
+  (fa: Observable<A>): Observable<A> =>
+    fa.pipe(RX.filter(f));
+
+// -----------------------------------------------------------------------------
 // instances
 // -----------------------------------------------------------------------------
 
@@ -39,8 +53,7 @@ declare module "fp-ts/lib/HKT" {
   }
 }
 
-const alt_: Alt1<URI>["alt"] = (fa, that) =>
-  fa.pipe(RX.catchError(() => that()));
+const alt_: Alt1<URI>["alt"] = (fa, that) => merge(fa, that());
 
 const ap_: Apply1<URI>["ap"] = (fab, fa) =>
   pipe(
