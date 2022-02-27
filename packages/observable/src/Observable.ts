@@ -3,8 +3,10 @@ import type { Alternative1 } from "fp-ts/lib/Alternative";
 import type { Applicative1 } from "fp-ts/lib/Applicative";
 import type { Apply1 } from "fp-ts/lib/Apply";
 import type { Chain1 } from "fp-ts/lib/Chain";
+import { bind as bind_ } from "fp-ts/lib/Chain";
 import { pipe } from "fp-ts/lib/function";
 import type { Functor1 } from "fp-ts/lib/Functor";
+import { bindTo as bindTo_ } from "fp-ts/lib/Functor";
 import type { Monad1 } from "fp-ts/lib/Monad";
 import type { Pointed1 } from "fp-ts/lib/Pointed";
 import type { Predicate } from "fp-ts/lib/Predicate";
@@ -135,3 +137,11 @@ export const Zero: Zero1<URI> = {
   URI,
   zero,
 };
+
+// -----------------------------------------------------------------------------
+// do notation
+// -----------------------------------------------------------------------------
+
+export const bindTo = bindTo_(Functor);
+
+export const bind = bind_(Chain);
