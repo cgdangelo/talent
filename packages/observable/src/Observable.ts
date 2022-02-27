@@ -4,6 +4,7 @@ import type { Applicative1 } from "fp-ts/lib/Applicative";
 import type { Apply1 } from "fp-ts/lib/Apply";
 import type { Chain1 } from "fp-ts/lib/Chain";
 import { bind as bind_ } from "fp-ts/lib/Chain";
+import type { Lazy } from "fp-ts/lib/function";
 import { pipe } from "fp-ts/lib/function";
 import type { Functor1 } from "fp-ts/lib/Functor";
 import { bindTo as bindTo_ } from "fp-ts/lib/Functor";
@@ -12,18 +13,21 @@ import type { Pointed1 } from "fp-ts/lib/Pointed";
 import type { Predicate } from "fp-ts/lib/Predicate";
 import type { Refinement } from "fp-ts/lib/Refinement";
 import type { Zero1 } from "fp-ts/lib/Zero";
-import { combineLatest, EMPTY, merge, Observable, of as rxOf } from "rxjs";
+import type { Observable } from "rxjs";
+import { combineLatest, EMPTY, merge, of as rxOf, from as rxFrom } from "rxjs";
 import * as RX from "rxjs/operators";
 
 // -----------------------------------------------------------------------------
 // model
 // -----------------------------------------------------------------------------
 
-export { Observable };
+export type { Observable };
 
 // -----------------------------------------------------------------------------
 // constructors
 // -----------------------------------------------------------------------------
+
+export const from: <A>(as: A[]) => Observable<A> = rxFrom;
 
 export const of: <A>(a: A) => Observable<A> = rxOf;
 
@@ -66,6 +70,10 @@ const ap_: Apply1<URI>["ap"] = (fab, fa) =>
 const chain_: Chain1<URI>["chain"] = (fa, f) => pipe(fa, RX.mergeMap(f));
 
 const map_: Functor1<URI>["map"] = (fa, f) => fa.pipe(RX.map(f));
+
+export const alt: <A>(
+  that: Lazy<Observable<A>>
+) => (fa: Observable<A>) => Observable<A> = (that) => (fa) => alt_(fa, that);
 
 export const ap: <A>(
   fa: Observable<A>
