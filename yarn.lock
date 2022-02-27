@@ -1951,7 +1951,6 @@ __metadata:
   dependencies:
     "@talent/parser": "workspace:packages/parser"
     "@talent/parser-goldsrc": "workspace:packages/parser-goldsrc"
-    "@types/node": ^16.11.7
     fp-ts: ^2.11.1
     rxjs: ^7.5.4
   languageName: unknown
