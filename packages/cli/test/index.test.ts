@@ -1,1 +1,1 @@
-test.todo("cli");
+test.todo("@talent/cli");
