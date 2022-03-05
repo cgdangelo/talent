@@ -1,5 +1,3 @@
-"use strict";
-
 module.exports = {
   parser: "@typescript-eslint/parser",
   parserOptions: {
@@ -13,6 +11,7 @@ module.exports = {
     "plugin:@typescript-eslint/recommended",
     "prettier",
   ],
+  env: { node: true },
   rules: {
     "@typescript-eslint/consistent-type-imports": [
       "error",
