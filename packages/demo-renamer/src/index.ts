@@ -1,11 +1,41 @@
 import { header } from "@talent/parser-goldsrc/lib/DemoHeader";
+import type { Stream } from "@talent/parser/lib/Stream";
 import { stream } from "@talent/parser/lib/Stream";
-import type { task as T } from "fp-ts";
-import { console, taskEither as TE } from "fp-ts";
-import { pipe } from "fp-ts/lib/function";
+import * as Console from "fp-ts/lib/Console";
+import * as E from "fp-ts/lib/Either";
+import { constant, flow, pipe } from "fp-ts/lib/function";
+import { not } from "fp-ts/lib/Predicate";
+import * as S from "fp-ts/lib/string";
+import * as TE from "fp-ts/lib/TaskEither";
 import * as fs from "fs/promises";
 import * as path from "path";
-import * as readline from "readline";
+
+const validateDemoPath: (path?: string) => E.Either<Error, string> = flow(
+  E.fromNullable("no demo path provided"),
+  E.chain(E.fromPredicate(not(S.isEmpty), constant("demo path is empty"))),
+  E.bimap(E.toError, S.trim)
+);
+
+const bufferToStream: (buffer: Buffer) => Stream<number> = (buffer) =>
+  stream(buffer as unknown as number[]);
+
+const readFileContents: (path: string) => TE.TaskEither<Error, Stream<number>> =
+  (path) =>
+    pipe(
+      TE.tryCatch(() => fs.readFile(path), E.toError),
+      TE.map(bufferToStream)
+    );
+
+const mapName = flow(
+  header,
+  E.map(({ value: { mapName } }) => mapName)
+);
+
+const fileCreationDate: (path: string) => TE.TaskEither<Error, Date> = (path) =>
+  pipe(
+    TE.tryCatch(() => fs.stat(path), E.toError),
+    TE.map(({ mtime }) => mtime)
+  );
 
 const padNumber: (a: number) => string = (a) => a.toString().padStart(2, "0");
 
@@ -13,18 +43,10 @@ const getNewDemoName: (path: string) => TE.TaskEither<unknown, string> = (
   path
 ) =>
   pipe(
-    TE.fromTask(() => fs.readFile(path)),
-    TE.chainEitherKW((buffer) =>
-      pipe(stream(buffer as unknown as number[]), header)
-    ),
-    TE.map(({ value: { mapName } }) => mapName),
+    readFileContents(path),
+    TE.chainEitherKW(mapName),
     TE.bindTo("mapName"),
-    TE.bind("creationDate", () =>
-      pipe(
-        TE.fromTask(() => fs.stat(path)),
-        TE.map(({ mtime }) => mtime)
-      )
-    ),
+    TE.bindW("creationDate", () => fileCreationDate(path)),
     TE.map(
       ({ creationDate, mapName }) =>
         `${creationDate.getFullYear()}-` +
@@ -35,46 +57,26 @@ const getNewDemoName: (path: string) => TE.TaskEither<unknown, string> = (
     )
   );
 
-const rl = readline.createInterface({
-  input: process.stdin,
-  output: process.stdout,
-});
+const renameFile: (
+  originalFile: string
+) => (newFile: string) => TE.TaskEither<unknown, void> =
+  (originalFile) => (newFile) =>
+    TE.tryCatch(() => fs.rename(originalFile, newFile), E.toError);
 
-const question: (query: string) => T.Task<string> = (query) => () =>
-  new Promise((resolve) => rl.question(query, resolve));
-
-const renameFile: (originalFile: string) => (newFile: string) => T.Task<void> =
-  (originalFile) => (newFile) => () =>
-    fs.rename(originalFile, newFile);
-
-const main = pipe(
-  process.argv.slice(2),
-
-  TE.traverseSeqArray((originalFile) =>
-    pipe(
-      TE.fromTask(() => fs.access(originalFile)),
-      TE.apSecond(getNewDemoName(originalFile)),
-      TE.map((newFile) => path.resolve(path.dirname(originalFile), newFile)),
-      TE.chainFirst((newFile) =>
-        pipe(
-          question(`Rename ${originalFile} -> ${newFile}? [Y/n]: `),
-          TE.fromTask,
-          TE.chainW(
-            TE.fromPredicate(
-              (answer) => answer.trim().toLowerCase() !== "n",
-              () => `Skipped ${originalFile}.\n`
-            )
-          )
-        )
-      ),
-      TE.chainFirstTaskK(renameFile(originalFile)),
-      TE.map((newFile) => `Renamed ${originalFile} -> ${newFile}.\n`),
-      TE.orElse(TE.of),
-      TE.chainIOK(console.log)
+const renameDemo: (path: string) => TE.TaskEither<unknown, void> = (
+  originalFile
+) =>
+  pipe(
+    validateDemoPath(originalFile),
+    TE.fromEither,
+    TE.apSecond(getNewDemoName(originalFile)),
+    TE.map((newFile) => path.resolve(path.dirname(originalFile), newFile)),
+    TE.chainFirst(renameFile(originalFile)),
+    TE.chainIOK((newFile) =>
+      Console.log(`Renamed ${originalFile} -> ${newFile}.\n`)
     )
-  )
-);
+  );
 
-main()
-  .catch((e) => console.error(e)())
-  .finally(() => rl.close());
+const main = pipe(process.argv.slice(2), TE.traverseArray(renameDemo));
+
+main();
