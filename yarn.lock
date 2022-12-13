@@ -1928,7 +1928,7 @@ __metadata:
   dependencies:
     "@talent/parser": "workspace:packages/parser"
     "@talent/parser-goldsrc": "workspace:packages/parser-goldsrc"
-    "@types/node": ^16.11.7
+    "@types/node": ^18.11.14
     fp-ts: ^2.11.1
   bin:
     talent: ./bin/talent
@@ -1940,7 +1940,7 @@ __metadata:
   resolution: "@talent/demo-renamer@workspace:packages/demo-renamer"
   dependencies:
     "@talent/parser-goldsrc": "workspace:packages/parser-goldsrc"
-    "@types/node": ^16.11.7
+    "@types/node": ^18.11.14
     fp-ts: ^2.11.1
   languageName: unknown
   linkType: soft
@@ -2122,10 +2122,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/node@npm:^16.11.7":
-  version: 16.11.7
-  resolution: "@types/node@npm:16.11.7"
-  checksum: 2706403e6efc4aa40fdce8f0b5d9884d5600c3c8610aedc7fa5e7e298d30366f7e8b7296028d52898dca3edef4c3e827b03bf20952c4780f13fa4e79864f7a86
+"@types/node@npm:^18.11.14":
+  version: 18.11.14
+  resolution: "@types/node@npm:18.11.14"
+  checksum: 1effaf6d55bbcccde9bca763e6454ebf92047726450256ccc0673bf44e4661fbddcd788b0779bad8a13809b05a7bdcbfba81db0713235478b866d553be864be9
   languageName: node
   linkType: hard
 
