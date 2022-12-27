@@ -1,7 +1,0 @@
-* Usage
-
-*Parse a demo and print the result to console:*
-
-#+BEGIN_EXAMPLE:
-./bin/talent <path to demo.dem>
-#+END_EXAMPLE

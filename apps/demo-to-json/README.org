@@ -1,0 +1,7 @@
+* Usage
+
+*Parse a demo and print the result to console:*
+
+#+BEGIN_EXAMPLE:
+./bin/demo-to-json <path to demo.dem>
+#+END_EXAMPLE
