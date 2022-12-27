@@ -1,34 +1,32 @@
-name: Pull request
+name: CI
 
 on:
+  push:
+    branches: ['main']
+
   pull_request:
-    branches:
-      - main
+    branches: ['main']
 
 jobs:
-  checks:
+  build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-
-      - name: Setup Node environment
-        uses: actions/setup-node@v2
+      - uses: actions/checkout@v3
         with:
-          node-version: "14"
-          cache: "yarn"
+          fetch-depth: 2
 
-      - name: Install dependencies
-        run: yarn install --immutable --immutable-cache
+      - name: Git config user
+        uses: snow-actions/git-config-user@v1.0.0
 
-      - name: Check types
-        run: yarn build
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 16
 
-      - name: Run tests
-        run: yarn test
+      - name: Verify Change Logs
+        run: node common/scripts/install-run-rush.js change --verify
 
-      - name: Check code style
-        run: yarn lint
+      - name: Rush Install
+        run: node common/scripts/install-run-rush.js install
 
-      - name: Check formatting
-        run: yarn format-check
+      - name: Rush rebuild
+        run: node common/scripts/install-run-rush.js rebuild --verbose --production
