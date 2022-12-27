@@ -488,8 +488,13 @@
     // }
 
     {
-      "packageName": "parser",
+      "packageName": "@talent/parser",
       "projectFolder": "libraries/parser"
+    },
+
+    {
+      "packageName": "@talent/parser-buffer",
+      "projectFolder": "libraries/parser-buffer"
     }
   ]
 }
