@@ -511,6 +511,10 @@
     {
       "packageName": "@talent/demo-to-json",
       "projectFolder": "apps/demo-to-json"
+    },
+    {
+      "packageName": "@talent/demo-renamer",
+      "projectFolder": "apps/demo-renamer"
     }
   ]
 }
