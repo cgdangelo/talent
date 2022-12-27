@@ -506,6 +506,11 @@
     {
       "packageName": "@talent/observable",
       "projectFolder": "libraries/observable"
+    },
+
+    {
+      "packageName": "@talent/demo-to-json",
+      "projectFolder": "apps/demo-to-json"
     }
   ]
 }
