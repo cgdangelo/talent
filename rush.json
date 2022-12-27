@@ -500,6 +500,10 @@
       "projectFolder": "libraries/parser-bitbuffer"
     },
     {
+      "packageName": "@talent/parser-goldsrc",
+      "projectFolder": "libraries/parser-goldsrc"
+    },
+    {
       "packageName": "@talent/observable",
       "projectFolder": "libraries/observable"
     }

@@ -1,23 +1,26 @@
 {
   "name": "@talent/parser-goldsrc",
   "version": "0.0.0",
-  "description": "> TODO: description",
-  "author": "Charles D'Angelo <c.g.dangelo@gmail.com>",
-  "homepage": "",
   "license": "MIT",
-  "directories": {
-    "lib": "lib"
-  },
-  "files": [
-    "lib"
-  ],
+  "main": "lib/index.js",
+  "typings": "lib/index.d.ts",
   "scripts": {
-    "test": "echo \"Error: run tests from root\" && exit 1"
+    "build": "heft test --clean"
   },
   "dependencies": {
-    "@talent/parser": "workspace:packages/parser",
-    "@talent/parser-bitbuffer": "workspace:packages/parser-bitbuffer",
-    "@talent/parser-buffer": "workspace:packages/parser-buffer",
+    "@talent/parser": "workspace:*",
+    "@talent/parser-bitbuffer": "workspace:*",
+    "@talent/parser-buffer": "workspace:*",
     "fp-ts": "^2.11.1"
+  },
+  "devDependencies": {
+    "@rushstack/heft-node-rig": "~1.11.11",
+    "@rushstack/heft": "~0.49.0",
+    "@rushstack/eslint-config": "~3.1.1",
+    "eslint": "~8.30.0",
+    "typescript": "~4.9.4",
+    "@rushstack/heft-jest-plugin": "~0.4.2",
+    "@types/heft-jest": "1.0.3",
+    "@types/node": "18.11.18"
   }
 }
