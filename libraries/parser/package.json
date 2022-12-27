@@ -1,29 +1,23 @@
 {
-  "name": "@talent/parser",
+  "name": "parser",
   "version": "0.0.0",
   "description": "> TODO: description",
   "author": "Charles D'Angelo <c.g.dangelo@gmail.com>",
   "homepage": "https://github.com/cgdangelo/talent#readme",
   "license": "MIT",
   "main": "lib/index.js",
-  "directories": {
-    "lib": "lib"
-  },
-  "files": [
-    "lib"
-  ],
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/cgdangelo/talent.git"
-  },
+  "typings": "lib/index.d.ts",
   "scripts": {
-    "test": "echo \"Error: run tests from root\" && exit 1"
-  },
-  "bugs": {
-    "url": "https://github.com/cgdangelo/talent/issues"
+    "build": "heft build --clean"
   },
   "dependencies": {
     "fp-ts": "^2.11.1",
     "parser-ts": "^0.6.16"
+  },
+  "devDependencies": {
+    "@rushstack/heft-node-rig": "~1.11.11",
+    "@rushstack/heft": "~0.49.0",
+    "typescript": "~4.9.4",
+    "@types/node": "~18.11.18"
   }
 }

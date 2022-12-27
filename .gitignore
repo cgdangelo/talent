@@ -66,3 +66,6 @@ common/autoinstallers/*/.npmrc
 
 # Heft
 .heft
+
+apps/**/lib
+libraries/**/lib
