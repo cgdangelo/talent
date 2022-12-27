@@ -6,13 +6,37 @@ For now: yet another GoldSrc parser, built with [[https://github.com/gcanti/fp-t
 
 ** Packages
 
-| [[https://github.com/cgdangelo/talent/tree/main/apps/demo-to-json][@talent/demo-to-json]]              | Runs the demo parser and logs to console.                    |
-| [[https://github.com/cgdangelo/talent/tree/main/apps/demo-renamer][@talent/demo-renamer]]     | Renames a list of demo files to ~YYYY-MM-DD_HHMM_{map}.dem~. |
-| [[https://github.com/cgdangelo/talent/tree/main/libraries/observable][@talent/observable]]       | fp-ts bindings for rxjs observables.                         |
-| [[https://github.com/cgdangelo/talent/tree/main/libraries/parser][@talent/parser]]           | General use parser combinators.                              |
-| [[https://github.com/cgdangelo/talent/tree/main/libraries/parser-bitbuffer][@talent/parser-bitbuffer]] | Parser combinators for bit-packed fields.                    |
-| [[https://github.com/cgdangelo/talent/tree/main/libraries/parser-buffer][@talent/parser-buffer]]    | Parser combinators for a [[https://nodejs.org/api/buffer.html][Buffer]].                             |
-| [[https://github.com/cgdangelo/talent/tree/main/libraries/parser-goldsrc][@talent/parser-goldsrc]]   | Parser combinators for a GoldSrc demo file.                  |
+*** Applications
+
+| [[https://github.com/cgdangelo/talent/tree/main/apps/demo-to-json][@talent/demo-to-json]] | Runs the demo parser and logs to console.                    |
+| [[https://github.com/cgdangelo/talent/tree/main/apps/demo-renamer][@talent/demo-renamer]] | Renames a list of demo files to ~YYYY-MM-DD_HHMM_{map}.dem~. |
+
+*** Libraries
+
+| [[https://github.com/cgdangelo/talent/tree/main/libraries/observable][@talent/observable]]       | fp-ts bindings for rxjs observables.        |
+| [[https://github.com/cgdangelo/talent/tree/main/libraries/parser][@talent/parser]]           | General use parser combinators.             |
+| [[https://github.com/cgdangelo/talent/tree/main/libraries/parser-bitbuffer][@talent/parser-bitbuffer]] | Parser combinators for bit-packed fields.   |
+| [[https://github.com/cgdangelo/talent/tree/main/libraries/parser-buffer][@talent/parser-buffer]]    | Parser combinators for a [[https://nodejs.org/api/buffer.html][Buffer]].            |
+| [[https://github.com/cgdangelo/talent/tree/main/libraries/parser-goldsrc][@talent/parser-goldsrc]]   | Parser combinators for a GoldSrc demo file. |
+
+** Getting started
+
+This is a monorepo managed by [[https://rushjs.io/][Rush]]. You will need the Rush tool to continue:
+
+#+BEGIN_EXAMPLE
+npm install -g @microsoft/rush
+#+END_EXAMPLE
+
+*** Running applications
+
+#+BEGIN_EXAMPLE
+git clone https://github.com/cgdangelo/talent.git
+cd talent
+rush install
+rush build
+./apps/demo-to-json/bin/demo-to-json <path-to-demo.dem>
+#+END_EXAMPLE
+
 
 ** What's working?
 

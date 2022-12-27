@@ -8,8 +8,7 @@
     "demo-to-json": "./bin/demo-to-json"
   },
   "scripts": {
-    "build": "heft test --clean",
-    "start": "bin/demo-to-json"
+    "build": "heft test --clean"
   },
   "dependencies": {
     "@talent/parser": "workspace:*",
