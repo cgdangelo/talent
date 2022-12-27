@@ -73,6 +73,7 @@ common/autoinstallers/*/.npmrc
 
 apps/**/lib
 libraries/**/lib
+**/temp
 
 #-------------------------------------------------------------------------------------------------------------------
 # Prettier-specific overrides

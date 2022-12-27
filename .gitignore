@@ -69,3 +69,4 @@ common/autoinstallers/*/.npmrc
 
 apps/**/lib
 libraries/**/lib
+**/temp
