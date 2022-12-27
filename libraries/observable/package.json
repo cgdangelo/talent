@@ -9,7 +9,7 @@
   },
   "dependencies": {
     "@talent/parser": "workspace:*",
-    "fp-ts": "^2.11.1",
+    "fp-ts": "~2.13.1",
     "rxjs": "^7.5.4"
   },
   "devDependencies": {

@@ -16,7 +16,7 @@ importers:
       '@types/heft-jest': 1.0.3
       '@types/node': 18.11.18
       eslint: ~8.30.0
-      fp-ts: ^2.11.1
+      fp-ts: ~2.13.1
       typescript: ~4.9.4
     dependencies:
       '@talent/parser': link:../../libraries/parser
@@ -43,7 +43,7 @@ importers:
       '@types/heft-jest': 1.0.3
       '@types/node': 18.11.18
       eslint: ~8.30.0
-      fp-ts: ^2.11.1
+      fp-ts: ~2.13.1
       typescript: ~4.9.4
     dependencies:
       '@talent/parser': link:../../libraries/parser
@@ -69,7 +69,7 @@ importers:
       '@types/heft-jest': 1.0.3
       '@types/node': 18.11.18
       eslint: ~8.30.0
-      fp-ts: ^2.11.1
+      fp-ts: ~2.13.1
       rxjs: ^7.5.4
       typescript: ~4.9.4
     dependencies:
@@ -95,8 +95,8 @@ importers:
       '@types/heft-jest': 1.0.3
       '@types/node': 18.11.18
       eslint: ~8.30.0
-      fp-ts: ^2.11.1
-      parser-ts: ^0.6.16
+      fp-ts: ~2.13.1
+      parser-ts: ~0.6.16
       typescript: ~4.9.4
     dependencies:
       fp-ts: 2.13.1
@@ -121,7 +121,7 @@ importers:
       '@types/heft-jest': 1.0.3
       '@types/node': 18.11.18
       eslint: ~8.30.0
-      fp-ts: ^2.11.1
+      fp-ts: ~2.13.1
       typescript: ~4.9.4
     dependencies:
       '@talent/parser': link:../parser
@@ -146,7 +146,7 @@ importers:
       '@types/heft-jest': 1.0.3
       '@types/node': 18.11.18
       eslint: ~8.30.0
-      fp-ts: ^2.11.1
+      fp-ts: ~2.13.1
       typescript: ~4.9.4
     dependencies:
       '@talent/parser': link:../parser
@@ -173,7 +173,7 @@ importers:
       '@types/heft-jest': 1.0.3
       '@types/node': 18.11.18
       eslint: ~8.30.0
-      fp-ts: ^2.11.1
+      fp-ts: ~2.13.1
       typescript: ~4.9.4
     dependencies:
       '@talent/parser': link:../parser

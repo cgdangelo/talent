@@ -14,7 +14,7 @@
   "dependencies": {
     "@talent/parser": "workspace:*",
     "@talent/parser-goldsrc": "workspace:*",
-    "fp-ts": "^2.11.1"
+    "fp-ts": "~2.13.1"
   },
   "devDependencies": {
     "@rushstack/heft-node-rig": "~1.11.11",

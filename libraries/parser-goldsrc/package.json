@@ -11,7 +11,7 @@
     "@talent/parser": "workspace:*",
     "@talent/parser-bitbuffer": "workspace:*",
     "@talent/parser-buffer": "workspace:*",
-    "fp-ts": "^2.11.1"
+    "fp-ts": "~2.13.1"
   },
   "devDependencies": {
     "@rushstack/heft-node-rig": "~1.11.11",

@@ -9,7 +9,7 @@
   },
   "dependencies": {
     "@talent/parser-goldsrc": "workspace:*",
-    "fp-ts": "^2.11.1",
+    "fp-ts": "~2.13.1",
     "@talent/parser": "workspace:*"
   },
   "devDependencies": {
