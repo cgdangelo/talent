@@ -491,12 +491,14 @@
       "packageName": "@talent/parser",
       "projectFolder": "libraries/parser"
     },
-
     {
       "packageName": "@talent/parser-buffer",
       "projectFolder": "libraries/parser-buffer"
     },
-
+    {
+      "packageName": "@talent/parser-bitbuffer",
+      "projectFolder": "libraries/parser-bitbuffer"
+    },
     {
       "packageName": "@talent/observable",
       "projectFolder": "libraries/observable"
