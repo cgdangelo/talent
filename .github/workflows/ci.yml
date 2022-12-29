@@ -22,11 +22,11 @@ jobs:
         with:
           node-version: 16
 
-      - name: Verify Change Logs
+      - name: Verify change logs
         run: node common/scripts/install-run-rush.js change --verify
 
-      - name: Rush Install
+      - name: Rush install
         run: node common/scripts/install-run-rush.js install
 
-      - name: Rush rebuild
-        run: node common/scripts/install-run-rush.js rebuild --verbose
+      - name: Rush retest
+        run: node common/scripts/install-run-rush.js retest --verbose
