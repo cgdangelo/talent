@@ -1,3 +1,6 @@
+/* eslint-disable @typescript-eslint/naming-convention */
+/* eslint-disable @typescript-eslint/no-use-before-define */
+
 import {
   either as E,
   readonlyArray as RA,
@@ -219,20 +222,26 @@ const chainRec_: ChainRec3<URI>['chainRec'] = <S, I, A, B>(
   f: (a: A) => StatefulParser<S, I, E.Either<A, B>>
 ): StatefulParser<S, I, B> => {
   const split =
-    (start: Stream<I>) =>
-    (
-      result: ParseSuccess<I, [E.Either<A, B>, S]>
-    ): E.Either<
-      { readonly value: A; readonly stream: Stream<I>; readonly state: S },
-      ParseResult<I, [B, S]>
-    > =>
-      E.isLeft(result.value[0])
-        ? E.left({
-            value: result.value[0].left,
-            stream: result.next,
-            state: result.value[1]
-          })
-        : E.right(success([result.value[0].right, result.value[1]], start, result.next));
+    /* eslint-disable @typescript-eslint/explicit-function-return-type */
+
+
+      (start: Stream<I>) =>
+      /* eslint-enable @typescript-eslint/explicit-function-return-type */
+      // ^ Only way to ignore this error. Prettier somehow adds 1 line break
+      // before the function for each comment, too.
+      (
+        result: ParseSuccess<I, [E.Either<A, B>, S]>
+      ): E.Either<
+        { readonly value: A; readonly stream: Stream<I>; readonly state: S },
+        ParseResult<I, [B, S]>
+      > =>
+        E.isLeft(result.value[0])
+          ? E.left({
+              value: result.value[0].left,
+              stream: result.next,
+              state: result.value[1]
+            })
+          : E.right(success([result.value[0].right, result.value[1]], start, result.next));
   return (s) => (start) =>
     tailRec({ value: a, stream: start, state: s }, (state) => {
       const result = f(state.value)(state.state)(state.stream);
@@ -283,7 +292,7 @@ export const of: <A, S, I>(a: A) => StatefulParser<S, I, A> = ST.of(P.Monad);
 // instances
 // -----------------------------------------------------------------------------
 
-export const URI = 'StatefulParser';
+export const URI: 'StatefulParser' = 'StatefulParser';
 
 export type URI = typeof URI;
 
@@ -367,14 +376,18 @@ export const log: <S, I, A>(ma: StatefulParser<S, I, A>) => StatefulParser<S, I,
     })
   );
 
+// eslint-disable-next-line @rushstack/typedef-var
 export const struct = sequenceS(Applicative);
 
+// eslint-disable-next-line @rushstack/typedef-var
 export const tuple = sequenceT(Applicative);
 
 // -----------------------------------------------------------------------------
 // do notation
 // -----------------------------------------------------------------------------
 
+// eslint-disable-next-line @rushstack/typedef-var
 export const bind = bind_(Chain);
 
+// eslint-disable-next-line @rushstack/typedef-var
 export const bindTo = bindTo_(Functor);

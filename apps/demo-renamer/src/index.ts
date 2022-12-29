@@ -24,11 +24,6 @@ const readFileContents: (path: string) => TE.TaskEither<Error, Stream<number>> =
     TE.map(bufferToStream)
   );
 
-const mapName = flow(
-  header,
-  E.map(({ value: { mapName } }) => mapName)
-);
-
 const fileCreationDate: (path: string) => TE.TaskEither<Error, Date> = (path) =>
   pipe(
     TE.tryCatch(() => fs.stat(path), E.toError),
@@ -40,7 +35,12 @@ const padNumber: (a: number) => string = (a) => a.toString().padStart(2, '0');
 const getNewDemoName: (path: string) => TE.TaskEither<unknown, string> = (path) =>
   pipe(
     readFileContents(path),
-    TE.chainEitherKW(mapName),
+    TE.chainEitherKW(
+      flow(
+        header,
+        E.map(({ value: { mapName } }) => mapName)
+      )
+    ),
     TE.bindTo('mapName'),
     TE.bindW('creationDate', () => fileCreationDate(path)),
     TE.map(
@@ -67,7 +67,7 @@ const renameDemo: (path: string) => TE.TaskEither<unknown, void> = (originalFile
     TE.chainIOK((newFile) => Console.log(`Renamed ${originalFile} -> ${newFile}.\n`))
   );
 
-const main = pipe(process.argv.slice(2), TE.traverseArray(renameDemo));
+const main: TE.TaskEither<unknown, unknown> = pipe(process.argv.slice(2), TE.traverseArray(renameDemo));
 
 main()
   .then(() => {})

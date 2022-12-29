@@ -1,13 +1,13 @@
-import * as P from "@talent/parser/lib/Parser";
-import { success } from "@talent/parser/lib/ParseResult";
-import { stream } from "@talent/parser/lib/Stream";
-import { either as E } from "fp-ts";
-import { pipe } from "fp-ts/lib/function";
+import * as P from '@talent/parser/lib/Parser';
+import { success } from '@talent/parser/lib/ParseResult';
+import { stream } from '@talent/parser/lib/Stream';
+import { either as E } from 'fp-ts';
+import { pipe } from 'fp-ts/lib/function';
 
 export type BufferParser<A> = P.Parser<number, A>;
 
-const int_: (
-  fa: Buffer[`read${"U" | ""}Int${"L" | "B"}E`]
+const makeIntParser: (
+  fa: Buffer[`read${'U' | ''}Int${'L' | 'B'}E`]
 ) => (bitLength: BitLength) => BufferParser<number> = (fa) => (bitLength) =>
   pipe(
     P.take<number>(bitLength / 8),
@@ -24,19 +24,19 @@ const int_: (
 
 type BitLength = 8 | 16 | 24 | 32 | 40 | 48;
 
-export const int_le: (bitLength: BitLength) => BufferParser<number> = int_(
+export const int_le: (bitLength: BitLength) => BufferParser<number> = makeIntParser(
   Buffer.prototype.readIntLE
 );
 
-export const uint_le: (bitLength: BitLength) => BufferParser<number> = int_(
+export const uint_le: (bitLength: BitLength) => BufferParser<number> = makeIntParser(
   Buffer.prototype.readUIntLE
 );
 
-export const int_be: (bitLength: BitLength) => BufferParser<number> = int_(
+export const int_be: (bitLength: BitLength) => BufferParser<number> = makeIntParser(
   Buffer.prototype.readIntBE
 );
 
-export const uint_be: (bitLength: BitLength) => BufferParser<number> = int_(
+export const uint_be: (bitLength: BitLength) => BufferParser<number> = makeIntParser(
   Buffer.prototype.readUIntBE
 );
 
@@ -58,15 +58,12 @@ export const float32_le: BufferParser<number> = pipe(
   P.map((buffer) => buffer.readFloatLE())
 );
 
-export const char: BufferParser<string> = pipe(
-  int_le(8),
-  P.map(String.fromCharCode)
-);
+export const char: BufferParser<string> = pipe(int_le(8), P.map(String.fromCharCode));
 
 export const str: (byteLength: number) => BufferParser<string> = (byteLength) =>
   pipe(
     P.manyN(char, byteLength),
-    P.map((a) => a.join(""))
+    P.map((a) => a.join(''))
   );
 
 export const ztstr: BufferParser<string> = pipe(
@@ -75,15 +72,8 @@ export const ztstr: BufferParser<string> = pipe(
   P.map((as) => String.fromCharCode(...as))
 );
 
-export const ztstr_padded: (minLength: number) => BufferParser<string> =
-  (minLength) => (i) =>
-    pipe(
-      ztstr(i),
-      E.chain((a) =>
-        success(
-          a.value,
-          a.start,
-          stream(a.next.buffer, a.start.cursor + minLength)
-        )
-      )
-    );
+export const ztstr_padded: (minLength: number) => BufferParser<string> = (minLength) => (i) =>
+  pipe(
+    ztstr(i),
+    E.chain((a) => success(a.value, a.start, stream(a.next.buffer, a.start.cursor + minLength)))
+  );

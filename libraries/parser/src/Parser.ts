@@ -55,8 +55,10 @@ export const take = <I>(length: number): P.Parser<I, readonly I[]> =>
     P.apFirst(skip(length))
   );
 
+// eslint-disable-next-line @rushstack/typedef-var
 export const struct = sequenceS(P.Applicative);
 
+// eslint-disable-next-line @rushstack/typedef-var
 export const tuple = sequenceT(P.Applicative);
 
 /* istanbul ignore next: Util function, don't care */
