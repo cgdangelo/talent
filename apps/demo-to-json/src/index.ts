@@ -24,25 +24,14 @@ const readFileContents: (path: string) => TE.TaskEither<Error, Stream<number>> =
     TE.map(bufferToStream)
   );
 
-const parseDemo = flow(
-  demo,
-  E.bimap(
-    ({ expected }) => E.toError(expected),
-    ({ value }) => value
-  )
-);
-
-const serializeDemo = flow(json.stringify, E.mapLeft(E.toError));
-
-const main = pipe(
-  validateDemoPath(process.argv[2]),
-  TE.fromEither,
+const main: TE.TaskEither<Error, void> = pipe(
+  TE.fromEither(validateDemoPath(process.argv[2])),
   TE.chain(readFileContents),
-  TE.chainEitherKW(parseDemo),
-  TE.chainEitherK(serializeDemo),
-  TE.chainIOK(Console.log)
+  TE.chainEitherKW(demo),
+  TE.map(({ value }) => value),
+  TE.chainEitherK(json.stringify),
+  TE.chainIOK(Console.log),
+  TE.mapLeft(E.toError)
 );
 
-main()
-  .then(() => {})
-  .catch(() => {});
+main().catch(() => {});
