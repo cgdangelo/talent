@@ -5,6 +5,11 @@ module.exports = {
   extends: ['@rushstack/eslint-config/profile/node'],
   parserOptions: { tsconfigRootDir: __dirname },
   rules: {
-    '@typescript-eslint/no-use-before-define': 'warn'
+    '@rushstack/typedef-var': 'off',
+    '@typescript-eslint/no-use-before-define': 'off',
+    '@typescript-eslint/naming-convention': 'off',
+    '@typescript-eslint/consistent-type-definitions': 'off',
+
+    'no-bitwise': 'off'
   }
 };
