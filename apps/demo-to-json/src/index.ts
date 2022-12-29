@@ -7,6 +7,7 @@ import { constant, flow, pipe } from 'fp-ts/lib/function';
 import * as json from 'fp-ts/lib/Json';
 import { not } from 'fp-ts/lib/Predicate';
 import * as S from 'fp-ts/lib/string';
+import * as T from 'fp-ts/lib/Task';
 import * as TE from 'fp-ts/lib/TaskEither';
 import { readFile } from 'fs/promises';
 
@@ -24,14 +25,15 @@ const readFileContents: (path: string) => TE.TaskEither<Error, Stream<number>> =
     TE.map(bufferToStream)
   );
 
-const main: TE.TaskEither<Error, void> = pipe(
+const main: T.Task<void> = pipe(
   TE.fromEither(validateDemoPath(process.argv[2])),
   TE.chain(readFileContents),
   TE.chainEitherKW(demo),
   TE.map(({ value }) => value),
   TE.chainEitherK(json.stringify),
-  TE.chainIOK(Console.log),
-  TE.mapLeft(E.toError)
+  TE.mapLeft((e) => (e instanceof Error ? e : E.toError(e))),
+  TE.fold((e) => T.of(e.message), T.of),
+  T.chainIOK(Console.log)
 );
 
 main().catch(() => {});
