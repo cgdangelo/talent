@@ -1,4 +1,4 @@
-import { demo, IDemoEventEmitter } from '@talent/parser-goldsrc';
+import { createDemoParserIO, IDemoEventEmitter } from '@talent/parser-goldsrc';
 import { EventEmitter } from 'events';
 import { PathLike } from 'fs';
 import { readFile } from 'fs/promises';
@@ -40,8 +40,11 @@ async function main(demoPath?: PathLike): Promise<void> {
   // Demo has finished parsing.
   demoEvents.on('demo:end', () => console.log('DemoAnalyzer | End.'));
 
+  // Create the parser. This is a lazy function you can invoke later to start parsing.
+  const runParser = createDemoParserIO(fileContents, demoEvents);
+
   // Run the parser; the parser will emit events through the `demoEvents` bus as the file is evaluated.
-  demo(demoEvents)({ buffer: fileContents as unknown as number[], cursor: 0 });
+  runParser(); // Demo | undefined
 }
 
 main(process.argv[2]).catch(console.error);
