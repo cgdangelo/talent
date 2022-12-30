@@ -489,37 +489,47 @@
 
     {
       "packageName": "@talent/parser",
-      "projectFolder": "libraries/parser"
+      "projectFolder": "libraries/parser",
+      "versionPolicyName": "goldsrcParserPolicy"
     },
     {
       "packageName": "@talent/parser-buffer",
-      "projectFolder": "libraries/parser-buffer"
+      "projectFolder": "libraries/parser-buffer",
+      "versionPolicyName": "goldsrcParserPolicy"
     },
     {
       "packageName": "@talent/parser-bitbuffer",
-      "projectFolder": "libraries/parser-bitbuffer"
+      "projectFolder": "libraries/parser-bitbuffer",
+      "versionPolicyName": "goldsrcParserPolicy"
     },
     {
       "packageName": "@talent/parser-goldsrc",
       "projectFolder": "libraries/parser-goldsrc",
-      "shouldPublish": true
+      "versionPolicyName": "goldsrcParserPolicy"
     },
+
     {
       "packageName": "@talent/observable",
-      "projectFolder": "libraries/observable"
+      "projectFolder": "libraries/observable",
+      "shouldPublish": false
     },
 
     {
       "packageName": "@talent/demo-to-json",
-      "projectFolder": "apps/demo-to-json"
+      "projectFolder": "apps/demo-to-json",
+      "versionPolicyName": "demoToJsonPolicy"
     },
+
     {
       "packageName": "@talent/demo-renamer",
-      "projectFolder": "apps/demo-renamer"
+      "projectFolder": "apps/demo-renamer",
+      "shouldPublish": false
     },
+
     {
       "packageName": "@talent/demo-analyzer",
-      "projectFolder": "apps/demo-analyzer"
+      "projectFolder": "apps/demo-analyzer",
+      "shouldPublish": false
     }
   ]
 }

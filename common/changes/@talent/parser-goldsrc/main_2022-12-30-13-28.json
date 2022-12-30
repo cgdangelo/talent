@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@talent/parser-goldsrc",
-      "comment": "initial release",
+      "comment": "Initial release",
       "type": "major"
     }
   ],

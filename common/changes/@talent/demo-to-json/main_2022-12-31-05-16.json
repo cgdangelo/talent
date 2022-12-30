@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@talent/demo-to-json",
+      "comment": "Initial release",
+      "type": "major"
+    }
+  ],
+  "packageName": "@talent/demo-to-json"
+}
