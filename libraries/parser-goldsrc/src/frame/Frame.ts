@@ -66,7 +66,7 @@ const frame_: (frameType: number) => DS.DemoStateParser<Frame> = (frameType) => 
           frameHeader,
           P.bindTo('header'),
 
-          P.bind('type', () => P.of('DemoStart' as const))
+          P.bind('type', () => P.of('NextSection' as const))
         )
       );
 
