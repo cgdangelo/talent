@@ -28,7 +28,7 @@ const readFileContents: (path: string) => TE.TaskEither<Error, Stream<number>> =
 const main: T.Task<void> = pipe(
   TE.fromEither(validateDemoPath(process.argv[2])),
   TE.chain(readFileContents),
-  TE.chainEitherKW(demo),
+  TE.chainEitherKW(demo()),
   TE.map(({ value }) => value),
   TE.chainEitherK(json.stringify),
   TE.mapLeft((e) => (e instanceof Error ? e : E.toError(e))),
