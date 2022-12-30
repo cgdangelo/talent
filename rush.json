@@ -501,7 +501,8 @@
     },
     {
       "packageName": "@talent/parser-goldsrc",
-      "projectFolder": "libraries/parser-goldsrc"
+      "projectFolder": "libraries/parser-goldsrc",
+      "shouldPublish": true
     },
     {
       "packageName": "@talent/observable",
