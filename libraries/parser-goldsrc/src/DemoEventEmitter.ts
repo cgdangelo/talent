@@ -72,6 +72,17 @@ export interface IDemoEventEmitter {
    */
   on(eventName: 'demo:end', listener: () => void): this;
 
+  off(eventName: 'demo:start', listener: () => void): this;
+  off(eventName: 'demo:header', listener: (demoHeader: DemoHeader) => void): this;
+  off(
+    eventName: 'demo:directory-entry',
+    listener: (directoryEntry: DirectoryEntry & { frames: never[] }) => void
+  ): this;
+  off(eventName: 'demo:frame', listener: (frame: Frame) => void): this;
+  off(eventName: 'demo:netmessage:engine', listener: (engineMessage: EngineMessage) => void): this;
+  off(eventName: 'demo:netmessage:user', listener: (userMessage: UserMessage) => void): this;
+  off(eventName: 'demo:end', listener: () => void): this;
+
   /** @internal */ emit(eventName: 'demo:start', ...args: never[]): unknown;
   /** @internal */ emit(eventName: 'demo:header', ...args: [DemoHeader]): unknown;
   /** @internal */ emit(eventName: 'demo:directory-entry', ...args: [DirectoryEntry]): unknown;
