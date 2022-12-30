@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@talent/parser-goldsrc",
+      "comment": "initial release",
+      "type": "major"
+    }
+  ],
+  "packageName": "@talent/parser-goldsrc"
+}
