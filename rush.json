@@ -515,6 +515,10 @@
     {
       "packageName": "@talent/demo-renamer",
       "projectFolder": "apps/demo-renamer"
+    },
+    {
+      "packageName": "@talent/demo-analyzer",
+      "projectFolder": "apps/demo-analyzer"
     }
   ]
 }

@@ -1,23 +1,23 @@
-import { parser as P, statefulParser as SP } from "@talent/parser";
-import { buffer as B } from "@talent/parser-buffer";
-import { pipe } from "fp-ts/lib/function";
-import * as DS from "../DemoState";
-import type { ClientData } from "./ClientData";
-import { clientData } from "./ClientData";
-import type { ConsoleCommand } from "./ConsoleCommand";
-import { consoleCommand } from "./ConsoleCommand";
-import type { DemoBuffer } from "./DemoBuffer";
-import { demoBuffer } from "./DemoBuffer";
-import type { Event } from "./Event";
-import { event } from "./Event";
-import type { FrameHeader } from "./FrameHeader";
-import { frameHeader } from "./FrameHeader";
-import type { NetworkMessages } from "./networkMessages/NetworkMessages";
-import { networkMessages } from "./networkMessages/NetworkMessages";
-import type { Sound } from "./Sound";
-import { sound } from "./Sound";
-import type { WeaponAnimation } from "./WeaponAnimation";
-import { weaponAnimation } from "./WeaponAnimation";
+import { parser as P, statefulParser as SP } from '@talent/parser';
+import { buffer as B } from '@talent/parser-buffer';
+import { pipe } from 'fp-ts/lib/function';
+import * as DS from '../DemoState';
+import type { ClientData } from './ClientData';
+import { clientData } from './ClientData';
+import type { ConsoleCommand } from './ConsoleCommand';
+import { consoleCommand } from './ConsoleCommand';
+import type { DemoBuffer } from './DemoBuffer';
+import { demoBuffer } from './DemoBuffer';
+import type { Event } from './Event';
+import { event } from './Event';
+import type { FrameHeader } from './FrameHeader';
+import { frameHeader } from './FrameHeader';
+import type { NetworkMessages } from './networkMessages/NetworkMessages';
+import { networkMessages } from './networkMessages/NetworkMessages';
+import type { Sound } from './Sound';
+import { sound } from './Sound';
+import type { WeaponAnimation } from './WeaponAnimation';
+import { weaponAnimation } from './WeaponAnimation';
 
 export type Frame =
   | NetworkMessages
@@ -29,7 +29,7 @@ export type Frame =
   | DemoBuffer
   | {
       readonly header: FrameHeader;
-      readonly type: "DemoStart" | "NextSection";
+      readonly type: 'DemoStart' | 'NextSection';
     };
 
 const frameType = DS.lift(
@@ -38,21 +38,19 @@ const frameType = DS.lift(
       B.uint8_le,
       P.filter((a) => a >= 0 && a <= 9)
     ),
-    "frame type id [0, 9]"
+    'frame type id [0, 9]'
   )
 );
 
-const frame_: (frameType: number) => DS.DemoStateParser<Frame> = (
-  frameType
-) => {
+const frame_: (frameType: number) => DS.DemoStateParser<Frame> = (frameType) => {
   switch (frameType) {
     case 2:
       return SP.lift(
         pipe(
           frameHeader,
-          P.bindTo("header"),
+          P.bindTo('header'),
 
-          P.bind("type", () => P.of("DemoStart" as const))
+          P.bind('type', () => P.of('DemoStart' as const))
         )
       );
 
@@ -66,9 +64,9 @@ const frame_: (frameType: number) => DS.DemoStateParser<Frame> = (
       return SP.lift(
         pipe(
           frameHeader,
-          P.bindTo("header"),
+          P.bindTo('header'),
 
-          P.bind("type", () => P.of("DemoStart" as const))
+          P.bind('type', () => P.of('DemoStart' as const))
         )
       );
 
@@ -89,7 +87,16 @@ const frame_: (frameType: number) => DS.DemoStateParser<Frame> = (
   }
 };
 
-const frame = pipe(frameType, SP.chain(frame_));
+const frame = pipe(
+  frameType,
+  SP.chain(frame_),
+  SP.chainFirst((frame) =>
+    pipe(
+      SP.get<number, DS.DemoState>(),
+      SP.map(({ eventEmitter }) => eventEmitter?.emit('demo:frame', frame))
+    )
+  )
+);
 
 export const frames: DS.DemoStateParser<readonly Frame[]> = SP.manyTill(
   frame,

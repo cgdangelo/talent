@@ -8,8 +8,9 @@ For now: yet another GoldSrc parser, built with [[https://github.com/gcanti/fp-t
 
 *** Applications
 
-| [[https://github.com/cgdangelo/talent/tree/main/apps/demo-to-json][@talent/demo-to-json]] | Runs the demo parser and logs to console.                    |
-| [[https://github.com/cgdangelo/talent/tree/main/apps/demo-renamer][@talent/demo-renamer]] | Renames a list of demo files to ~YYYY-MM-DD_HHMM_{map}.dem~. |
+| [[https://github.com/cgdangelo/talent/tree/main/apps/demo-to-json][@talent/demo-to-json]]  | Runs the demo parser and logs to console.                                         |
+| [[https://github.com/cgdangelo/talent/tree/main/apps/demo-analyzer][@talent/demo-analyzer]] | Example of a real-time demo analysis application using the demo parser event bus. |
+| [[https://github.com/cgdangelo/talent/tree/main/apps/demo-renamer][@talent/demo-renamer]]  | Renames a list of demo files to ~YYYY-MM-DD_HHMM_{map}.dem~.                      |
 
 *** Libraries
 
@@ -32,9 +33,10 @@ npm install -g @microsoft/rush
 #+BEGIN_EXAMPLE
 git clone https://github.com/cgdangelo/talent.git
 cd talent
-rush install
+rush update
 rush build
-./apps/demo-to-json/bin/demo-to-json <path-to-demo.dem>
+
+node ./apps/<name-of-app>/lib/index.js [app params]
 #+END_EXAMPLE
 
 
