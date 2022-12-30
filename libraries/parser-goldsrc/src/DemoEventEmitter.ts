@@ -1,4 +1,3 @@
-import { EventEmitter } from 'events';
 import { DemoHeader } from './DemoHeader';
 import { DirectoryEntry } from './DirectoryEntry';
 import { Frame } from './frame/Frame';
@@ -8,7 +7,7 @@ import { UserMessage } from './frame/networkMessages/UserMessage';
 /**
  * Event bus for demo parser.
  */
-export interface IDemoEventEmitter extends EventEmitter {
+export interface IDemoEventEmitter {
   /**
    * Emitted when parsing has begun.
    *
@@ -72,4 +71,12 @@ export interface IDemoEventEmitter extends EventEmitter {
    * @param listener - The callback function.
    */
   on(eventName: 'demo:end', listener: () => void): this;
+
+  /** @internal */ emit(eventName: 'demo:start', ...args: never[]): unknown;
+  /** @internal */ emit(eventName: 'demo:header', ...args: [DemoHeader]): unknown;
+  /** @internal */ emit(eventName: 'demo:directory-entry', ...args: [DirectoryEntry]): unknown;
+  /** @internal */ emit(eventName: 'demo:frame', ...args: [Frame]): unknown;
+  /** @internal */ emit(eventName: 'demo:netmessage:engine', ...args: [EngineMessage]): unknown;
+  /** @internal */ emit(eventName: 'demo:netmessage:user', ...args: [UserMessage]): unknown;
+  /** @internal */ emit(eventName: 'demo:end', ...args: never[]): unknown;
 }
