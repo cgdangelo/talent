@@ -1,5 +1,5 @@
 {
-  "name": "@talent/parser",
+  "name": "@cgdangelo/talent-parser",
   "version": "1.0.0",
   "license": "MIT",
   "main": "lib/index.js",

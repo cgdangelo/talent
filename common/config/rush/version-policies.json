@@ -105,11 +105,11 @@
     "definitionName": "lockStepVersion",
     "version": "1.0.0",
     "nextBump": "prerelease",
-    "mainProject": "@talent/parser-goldsrc"
+    "mainProject": "@cgdangelo/talent-parser-goldsrc"
   },
 
   {
-    "policyName": "demoToJsonPolicy",
+    "policyName": "jsonifyDemoPolicy",
     "definitionName": "individualVersion"
   }
 ]

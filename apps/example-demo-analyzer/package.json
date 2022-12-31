@@ -1,5 +1,5 @@
 {
-  "name": "@talent/demo-analyzer",
+  "name": "@cgdangelo/talent-example-demo-analyzer",
   "version": "0.0.0",
   "license": "MIT",
   "main": "lib/index.js",
@@ -11,7 +11,7 @@
     "test": "heft test --clean"
   },
   "dependencies": {
-    "@talent/parser-goldsrc": "workspace:*"
+    "@cgdangelo/talent-parser-goldsrc": "workspace:*"
   },
   "devDependencies": {
     "@rushstack/heft-node-rig": "~1.11.11",

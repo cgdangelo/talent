@@ -1,5 +1,5 @@
 {
-  "name": "@talent/parser-goldsrc",
+  "name": "@cgdangelo/talent-parser-goldsrc",
   "version": "1.0.0",
   "license": "MIT",
   "main": "lib/index.js",
@@ -11,9 +11,9 @@
     "test": "heft test --clean"
   },
   "dependencies": {
-    "@talent/parser": "workspace:*",
-    "@talent/parser-bitbuffer": "workspace:*",
-    "@talent/parser-buffer": "workspace:*",
+    "@cgdangelo/talent-parser": "workspace:*",
+    "@cgdangelo/talent-parser-bitbuffer": "workspace:*",
+    "@cgdangelo/talent-parser-buffer": "workspace:*",
     "fp-ts": "~2.13.1"
   },
   "devDependencies": {

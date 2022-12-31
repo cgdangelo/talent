@@ -1,5 +1,5 @@
 {
-  "name": "@talent/demo-renamer",
+  "name": "@cgdangelo/talent-demo-renamer",
   "version": "0.0.0",
   "license": "MIT",
   "main": "lib/index.js",
@@ -11,9 +11,9 @@
     "test": "heft test --clean"
   },
   "dependencies": {
-    "@talent/parser-goldsrc": "workspace:*",
-    "fp-ts": "~2.13.1",
-    "@talent/parser": "workspace:*"
+    "@cgdangelo/talent-parser-goldsrc": "workspace:*",
+    "@cgdangelo/talent-parser": "workspace:*",
+    "fp-ts": "~2.13.1"
   },
   "devDependencies": {
     "@rushstack/heft-node-rig": "~1.11.11",

@@ -1,5 +1,5 @@
 {
-  "name": "@talent/demo-to-json",
+  "name": "@cgdangelo/talent-jsonify-demo",
   "version": "1.0.0",
   "license": "MIT",
   "main": "lib/index.js",
@@ -14,8 +14,8 @@
     "test": "heft test --clean"
   },
   "dependencies": {
-    "@talent/parser": "workspace:*",
-    "@talent/parser-goldsrc": "workspace:*",
+    "@cgdangelo/talent-parser": "workspace:*",
+    "@cgdangelo/talent-parser-goldsrc": "workspace:*",
     "fp-ts": "~2.13.1"
   },
   "devDependencies": {

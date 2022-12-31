@@ -487,48 +487,48 @@
     //   "tags": ["tools"]
     // }
 
+    // {
+    //   "packageName": "@cgdangelo/observable",
+    //   "projectFolder": "libraries/observable",
+    //   "shouldPublish": false
+    // },
+
     {
-      "packageName": "@talent/parser",
+      "packageName": "@cgdangelo/talent-parser",
       "projectFolder": "libraries/parser",
       "versionPolicyName": "goldsrcParserPolicy"
     },
     {
-      "packageName": "@talent/parser-buffer",
+      "packageName": "@cgdangelo/talent-parser-buffer",
       "projectFolder": "libraries/parser-buffer",
       "versionPolicyName": "goldsrcParserPolicy"
     },
     {
-      "packageName": "@talent/parser-bitbuffer",
+      "packageName": "@cgdangelo/talent-parser-bitbuffer",
       "projectFolder": "libraries/parser-bitbuffer",
       "versionPolicyName": "goldsrcParserPolicy"
     },
     {
-      "packageName": "@talent/parser-goldsrc",
+      "packageName": "@cgdangelo/talent-parser-goldsrc",
       "projectFolder": "libraries/parser-goldsrc",
       "versionPolicyName": "goldsrcParserPolicy"
     },
 
     {
-      "packageName": "@talent/observable",
-      "projectFolder": "libraries/observable",
-      "shouldPublish": false
+      "packageName": "@cgdangelo/talent-jsonify-demo",
+      "projectFolder": "apps/jsonify-demo",
+      "versionPolicyName": "jsonifyDemoPolicy"
     },
 
     {
-      "packageName": "@talent/demo-to-json",
-      "projectFolder": "apps/demo-to-json",
-      "versionPolicyName": "demoToJsonPolicy"
-    },
-
-    {
-      "packageName": "@talent/demo-renamer",
+      "packageName": "@cgdangelo/talent-demo-renamer",
       "projectFolder": "apps/demo-renamer",
       "shouldPublish": false
     },
 
     {
-      "packageName": "@talent/demo-analyzer",
-      "projectFolder": "apps/demo-analyzer",
+      "packageName": "@cgdangelo/talent-example-demo-analyzer",
+      "projectFolder": "apps/example-demo-analyzer",
       "shouldPublish": false
     }
   ]
