@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@cgdangelo/talent-jsonify-demo",
+      "comment": "Initial release",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@cgdangelo/talent-jsonify-demo"
+}
