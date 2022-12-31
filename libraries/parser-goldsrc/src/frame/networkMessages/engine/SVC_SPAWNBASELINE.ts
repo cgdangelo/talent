@@ -1,17 +1,17 @@
-import { parser as P, statefulParser as SP } from "@talent/parser";
-import * as BB from "@talent/parser-bitbuffer";
-import { success } from "@talent/parser/lib/ParseResult";
-import { stream } from "@talent/parser/lib/Stream";
-import { number, ord, readonlyArray as RA } from "fp-ts";
-import { pipe } from "fp-ts/lib/function";
-import type { Delta } from "../../../delta";
-import { readDelta } from "../../../delta";
-import * as DS from "../../../DemoState";
-import { MessageType } from "../MessageType";
+import { parser as P, statefulParser as SP } from '@cgdangelo/talent-parser';
+import * as BB from '@cgdangelo/talent-parser-bitbuffer';
+import { success } from '@cgdangelo/talent-parser/lib/ParseResult';
+import { stream } from '@cgdangelo/talent-parser/lib/Stream';
+import { number, ord, readonlyArray as RA } from 'fp-ts';
+import { pipe } from 'fp-ts/lib/function';
+import type { Delta } from '../../../delta';
+import { readDelta } from '../../../delta';
+import * as DS from '../../../DemoState';
+import { MessageType } from '../MessageType';
 
 export type SpawnBaseline = {
   readonly id: MessageType.SVC_SPAWNBASELINE;
-  readonly name: "SVC_SPAWNBASELINE";
+  readonly name: 'SVC_SPAWNBASELINE';
 
   readonly fields: {
     readonly entities: readonly {
@@ -32,20 +32,20 @@ export const spawnBaseline: DS.DemoStateParser<SpawnBaseline> = (s) => (i) =>
         pipe(
           DS.lift(BB.ubits(11)),
 
-          SP.bindTo("index"),
+          SP.bindTo('index'),
 
-          SP.bind("type", () => SP.lift(BB.ubits(2))),
+          SP.bind('type', () => SP.lift(BB.ubits(2))),
 
-          SP.bind("delta", ({ index, type }) =>
+          SP.bind('delta', ({ index, type }) =>
             pipe(
               SP.get<number, DS.DemoState>(),
               SP.chain(({ maxClients }) =>
                 readDelta(
                   (type & 1) !== 0
                     ? index > 0 && index <= maxClients
-                      ? "entity_state_player_t"
-                      : "entity_state_t"
-                    : "custom_entity_state_t"
+                      ? 'entity_state_player_t'
+                      : 'entity_state_t'
+                    : 'custom_entity_state_t'
                 )
               )
             )
@@ -69,7 +69,7 @@ export const spawnBaseline: DS.DemoStateParser<SpawnBaseline> = (s) => (i) =>
         )
       ),
 
-      SP.bindTo("entities"),
+      SP.bindTo('entities'),
 
       SP.chainFirst(() =>
         SP.lift(
@@ -80,23 +80,16 @@ export const spawnBaseline: DS.DemoStateParser<SpawnBaseline> = (s) => (i) =>
         )
       ),
 
-      SP.bind("extraData", () =>
+      SP.bind('extraData', () =>
         pipe(
           DS.lift(BB.ubits(6)),
-          SP.chain((n) => SP.manyN(readDelta("entity_state_t"), n))
+          SP.chain((n) => SP.manyN(readDelta('entity_state_t'), n))
         )
       ),
 
       SP.chain((a) =>
         SP.lift((o) =>
-          success(
-            a,
-            i,
-            stream(
-              o.buffer,
-              o.cursor % 8 === 0 ? o.cursor / 8 : Math.floor(o.cursor / 8) + 1
-            )
-          )
+          success(a, i, stream(o.buffer, o.cursor % 8 === 0 ? o.cursor / 8 : Math.floor(o.cursor / 8) + 1))
         )
       ),
 
@@ -104,8 +97,8 @@ export const spawnBaseline: DS.DemoStateParser<SpawnBaseline> = (s) => (i) =>
         (fields) =>
           ({
             id: MessageType.SVC_SPAWNBASELINE,
-            name: "SVC_SPAWNBASELINE",
-            fields,
+            name: 'SVC_SPAWNBASELINE',
+            fields
           } as const)
       )
     )(s)

@@ -1,13 +1,13 @@
-import { parser as P } from "@talent/parser";
-import { buffer as B } from "@talent/parser-buffer";
-import { pipe } from "fp-ts/lib/function";
-import type { Point } from "../../../../Point";
-import { coordPoint } from "./coord";
-import { TempEntityType } from "./TempEntityType";
+import { parser as P } from '@cgdangelo/talent-parser';
+import { buffer as B } from '@cgdangelo/talent-parser-buffer';
+import { pipe } from 'fp-ts/lib/function';
+import type { Point } from '../../../../Point';
+import { coordPoint } from './coord';
+import { TempEntityType } from './TempEntityType';
 
 export type Line = {
   readonly id: TempEntityType.TE_LINE;
-  readonly name: "TE_LINE";
+  readonly name: 'TE_LINE';
   readonly fields: {
     readonly startPosition: Point;
     readonly endPosition: Point;
@@ -28,9 +28,9 @@ export const line: B.BufferParser<Line> = pipe(
     color: P.struct({
       r: B.uint8_le,
       g: B.uint8_le,
-      b: B.uint8_le,
-    }),
+      b: B.uint8_le
+    })
   }),
 
-  P.map((fields) => ({ id: TempEntityType.TE_LINE, name: "TE_LINE", fields }))
+  P.map((fields) => ({ id: TempEntityType.TE_LINE, name: 'TE_LINE', fields }))
 );

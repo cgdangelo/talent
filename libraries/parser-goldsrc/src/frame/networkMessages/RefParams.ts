@@ -1,7 +1,7 @@
-import { buffer as B } from "@talent/parser-buffer";
-import * as P from "@talent/parser/lib/Parser";
-import type { Point } from "../../Point";
-import { point } from "../../Point";
+import { buffer as B } from '@cgdangelo/talent-parser-buffer';
+import * as P from '@cgdangelo/talent-parser/lib/Parser';
+import type { Point } from '../../Point';
+import { point } from '../../Point';
 
 export type RefParams = {
   readonly viewOrigin: Point;
@@ -34,17 +34,12 @@ export type RefParams = {
   readonly smoothing: number;
   readonly ptrCmd: number;
   readonly ptrMoveVars: number;
-  readonly viewPort: readonly [
-    _: number,
-    _: number,
-    width: number,
-    height: number
-  ];
+  readonly viewPort: readonly [_: number, _: number, width: number, height: number];
   readonly nextView: number;
   readonly onlyClientDraw: number;
 };
 
-const viewPort: B.BufferParser<RefParams["viewPort"]> = P.tuple(
+const viewPort: B.BufferParser<RefParams['viewPort']> = P.tuple(
   B.int32_le,
   B.int32_le,
   B.int32_le,
@@ -84,5 +79,5 @@ export const refParams: B.BufferParser<RefParams> = P.struct({
   ptrMoveVars: B.int32_le,
   viewPort,
   nextView: B.int32_le,
-  onlyClientDraw: B.int32_le,
+  onlyClientDraw: B.int32_le
 });

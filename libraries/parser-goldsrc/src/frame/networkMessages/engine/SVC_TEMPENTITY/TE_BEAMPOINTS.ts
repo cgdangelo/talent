@@ -1,13 +1,13 @@
-import { parser as P } from "@talent/parser";
-import { buffer as B } from "@talent/parser-buffer";
-import { pipe } from "fp-ts/lib/function";
-import type { Point } from "../../../../Point";
-import { coordPoint } from "./coord";
-import { TempEntityType } from "./TempEntityType";
+import { parser as P } from '@cgdangelo/talent-parser';
+import { buffer as B } from '@cgdangelo/talent-parser-buffer';
+import { pipe } from 'fp-ts/lib/function';
+import type { Point } from '../../../../Point';
+import { coordPoint } from './coord';
+import { TempEntityType } from './TempEntityType';
 
 export type BeamPoints = {
   readonly id: TempEntityType.TE_BEAMPOINTS;
-  readonly name: "TE_BEAMPOINTS";
+  readonly name: 'TE_BEAMPOINTS';
   readonly fields: {
     readonly startPosition: Point;
     readonly endPosition: Point;
@@ -41,14 +41,14 @@ export const beamPoints: B.BufferParser<BeamPoints> = pipe(
       r: B.uint8_le,
       g: B.uint8_le,
       b: B.uint8_le,
-      a: B.uint8_le,
+      a: B.uint8_le
     }),
-    speed: B.uint8_le,
+    speed: B.uint8_le
   }),
 
   P.map((fields) => ({
     id: TempEntityType.TE_BEAMPOINTS,
-    name: "TE_BEAMPOINTS",
-    fields,
+    name: 'TE_BEAMPOINTS',
+    fields
   }))
 );

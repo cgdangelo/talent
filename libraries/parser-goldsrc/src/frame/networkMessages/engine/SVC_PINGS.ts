@@ -1,13 +1,13 @@
-import * as BB from "@talent/parser-bitbuffer";
-import type { buffer as B } from "@talent/parser-buffer";
-import * as P from "@talent/parser/lib/Parser";
-import { stream } from "@talent/parser/lib/Stream";
-import { pipe } from "fp-ts/lib/function";
-import { MessageType } from "../MessageType";
+import * as BB from '@cgdangelo/talent-parser-bitbuffer';
+import type { buffer as B } from '@cgdangelo/talent-parser-buffer';
+import * as P from '@cgdangelo/talent-parser/lib/Parser';
+import { stream } from '@cgdangelo/talent-parser/lib/Stream';
+import { pipe } from 'fp-ts/lib/function';
+import { MessageType } from '../MessageType';
 
 export type Pings = {
   readonly id: MessageType.SVC_PINGS;
-  readonly name: "SVC_PINGS";
+  readonly name: 'SVC_PINGS';
 
   readonly fields: {
     readonly pings: readonly {
@@ -31,19 +31,19 @@ export const pings: B.BufferParser<Pings> = (i) =>
             P.struct({
               playerId: BB.ubits(8),
               ping: BB.ubits(8),
-              loss: BB.ubits(8),
+              loss: BB.ubits(8)
             })
           )
         )
       ),
-      P.bindTo("pings"),
+      P.bindTo('pings'),
       P.apFirst(P.skip(1)),
       BB.nextByte,
 
       P.map((fields) => ({
         id: MessageType.SVC_PINGS,
-        name: "SVC_PINGS",
-        fields,
+        name: 'SVC_PINGS',
+        fields
       }))
     )
   );

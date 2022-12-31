@@ -1,8 +1,8 @@
-import { parser as P } from "@talent/parser";
-import { buffer as B } from "@talent/parser-buffer";
-import { pipe } from "fp-ts/lib/function";
-import type { Point } from "../../../../Point";
-import { pointBy } from "../../../../Point";
+import { parser as P } from '@cgdangelo/talent-parser';
+import { buffer as B } from '@cgdangelo/talent-parser-buffer';
+import { pipe } from 'fp-ts/lib/function';
+import type { Point } from '../../../../Point';
+import { pointBy } from '../../../../Point';
 
 export const coord: B.BufferParser<number> = pipe(
   B.int16_le,

@@ -1,11 +1,11 @@
-import { buffer as B } from "@talent/parser-buffer";
-import * as P from "@talent/parser/lib/Parser";
-import { pipe } from "fp-ts/lib/function";
-import { MessageType } from "../MessageType";
+import { buffer as B } from '@cgdangelo/talent-parser-buffer';
+import * as P from '@cgdangelo/talent-parser/lib/Parser';
+import { pipe } from 'fp-ts/lib/function';
+import { MessageType } from '../MessageType';
 
 export type Director = {
   readonly id: MessageType.SVC_DIRECTOR;
-  readonly name: "SVC_DIRECTOR";
+  readonly name: 'SVC_DIRECTOR';
 
   readonly fields: {
     readonly flag: number;
@@ -19,13 +19,13 @@ export const director: B.BufferParser<Director> = pipe(
   P.chain((length) =>
     P.struct({
       flag: B.uint8_le,
-      message: B.ztstr_padded(length),
+      message: B.ztstr_padded(length)
     })
   ),
 
   P.map((fields) => ({
     id: MessageType.SVC_DIRECTOR,
-    name: "SVC_DIRECTOR",
-    fields,
+    name: 'SVC_DIRECTOR',
+    fields
   }))
 );

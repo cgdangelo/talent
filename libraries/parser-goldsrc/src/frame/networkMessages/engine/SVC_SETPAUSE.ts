@@ -1,11 +1,11 @@
-import { buffer as B } from "@talent/parser-buffer";
-import * as P from "@talent/parser/lib/Parser";
-import { pipe } from "fp-ts/lib/function";
-import { MessageType } from "../MessageType";
+import { buffer as B } from '@cgdangelo/talent-parser-buffer';
+import * as P from '@cgdangelo/talent-parser/lib/Parser';
+import { pipe } from 'fp-ts/lib/function';
+import { MessageType } from '../MessageType';
 
 export type SetPause = {
   readonly id: MessageType.SVC_SETPAUSE;
-  readonly name: "SVC_SETPAUSE";
+  readonly name: 'SVC_SETPAUSE';
 
   readonly fields: {
     readonly isPaused: number;
@@ -17,7 +17,7 @@ export const setPause: B.BufferParser<SetPause> = pipe(
 
   P.map((fields) => ({
     id: MessageType.SVC_SETPAUSE,
-    name: "SVC_SETPAUSE",
-    fields,
+    name: 'SVC_SETPAUSE',
+    fields
   }))
 );

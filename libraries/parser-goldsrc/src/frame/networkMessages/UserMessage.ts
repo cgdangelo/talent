@@ -1,8 +1,8 @@
-import { parser as P, statefulParser as SP } from "@talent/parser";
-import { buffer as B } from "@talent/parser-buffer";
-import { number, option as O, readonlyMap as RM } from "fp-ts";
-import { pipe } from "fp-ts/lib/function";
-import * as DS from "../../DemoState";
+import { parser as P, statefulParser as SP } from '@cgdangelo/talent-parser';
+import { buffer as B } from '@cgdangelo/talent-parser-buffer';
+import { number, option as O, readonlyMap as RM } from 'fp-ts';
+import { pipe } from 'fp-ts/lib/function';
+import * as DS from '../../DemoState';
 
 export type UserMessage = {
   readonly id: number;
@@ -12,9 +12,7 @@ export type UserMessage = {
 
 const lookupUserMessage = RM.lookup(number.Eq);
 
-export const userMessage: (
-  messageId: number
-) => DS.DemoStateParser<UserMessage> = (messageId) =>
+export const userMessage: (messageId: number) => DS.DemoStateParser<UserMessage> = (messageId) =>
   pipe(
     SP.get<number, DS.DemoState>(),
     SP.chain(({ userMessages }) =>

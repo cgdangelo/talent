@@ -1,8 +1,8 @@
-import { buffer as B } from "@talent/parser-buffer";
-import * as P from "@talent/parser/lib/Parser";
-import { pipe } from "fp-ts/lib/function";
-import type { Point } from "../../Point";
-import { point } from "../../Point";
+import { buffer as B } from '@cgdangelo/talent-parser-buffer';
+import * as P from '@cgdangelo/talent-parser/lib/Parser';
+import { pipe } from 'fp-ts/lib/function';
+import type { Point } from '../../Point';
+import { point } from '../../Point';
 
 export type MoveVars = {
   readonly gravity: number;
@@ -58,5 +58,5 @@ export const moveVars: B.BufferParser<MoveVars> = P.struct({
     point,
     P.map(({ x: r, y: g, z: b }) => ({ r, g, b }))
   ),
-  skyVec: point,
+  skyVec: point
 });

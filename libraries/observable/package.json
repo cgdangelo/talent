@@ -1,5 +1,5 @@
 {
-  "name": "@talent/observable",
+  "name": "@cgdangelo/talent-observable",
   "version": "0.0.0",
   "license": "MIT",
   "main": "lib/index.js",
@@ -11,7 +11,7 @@
     "test": "heft test --clean"
   },
   "dependencies": {
-    "@talent/parser": "workspace:*",
+    "@cgdangelo/talent-parser": "workspace:*",
     "fp-ts": "~2.13.1",
     "rxjs": "^7.5.4"
   },

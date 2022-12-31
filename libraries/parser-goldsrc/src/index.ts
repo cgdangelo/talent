@@ -1,5 +1,5 @@
-import { ParseResult } from '@talent/parser/lib/ParseResult';
-import { Stream, stream } from '@talent/parser/lib/Stream';
+import { ParseResult } from '@cgdangelo/talent-parser/lib/ParseResult';
+import { Stream, stream } from '@cgdangelo/talent-parser/lib/Stream';
 import * as E from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/function';
 import { IO } from 'fp-ts/lib/IO';

@@ -1,11 +1,11 @@
-import { parser as P } from "@talent/parser";
-import { buffer as B } from "@talent/parser-buffer";
-import { pipe } from "fp-ts/lib/function";
-import { TempEntityType } from "./TempEntityType";
+import { parser as P } from '@cgdangelo/talent-parser';
+import { buffer as B } from '@cgdangelo/talent-parser-buffer';
+import { pipe } from 'fp-ts/lib/function';
+import { TempEntityType } from './TempEntityType';
 
 export type BeamEnts = {
   readonly id: TempEntityType.TE_BEAMENTS;
-  readonly name: "TE_BEAMENTS";
+  readonly name: 'TE_BEAMENTS';
   readonly fields: {
     readonly startEntity: number;
     readonly endEntity: number;
@@ -39,14 +39,14 @@ export const beamEnts: B.BufferParser<BeamEnts> = pipe(
       r: B.uint8_le,
       g: B.uint8_le,
       b: B.uint8_le,
-      a: B.uint8_le,
+      a: B.uint8_le
     }),
-    speed: B.uint8_le,
+    speed: B.uint8_le
   }),
 
   P.map((fields) => ({
     id: TempEntityType.TE_BEAMENTS,
-    name: "TE_BEAMENTS",
-    fields,
+    name: 'TE_BEAMENTS',
+    fields
   }))
 );

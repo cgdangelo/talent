@@ -1,15 +1,15 @@
-import { buffer as B } from "@talent/parser-buffer";
-import * as P from "@talent/parser/lib/Parser";
-import { pipe } from "fp-ts/lib/function";
-import { point } from "../../../Point";
-import type { MoveVars } from "../MoveVars";
-import { MessageType } from "../MessageType";
+import { buffer as B } from '@cgdangelo/talent-parser-buffer';
+import * as P from '@cgdangelo/talent-parser/lib/Parser';
+import { pipe } from 'fp-ts/lib/function';
+import { point } from '../../../Point';
+import type { MoveVars } from '../MoveVars';
+import { MessageType } from '../MessageType';
 
 // TODO sky stuff is at the bottom unlike moveVars parser unfortunately, but
 // structure is the same.
 export type NewMoveVars = {
   readonly id: MessageType.SVC_NEWMOVEVARS;
-  readonly name: "SVC_NEWMOVEVARS";
+  readonly name: 'SVC_NEWMOVEVARS';
 
   readonly fields: MoveVars;
 };
@@ -40,12 +40,12 @@ export const newMoveVars: B.BufferParser<NewMoveVars> = pipe(
       P.map(({ x: r, y: g, z: b }) => ({ r, g, b }))
     ),
     skyVec: point,
-    skyName: B.ztstr,
+    skyName: B.ztstr
   }),
 
   P.map((fields) => ({
     id: MessageType.SVC_NEWMOVEVARS,
-    name: "SVC_NEWMOVEVARS",
-    fields,
+    name: 'SVC_NEWMOVEVARS',
+    fields
   }))
 );

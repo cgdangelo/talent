@@ -1,8 +1,8 @@
 /* eslint-disable no-bitwise */
 
-import * as P from '@talent/parser/lib/Parser';
-import { error, success } from '@talent/parser/lib/ParseResult';
-import { stream } from '@talent/parser/lib/Stream';
+import * as P from '@cgdangelo/talent-parser/lib/Parser';
+import { error, success } from '@cgdangelo/talent-parser/lib/ParseResult';
+import { stream } from '@cgdangelo/talent-parser/lib/Stream';
 import { pipe } from 'fp-ts/lib/function';
 
 const makeBitsParser: (signed: boolean) => (n: number) => P.Parser<number, number> =

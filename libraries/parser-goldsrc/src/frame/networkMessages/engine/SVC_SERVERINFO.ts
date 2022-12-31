@@ -1,12 +1,12 @@
-import { buffer as B } from "@talent/parser-buffer";
-import { parser as P, statefulParser as SP } from "@talent/parser";
-import { pipe } from "fp-ts/lib/function";
-import { MessageType } from "../MessageType";
-import * as DS from "../../../DemoState";
+import { buffer as B } from '@cgdangelo/talent-parser-buffer';
+import { parser as P, statefulParser as SP } from '@cgdangelo/talent-parser';
+import { pipe } from 'fp-ts/lib/function';
+import { MessageType } from '../MessageType';
+import * as DS from '../../../DemoState';
 
 export type ServerInfo = {
   readonly id: MessageType.SVC_SERVERINFO;
-  readonly name: "SVC_SERVERINFO";
+  readonly name: 'SVC_SERVERINFO';
 
   readonly fields: {
     readonly protocol: number;
@@ -35,7 +35,7 @@ const serverInfo_: B.BufferParser<ServerInfo> = pipe(
     gameDir: B.ztstr,
     hostname: B.ztstr,
     mapFileName: B.ztstr,
-    mapCycle: B.ztstr,
+    mapCycle: B.ztstr
   }),
 
   // TODO What's this?
@@ -49,14 +49,12 @@ const serverInfo_: B.BufferParser<ServerInfo> = pipe(
 
   P.map((fields) => ({
     id: MessageType.SVC_SERVERINFO,
-    name: "SVC_SERVERINFO",
-    fields,
+    name: 'SVC_SERVERINFO',
+    fields
   }))
 );
 
 export const serverInfo: DS.DemoStateParser<ServerInfo> = pipe(
   DS.lift(serverInfo_),
-  SP.chainFirst(({ fields: { maxPlayers } }) =>
-    pipe(SP.modify((s) => ({ ...s, maxClients: maxPlayers })))
-  )
+  SP.chainFirst(({ fields: { maxPlayers } }) => pipe(SP.modify((s) => ({ ...s, maxClients: maxPlayers }))))
 );

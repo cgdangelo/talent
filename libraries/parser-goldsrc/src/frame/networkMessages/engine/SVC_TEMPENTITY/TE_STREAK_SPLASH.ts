@@ -1,13 +1,13 @@
-import { parser as P } from "@talent/parser";
-import { buffer as B } from "@talent/parser-buffer";
-import { pipe } from "fp-ts/lib/function";
-import type { Point } from "../../../../Point";
-import { coordPoint } from "./coord";
-import { TempEntityType } from "./TempEntityType";
+import { parser as P } from '@cgdangelo/talent-parser';
+import { buffer as B } from '@cgdangelo/talent-parser-buffer';
+import { pipe } from 'fp-ts/lib/function';
+import type { Point } from '../../../../Point';
+import { coordPoint } from './coord';
+import { TempEntityType } from './TempEntityType';
 
 export type StreakSplash = {
   readonly id: TempEntityType.TE_STREAK_SPLASH;
-  readonly name: "TE_STREAK_SPLASH";
+  readonly name: 'TE_STREAK_SPLASH';
   readonly fields: {
     readonly startPosition: Point;
     readonly vector: Point;
@@ -25,12 +25,12 @@ export const streakSplash: B.BufferParser<StreakSplash> = pipe(
     color: B.uint8_le,
     count: B.int16_le,
     velocity: B.int16_le,
-    velocityRandomness: B.int16_le,
+    velocityRandomness: B.int16_le
   }),
 
   P.map((fields) => ({
     id: TempEntityType.TE_STREAK_SPLASH,
-    name: "TE_STREAK_SPLASH",
-    fields,
+    name: 'TE_STREAK_SPLASH',
+    fields
   }))
 );

@@ -1,11 +1,11 @@
-import { buffer as B } from "@talent/parser-buffer";
-import * as P from "@talent/parser/lib/Parser";
-import { pipe } from "fp-ts/lib/function";
-import { MessageType } from "../MessageType";
+import { buffer as B } from '@cgdangelo/talent-parser-buffer';
+import * as P from '@cgdangelo/talent-parser/lib/Parser';
+import { pipe } from 'fp-ts/lib/function';
+import { MessageType } from '../MessageType';
 
 export type SendCvarValue = {
   readonly id: MessageType.SVC_SENDCVARVALUE;
-  readonly name: "SVC_SENDCVARVALUE";
+  readonly name: 'SVC_SENDCVARVALUE';
 
   readonly fields: {
     readonly name: string;
@@ -18,7 +18,7 @@ export const sendCvarValue: B.BufferParser<SendCvarValue> = pipe(
 
   P.map((fields) => ({
     id: MessageType.SVC_SENDCVARVALUE,
-    name: "SVC_SENDCVARVALUE",
-    fields,
+    name: 'SVC_SENDCVARVALUE',
+    fields
   }))
 );

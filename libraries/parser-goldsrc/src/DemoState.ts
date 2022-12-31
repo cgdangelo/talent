@@ -1,5 +1,5 @@
-import type { parser as P } from '@talent/parser';
-import { statefulParser as SP } from '@talent/parser';
+import type { parser as P } from '@cgdangelo/talent-parser';
+import { statefulParser as SP } from '@cgdangelo/talent-parser';
 import { readonlyMap as RM } from 'fp-ts';
 import type { DeltaDecoder } from './delta';
 import { initialDeltaDecoders } from './delta';

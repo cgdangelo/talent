@@ -1,13 +1,13 @@
-import { parser as P } from "@talent/parser";
-import { buffer as B } from "@talent/parser-buffer";
-import { pipe } from "fp-ts/lib/function";
-import type { Point } from "../../../../Point";
-import { coordPoint } from "./coord";
-import { TempEntityType } from "./TempEntityType";
+import { parser as P } from '@cgdangelo/talent-parser';
+import { buffer as B } from '@cgdangelo/talent-parser-buffer';
+import { pipe } from 'fp-ts/lib/function';
+import type { Point } from '../../../../Point';
+import { coordPoint } from './coord';
+import { TempEntityType } from './TempEntityType';
 
 export type Lightning = {
   readonly id: TempEntityType.TE_LIGHTNING;
-  readonly name: "TE_LIGHTNING";
+  readonly name: 'TE_LIGHTNING';
   readonly fields: {
     readonly startPosition: Point;
     readonly endPosition: Point;
@@ -25,12 +25,12 @@ export const lightning: B.BufferParser<Lightning> = pipe(
     life: B.uint8_le,
     width: B.uint8_le,
     noise: B.uint8_le,
-    modelIndex: B.int16_le,
+    modelIndex: B.int16_le
   }),
 
   P.map((fields) => ({
     id: TempEntityType.TE_LIGHTNING,
-    name: "TE_LIGHTNING",
-    fields,
+    name: 'TE_LIGHTNING',
+    fields
   }))
 );

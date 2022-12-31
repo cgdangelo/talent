@@ -1,13 +1,13 @@
-import { buffer as B } from "@talent/parser-buffer";
-import * as P from "@talent/parser/lib/Parser";
-import { pipe } from "fp-ts/lib/function";
-import type { Point } from "../../../Point";
-import { pointBy } from "../../../Point";
-import { MessageType } from "../MessageType";
+import { buffer as B } from '@cgdangelo/talent-parser-buffer';
+import * as P from '@cgdangelo/talent-parser/lib/Parser';
+import { pipe } from 'fp-ts/lib/function';
+import type { Point } from '../../../Point';
+import { pointBy } from '../../../Point';
+import { MessageType } from '../MessageType';
 
 export type Particle = {
   readonly id: MessageType.SVC_PARTICLE;
-  readonly name: "SVC_PARTICLE";
+  readonly name: 'SVC_PARTICLE';
 
   readonly fields: {
     readonly origin: Point;
@@ -30,12 +30,12 @@ export const particle: B.BufferParser<Particle> = pipe(
     direction: pointBy(B.int8_le),
 
     count: B.uint8_le,
-    color: B.uint8_le,
+    color: B.uint8_le
   }),
 
   P.map((fields) => ({
     id: MessageType.SVC_PARTICLE,
-    name: "SVC_PARTICLE",
-    fields,
+    name: 'SVC_PARTICLE',
+    fields
   }))
 );

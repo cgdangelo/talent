@@ -1,11 +1,11 @@
-import { buffer as B } from "@talent/parser-buffer";
-import * as P from "@talent/parser/lib/Parser";
-import { pipe } from "fp-ts/lib/function";
-import { MessageType } from "../MessageType";
+import { buffer as B } from '@cgdangelo/talent-parser-buffer';
+import * as P from '@cgdangelo/talent-parser/lib/Parser';
+import { pipe } from 'fp-ts/lib/function';
+import { MessageType } from '../MessageType';
 
 export type SoundFade = {
   readonly id: MessageType.SVC_SOUNDFADE;
-  readonly name: "SVC_SOUNDFADE";
+  readonly name: 'SVC_SOUNDFADE';
 
   readonly fields: {
     readonly initialPercent: number;
@@ -20,12 +20,12 @@ export const soundFade: B.BufferParser<SoundFade> = pipe(
     initialPercent: B.uint8_le,
     holdTime: B.uint8_le,
     fadeOutTime: B.uint8_le,
-    fadeInTime: B.uint8_le,
+    fadeInTime: B.uint8_le
   }),
 
   P.map((fields) => ({
     id: MessageType.SVC_SOUNDFADE,
-    name: "SVC_SOUNDFADE",
-    fields,
+    name: 'SVC_SOUNDFADE',
+    fields
   }))
 );

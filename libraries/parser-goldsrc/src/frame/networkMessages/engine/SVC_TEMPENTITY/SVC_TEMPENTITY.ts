@@ -1,13 +1,13 @@
-import { buffer as B } from "@talent/parser-buffer";
-import * as P from "@talent/parser/lib/Parser";
-import { absurd, pipe } from "fp-ts/lib/function";
-import { MessageType } from "../../MessageType";
-import * as TENT from "./TempEntity";
-import { TempEntityType } from "./TempEntityType";
+import { buffer as B } from '@cgdangelo/talent-parser-buffer';
+import * as P from '@cgdangelo/talent-parser/lib/Parser';
+import { absurd, pipe } from 'fp-ts/lib/function';
+import { MessageType } from '../../MessageType';
+import * as TENT from './TempEntity';
+import { TempEntityType } from './TempEntityType';
 
 export type TempEntity = {
   readonly id: MessageType.SVC_TEMPENTITY;
-  readonly name: "SVC_TEMPENTITY";
+  readonly name: 'SVC_TEMPENTITY';
   readonly fields:
     | TENT.BeamPoints
     | TENT.BeamEntPoint
@@ -73,7 +73,7 @@ export type TempEntity = {
 export const tempEntity: B.BufferParser<TempEntity> = pipe(
   B.uint8_le,
   P.filter((id): id is TempEntityType => id in TempEntityType),
-  P.chain((id): B.BufferParser<TempEntity["fields"]> => {
+  P.chain((id): B.BufferParser<TempEntity['fields']> => {
     switch (id) {
       case TempEntityType.TE_BEAMPOINTS: // 0
         return TENT.beamPoints;
@@ -261,7 +261,7 @@ export const tempEntity: B.BufferParser<TempEntity> = pipe(
 
   P.map((fields) => ({
     id: MessageType.SVC_TEMPENTITY as const,
-    name: "SVC_TEMPENTITY" as const,
-    fields,
+    name: 'SVC_TEMPENTITY' as const,
+    fields
   }))
 );

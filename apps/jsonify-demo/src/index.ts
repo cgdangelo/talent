@@ -1,6 +1,6 @@
-import { demo } from '@talent/parser-goldsrc/lib/Demo';
-import type { Stream } from '@talent/parser/lib/Stream';
-import { stream } from '@talent/parser/lib/Stream';
+import { demo } from '@cgdangelo/talent-parser-goldsrc/lib/Demo';
+import type { Stream } from '@cgdangelo/talent-parser/lib/Stream';
+import { stream } from '@cgdangelo/talent-parser/lib/Stream';
 import * as Console from 'fp-ts/lib/Console';
 import * as E from 'fp-ts/lib/Either';
 import { constant, flow, pipe } from 'fp-ts/lib/function';

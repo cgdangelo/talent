@@ -1,4 +1,4 @@
-import { createDemoParserIO, IDemoEventEmitter } from '@talent/parser-goldsrc';
+import { createDemoParserIO, IDemoEventEmitter } from '@cgdangelo/talent-parser-goldsrc';
 import { EventEmitter } from 'events';
 import { PathLike } from 'fs';
 import { readFile } from 'fs/promises';

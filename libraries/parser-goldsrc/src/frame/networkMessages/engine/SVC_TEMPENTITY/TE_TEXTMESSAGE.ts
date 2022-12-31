@@ -1,17 +1,17 @@
-import { parser as P } from "@talent/parser";
-import { buffer as B } from "@talent/parser-buffer";
-import { pipe } from "fp-ts/lib/function";
-import { TempEntityType } from "./TempEntityType";
+import { parser as P } from '@cgdangelo/talent-parser';
+import { buffer as B } from '@cgdangelo/talent-parser-buffer';
+import { pipe } from 'fp-ts/lib/function';
+import { TempEntityType } from './TempEntityType';
 
 enum TE_TEXTMESSAGE_FX {
   FadeInOut = 0,
   Credits = 1 << 0,
-  WriteOut = 1 << 1,
+  WriteOut = 1 << 1
 }
 
 export type TextMessage = {
   readonly id: TempEntityType.TE_TEXTMESSAGE;
-  readonly name: "TE_TEXTMESSAGE";
+  readonly name: 'TE_TEXTMESSAGE';
   readonly fields: {
     readonly channel: number;
     readonly position: {
@@ -50,7 +50,7 @@ export const textMessage: B.BufferParser<TextMessage> = pipe(
       y: pipe(
         B.int16_le
         // P.map((a) => a / 8192)
-      ),
+      )
     }),
     effect: pipe(
       B.uint8_le,
@@ -60,13 +60,13 @@ export const textMessage: B.BufferParser<TextMessage> = pipe(
       r: B.uint8_le,
       g: B.uint8_le,
       b: B.uint8_le,
-      a: B.uint8_le,
+      a: B.uint8_le
     }),
     effectColor: P.struct({
       r: B.uint8_le,
       g: B.uint8_le,
       b: B.uint8_le,
-      a: B.uint8_le,
+      a: B.uint8_le
     }),
     fadeIn: pipe(
       B.int16_le
@@ -76,10 +76,10 @@ export const textMessage: B.BufferParser<TextMessage> = pipe(
       B.int16_le
       // P.map((a) => a / 256)
     ),
-    hold: B.int16_le,
+    hold: B.int16_le
   }),
 
-  P.bind("fxTime", ({ effect }) =>
+  P.bind('fxTime', ({ effect }) =>
     effect === TE_TEXTMESSAGE_FX.WriteOut
       ? pipe(
           B.int16_le
@@ -88,11 +88,11 @@ export const textMessage: B.BufferParser<TextMessage> = pipe(
       : P.of(undefined)
   ),
 
-  P.bind("textMessage", () => B.ztstr),
+  P.bind('textMessage', () => B.ztstr),
 
   P.map((fields) => ({
     id: TempEntityType.TE_TEXTMESSAGE,
-    name: "TE_TEXTMESSAGE",
-    fields,
+    name: 'TE_TEXTMESSAGE',
+    fields
   }))
 );

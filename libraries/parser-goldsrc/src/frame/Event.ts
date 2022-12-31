@@ -1,14 +1,14 @@
-import { buffer as B } from "@talent/parser-buffer";
-import * as P from "@talent/parser/lib/Parser";
-import { pipe } from "fp-ts/lib/function";
-import type { Point } from "../Point";
-import { point } from "../Point";
-import type { FrameHeader } from "./FrameHeader";
-import { frameHeader } from "./FrameHeader";
+import { buffer as B } from '@cgdangelo/talent-parser-buffer';
+import * as P from '@cgdangelo/talent-parser/lib/Parser';
+import { pipe } from 'fp-ts/lib/function';
+import type { Point } from '../Point';
+import { point } from '../Point';
+import type { FrameHeader } from './FrameHeader';
+import { frameHeader } from './FrameHeader';
 
 export type Event = {
   readonly header: FrameHeader;
-  readonly type: "Event";
+  readonly type: 'Event';
   readonly frameData: {
     readonly flags: number;
     readonly index: number;
@@ -44,21 +44,21 @@ const args: B.BufferParser<EventArgs> = P.struct({
   iparam1: B.int32_le,
   iparam2: B.int32_le,
   bparam1: B.int32_le,
-  bparam2: B.int32_le,
+  bparam2: B.int32_le
 });
 
 export const event: B.BufferParser<Event> = pipe(
   frameHeader,
-  P.bindTo("header"),
+  P.bindTo('header'),
 
-  P.bind("type", () => P.of("Event" as const)),
+  P.bind('type', () => P.of('Event' as const)),
 
-  P.bind("frameData", () =>
+  P.bind('frameData', () =>
     P.struct({
       flags: B.int32_le,
       index: B.int32_le,
       delay: B.float32_le,
-      args,
+      args
     })
   )
 );

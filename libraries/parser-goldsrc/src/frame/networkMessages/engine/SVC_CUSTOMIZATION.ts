@@ -1,11 +1,11 @@
-import { buffer as B } from "@talent/parser-buffer";
-import * as P from "@talent/parser/lib/Parser";
-import { pipe } from "fp-ts/lib/function";
-import { MessageType } from "../MessageType";
+import { buffer as B } from '@cgdangelo/talent-parser-buffer';
+import * as P from '@cgdangelo/talent-parser/lib/Parser';
+import { pipe } from 'fp-ts/lib/function';
+import { MessageType } from '../MessageType';
 
 export type Customization = {
   readonly id: MessageType.SVC_CUSTOMIZATION;
-  readonly name: "SVC_CUSTOMIZATION";
+  readonly name: 'SVC_CUSTOMIZATION';
 
   readonly fields: {
     readonly playerIndex: number;
@@ -25,16 +25,14 @@ export const customization: B.BufferParser<Customization> = pipe(
     name: B.ztstr,
     index: B.uint16_le,
     downloadSize: B.uint32_le,
-    flags: B.uint8_le,
+    flags: B.uint8_le
   }),
 
-  P.bind("md5Hash", ({ flags }) =>
-    (flags & 4) !== 0 ? P.take(16) : P.of(undefined)
-  ),
+  P.bind('md5Hash', ({ flags }) => ((flags & 4) !== 0 ? P.take(16) : P.of(undefined))),
 
   P.map((fields) => ({
     id: MessageType.SVC_CUSTOMIZATION,
-    name: "SVC_CUSTOMIZATION",
-    fields,
+    name: 'SVC_CUSTOMIZATION',
+    fields
   }))
 );

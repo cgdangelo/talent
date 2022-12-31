@@ -1,6 +1,6 @@
-import { buffer as B } from '@talent/parser-buffer';
-import * as P from '@talent/parser/lib/Parser';
-import * as SP from '@talent/parser/lib/StatefulParser';
+import { buffer as B } from '@cgdangelo/talent-parser-buffer';
+import * as P from '@cgdangelo/talent-parser/lib/Parser';
+import * as SP from '@cgdangelo/talent-parser/lib/StatefulParser';
 import { pipe } from 'fp-ts/lib/function';
 import * as DS from './DemoState';
 import type { Frame } from './frame/Frame';

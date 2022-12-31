@@ -1,14 +1,14 @@
 ‼️  If you're looking for the demo file documentation, it is located [here](docs/demo-structure.md). ‼️
 
-# @talent/parser-goldsrc
+# @cgdangelo/talent-parser-goldsrc
 
 Parser combinators and utilities for GoldSrc demo files.
 
 ## Installation
 
-`@talent/parser-goldsrc` is published to NPM. Install with your package manager (pnpm, npm, yarn) of choice:
+`@cgdangelo/talent-parser-goldsrc` is published to NPM. Install with your package manager (pnpm, npm, yarn) of choice:
 ```
-npm install @talent/parser-goldsrc
+npm install @cgdangelo/talent-parser-goldsrc
 ```
 
 ## Usage
@@ -17,7 +17,7 @@ npm install @talent/parser-goldsrc
 
 ```ts
 import { readFile } from "fs/promises";
-import { createDemoParserIO } from "@talent/parser-goldsrc";
+import { createDemoParserIO } from "@cgdangelo/talent-parser-goldsrc";
 
 const fileContents = await readFile('./demo.dem');
 const runParser = createDemoParserIO(fileContents);
@@ -31,12 +31,12 @@ Demos take quite a while to process, and the final parse result is not exactly t
 
 To alleviate this, the parser combinator allows for an event bus implementation to be provided so that data can be emitted as the file is evaluated, instead of waiting for the full parsing to complete.
 
-See [`@talent/demo-analyzer` application](../../apps/demo-analyzer/src/index.ts) for more.
+See [`@cgdangelo/talent-demo-analyzer` application](../../apps/demo-analyzer/src/index.ts) for more.
 
 ```ts
 import { EventEmitter } from "events";
 import { readFile } from "fs/promises";
-import { createDemoParserIO } from "@talent/parser-goldsrc";
+import { createDemoParserIO } from "@cgdangelo/talent-parser-goldsrc";
 
 const demoEvents = new EventEmitter();
 
@@ -50,8 +50,8 @@ runParser();
 
 ### Note for fp-ts users
 
-If you are working on a project within the [fp-ts](https://github.com/gcanti/fp-ts) ecosystem, `@talent/parser-goldsrc` exports a `demo` combinator built with [parser-ts](https://github.com/gcanti/parser-ts). You should be able to use the combinator in your application the same way this library does.
+If you are working on a project within the [fp-ts](https://github.com/gcanti/fp-ts) ecosystem, `@cgdangelo/talent-parser-goldsrc` exports a `demo` combinator built with [parser-ts](https://github.com/gcanti/parser-ts). You should be able to use the combinator in your application the same way this library does.
 
-See [`@talent/demo-to-json` application](../../apps/demo-to-json/src/index.ts) for more.
+See [`@cgdangelo/talent-demo-to-json` application](../../apps/demo-to-json/src/index.ts) for more.
 
 Similarly, the `createDemoParserIO` factory creates an IO monad that you can manipulate with `IO.map`, `IO.chain`, and so on.

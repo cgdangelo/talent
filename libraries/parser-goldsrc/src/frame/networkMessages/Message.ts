@@ -1,5 +1,5 @@
-import { parser as P, statefulParser as SP } from '@talent/parser';
-import { buffer as B } from '@talent/parser-buffer';
+import { parser as P, statefulParser as SP } from '@cgdangelo/talent-parser';
+import { buffer as B } from '@cgdangelo/talent-parser-buffer';
 import { pipe } from 'fp-ts/lib/function';
 import * as DS from '../../DemoState';
 import type { EngineMessage } from './EngineMessage';

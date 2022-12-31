@@ -1,13 +1,13 @@
-import { parser as P, statefulParser as SP } from "@talent/parser";
-import * as BB from "@talent/parser-bitbuffer";
-import type { buffer as B } from "@talent/parser-buffer";
-import { success } from "@talent/parser/lib/ParseResult";
-import { stream } from "@talent/parser/lib/Stream";
-import { pipe } from "fp-ts/lib/function";
-import type { Delta } from "../../../delta";
-import { readDelta } from "../../../delta";
-import * as DS from "../../../DemoState";
-import { MessageType } from "../MessageType";
+import { parser as P, statefulParser as SP } from '@cgdangelo/talent-parser';
+import * as BB from '@cgdangelo/talent-parser-bitbuffer';
+import type { buffer as B } from '@cgdangelo/talent-parser-buffer';
+import { success } from '@cgdangelo/talent-parser/lib/ParseResult';
+import { stream } from '@cgdangelo/talent-parser/lib/Stream';
+import { pipe } from 'fp-ts/lib/function';
+import type { Delta } from '../../../delta';
+import { readDelta } from '../../../delta';
+import * as DS from '../../../DemoState';
+import { MessageType } from '../MessageType';
 
 type PacketEntity = {
   readonly entityIndex: number;
@@ -17,7 +17,7 @@ type PacketEntity = {
 
 export type PacketEntities = {
   readonly id: MessageType.SVC_PACKETENTITIES;
-  readonly name: "SVC_PACKETENTITIES";
+  readonly name: 'SVC_PACKETENTITIES';
 
   readonly fields: {
     readonly entityCount: number;
@@ -25,13 +25,11 @@ export type PacketEntities = {
   };
 };
 
-const entityState: (entityIndex: number) => DS.DemoStateParser<PacketEntity> = (
-  entityIndex
-) =>
+const entityState: (entityIndex: number) => DS.DemoStateParser<PacketEntity> = (entityIndex) =>
   pipe(
     DS.lift(BB.ubits(1)),
-    SP.bindTo("hasCustomDelta"),
-    SP.bind("baselineIndex", () => SP.lift(BB.bitFlagged(() => BB.ubits(6)))),
+    SP.bindTo('hasCustomDelta'),
+    SP.bind('baselineIndex', () => SP.lift(BB.bitFlagged(() => BB.ubits(6)))),
     SP.chain(({ hasCustomDelta, baselineIndex }) =>
       pipe(
         SP.get<number, DS.DemoState>(),
@@ -39,15 +37,15 @@ const entityState: (entityIndex: number) => DS.DemoStateParser<PacketEntity> = (
           pipe(
             readDelta(
               entityIndex > 0 && entityIndex <= maxClients
-                ? "entity_state_player_t"
+                ? 'entity_state_player_t'
                 : hasCustomDelta !== 0
-                ? "custom_entity_state_t"
-                : "entity_state_t"
+                ? 'custom_entity_state_t'
+                : 'entity_state_t'
             ),
             SP.map((entityState) => ({
               entityIndex,
               baselineIndex,
-              entityState,
+              entityState
             }))
           )
         )
@@ -72,9 +70,7 @@ const nextEntityIndex: () => B.BufferParser<number> = () => {
               absoluteEntityIndex !== 0
                 ? pipe(
                     BB.ubits(11),
-                    P.map(
-                      (nextEntityIndex) => nextEntityIndex - currentEntityIndex
-                    )
+                    P.map((nextEntityIndex) => nextEntityIndex - currentEntityIndex)
                   )
                 : BB.ubits(6)
             )
@@ -85,9 +81,7 @@ const nextEntityIndex: () => B.BufferParser<number> = () => {
   );
 };
 
-const entityStates: () => DS.DemoStateParser<
-  PacketEntities["fields"]["entityStates"]
-> = () =>
+const entityStates: () => DS.DemoStateParser<PacketEntities['fields']['entityStates']> = () =>
   SP.many(
     pipe(
       DS.lift(
@@ -118,22 +112,15 @@ export const packetEntities: DS.DemoStateParser<PacketEntities> = (s) => (i) =>
     pipe(
       DS.lift(BB.ubits(16)),
 
-      SP.bindTo("entityCount"),
+      SP.bindTo('entityCount'),
 
-      SP.bind("entityStates", () => entityStates()),
+      SP.bind('entityStates', () => entityStates()),
 
       SP.chainFirst(() => SP.lift(P.skip(16))),
 
       SP.chain((a) =>
         SP.lift((o) =>
-          success(
-            a,
-            i,
-            stream(
-              o.buffer,
-              o.cursor % 8 === 0 ? o.cursor / 8 : Math.floor(o.cursor / 8) + 1
-            )
-          )
+          success(a, i, stream(o.buffer, o.cursor % 8 === 0 ? o.cursor / 8 : Math.floor(o.cursor / 8) + 1))
         )
       ),
 
@@ -142,8 +129,8 @@ export const packetEntities: DS.DemoStateParser<PacketEntities> = (s) => (i) =>
 
         return {
           id: MessageType.SVC_PACKETENTITIES,
-          name: "SVC_PACKETENTITIES",
-          fields,
+          name: 'SVC_PACKETENTITIES',
+          fields
         } as const;
       })
     )(s)

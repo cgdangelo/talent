@@ -1,5 +1,5 @@
-import type { buffer as B } from '@talent/parser-buffer';
-import * as P from '@talent/parser/lib/Parser';
+import type { buffer as B } from '@cgdangelo/talent-parser-buffer';
+import * as P from '@cgdangelo/talent-parser/lib/Parser';
 import { MessageType } from '../MessageType';
 
 export type FoundSecret = {

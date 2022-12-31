@@ -1,10 +1,10 @@
-import type { buffer as B } from "@talent/parser-buffer";
-import * as P from "@talent/parser/lib/Parser";
-import type { MessageType } from "../MessageType";
+import type { buffer as B } from '@cgdangelo/talent-parser-buffer';
+import * as P from '@cgdangelo/talent-parser/lib/Parser';
+import type { MessageType } from '../MessageType';
 
 export type Bad = {
   readonly id: MessageType.SVC_BAD;
-  readonly name: "SVC_BAD";
+  readonly name: 'SVC_BAD';
 
   readonly fields: never;
 };

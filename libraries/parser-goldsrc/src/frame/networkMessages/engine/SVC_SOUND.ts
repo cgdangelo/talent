@@ -1,14 +1,14 @@
-import * as BB from "@talent/parser-bitbuffer";
-import type { buffer as B } from "@talent/parser-buffer";
-import * as P from "@talent/parser/lib/Parser";
-import { stream } from "@talent/parser/lib/Stream";
-import { pipe } from "fp-ts/lib/function";
-import type { Point } from "../../../Point";
-import { MessageType } from "../MessageType";
+import * as BB from '@cgdangelo/talent-parser-bitbuffer';
+import type { buffer as B } from '@cgdangelo/talent-parser-buffer';
+import * as P from '@cgdangelo/talent-parser/lib/Parser';
+import { stream } from '@cgdangelo/talent-parser/lib/Stream';
+import { pipe } from 'fp-ts/lib/function';
+import type { Point } from '../../../Point';
+import { MessageType } from '../MessageType';
 
 export type Sound = {
   readonly id: MessageType.SVC_SOUND;
-  readonly name: "SVC_SOUND";
+  readonly name: 'SVC_SOUND';
 
   readonly fields: {
     readonly volume?: number;
@@ -21,9 +21,7 @@ export type Sound = {
   };
 };
 
-const volume: (flags: number) => B.BufferParser<Sound["fields"]["volume"]> = (
-  flags
-) =>
+const volume: (flags: number) => B.BufferParser<Sound['fields']['volume']> = (flags) =>
   (flags & 1) !== 0
     ? pipe(
         BB.ubits(8),
@@ -31,9 +29,7 @@ const volume: (flags: number) => B.BufferParser<Sound["fields"]["volume"]> = (
       )
     : P.of(undefined);
 
-const attenuation: (
-  flags: number
-) => B.BufferParser<Sound["fields"]["attenuation"]> = (flags) =>
+const attenuation: (flags: number) => B.BufferParser<Sound['fields']['attenuation']> = (flags) =>
   (flags & 2) !== 0
     ? pipe(
         BB.ubits(8),
@@ -41,19 +37,14 @@ const attenuation: (
       )
     : P.of(undefined);
 
-const channel: B.BufferParser<Sound["fields"]["channel"]> = BB.ubits(3);
+const channel: B.BufferParser<Sound['fields']['channel']> = BB.ubits(3);
 
-const entityIndex: B.BufferParser<Sound["fields"]["entityIndex"]> =
-  BB.ubits(11);
+const entityIndex: B.BufferParser<Sound['fields']['entityIndex']> = BB.ubits(11);
 
-const soundIndex: (
-  flags: number
-) => B.BufferParser<Sound["fields"]["soundIndex"]> = (flags) =>
+const soundIndex: (flags: number) => B.BufferParser<Sound['fields']['soundIndex']> = (flags) =>
   (flags & 4) !== 0 ? BB.ubits(16) : BB.ubits(8);
 
-const originAxisValue: B.BufferParser<
-  Sound["fields"]["origin"][keyof Sound["fields"]["origin"]]
-> = pipe(
+const originAxisValue: B.BufferParser<Sound['fields']['origin'][keyof Sound['fields']['origin']]> = pipe(
   P.struct({ intFlag: BB.ubits(1), fractionFlag: BB.ubits(1) }),
   P.filter(({ intFlag, fractionFlag }) => intFlag + fractionFlag !== 0),
   P.chain(({ intFlag, fractionFlag }) =>
@@ -63,12 +54,11 @@ const originAxisValue: B.BufferParser<
         pipe(
           P.struct({
             intValue: intFlag !== 0 ? BB.ubits(12) : P.of(0),
-            fractionValue: fractionFlag !== 0 ? BB.ubits(3) : P.of(0),
+            fractionValue: fractionFlag !== 0 ? BB.ubits(3) : P.of(0)
           }),
 
           P.map(
-            ({ intValue, fractionValue }) =>
-              (intValue + fractionValue / 32) * (isNegative !== 0 ? -1 : 1)
+            ({ intValue, fractionValue }) => (intValue + fractionValue / 32) * (isNegative !== 0 ? -1 : 1)
           )
         )
       )
@@ -78,25 +68,24 @@ const originAxisValue: B.BufferParser<
   P.alt(() => pipe(P.of<number, number>(0), P.apFirst(P.skip(2))))
 );
 
-const origin: B.BufferParser<Sound["fields"]["origin"]> = pipe(
+const origin: B.BufferParser<Sound['fields']['origin']> = pipe(
   P.struct({
     x: BB.bits(1),
     y: BB.bits(1),
-    z: BB.bits(1),
+    z: BB.bits(1)
   }),
 
   P.chain(({ x, y, z }) =>
     P.struct({
       x: x !== 0 ? originAxisValue : P.of(undefined),
       y: y !== 0 ? originAxisValue : P.of(undefined),
-      z: z !== 0 ? originAxisValue : P.of(undefined),
+      z: z !== 0 ? originAxisValue : P.of(undefined)
     })
   )
 );
 
-const pitch: (flags: number) => B.BufferParser<Sound["fields"]["pitch"]> = (
-  flags
-) => ((flags & 8) !== 0 ? BB.ubits(8) : P.of(1));
+const pitch: (flags: number) => B.BufferParser<Sound['fields']['pitch']> = (flags) =>
+  (flags & 8) !== 0 ? BB.ubits(8) : P.of(1);
 
 export const sound: B.BufferParser<Sound> = (i) =>
   pipe(
@@ -112,15 +101,15 @@ export const sound: B.BufferParser<Sound> = (i) =>
           entityIndex,
           soundIndex: soundIndex(flags),
           origin,
-          pitch: pitch(flags),
+          pitch: pitch(flags)
         })
       ),
       BB.nextByte,
 
       P.map((fields) => ({
         id: MessageType.SVC_SOUND,
-        name: "SVC_SOUND",
-        fields,
+        name: 'SVC_SOUND',
+        fields
       }))
     )
   );

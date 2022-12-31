@@ -1,8 +1,8 @@
-import { parser as P, statefulParser as SP } from '@talent/parser';
-import * as BB from '@talent/parser-bitbuffer';
-import type { buffer as B } from '@talent/parser-buffer';
-import { success } from '@talent/parser/lib/ParseResult';
-import { stream } from '@talent/parser/lib/Stream';
+import { parser as P, statefulParser as SP } from '@cgdangelo/talent-parser';
+import * as BB from '@cgdangelo/talent-parser-bitbuffer';
+import type { buffer as B } from '@cgdangelo/talent-parser-buffer';
+import { success } from '@cgdangelo/talent-parser/lib/ParseResult';
+import { stream } from '@cgdangelo/talent-parser/lib/Stream';
 import { pipe } from 'fp-ts/lib/function';
 import type { Delta } from '../../../delta';
 import { readDelta } from '../../../delta';

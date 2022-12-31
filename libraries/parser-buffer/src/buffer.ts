@@ -1,6 +1,6 @@
-import * as P from '@talent/parser/lib/Parser';
-import { success } from '@talent/parser/lib/ParseResult';
-import { stream } from '@talent/parser/lib/Stream';
+import * as P from '@cgdangelo/talent-parser/lib/Parser';
+import { success } from '@cgdangelo/talent-parser/lib/ParseResult';
+import { stream } from '@cgdangelo/talent-parser/lib/Stream';
 import { either as E } from 'fp-ts';
 import { pipe } from 'fp-ts/lib/function';
 

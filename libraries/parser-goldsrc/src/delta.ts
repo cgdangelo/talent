@@ -1,13 +1,8 @@
-import { parser as P, statefulParser as SP } from "@talent/parser";
-import * as BB from "@talent/parser-bitbuffer";
-import {
-  option as O,
-  readonlyArray as RA,
-  readonlyMap as RM,
-  string,
-} from "fp-ts";
-import { constant, flow, pipe } from "fp-ts/lib/function";
-import type { DemoState, DemoStateParser } from "./DemoState";
+import { parser as P, statefulParser as SP } from '@cgdangelo/talent-parser';
+import * as BB from '@cgdangelo/talent-parser-bitbuffer';
+import { option as O, readonlyArray as RA, readonlyMap as RM, string } from 'fp-ts';
+import { constant, flow, pipe } from 'fp-ts/lib/function';
+import type { DemoState, DemoStateParser } from './DemoState';
 
 // A delta is some collection of fields, specified by a decoder.
 export type Delta = Record<string, number | string>;
@@ -36,68 +31,65 @@ enum DeltaType {
   TIMEWINDOW_8 = 1 << 5,
   TIMEWINDOW_BIG = 1 << 6,
   STRING = 1 << 7,
-  SIGNED = 1 << 31,
+  SIGNED = 1 << 31
 }
 
 export const initialDeltaDecoders: ReadonlyMap<string, DeltaDecoder> = new Map([
   [
-    "delta_description_t",
+    'delta_description_t',
     [
       {
-        name: "flags",
+        name: 'flags',
         bits: 32,
         divisor: 1,
-        flags: DeltaType.INTEGER,
+        flags: DeltaType.INTEGER
       },
       {
-        name: "name",
+        name: 'name',
         bits: 8,
         divisor: 1,
-        flags: DeltaType.STRING,
+        flags: DeltaType.STRING
       },
       {
-        name: "offset",
+        name: 'offset',
         bits: 16,
         divisor: 1,
-        flags: DeltaType.INTEGER,
+        flags: DeltaType.INTEGER
       },
       {
-        name: "size",
+        name: 'size',
         bits: 8,
         divisor: 1,
-        flags: DeltaType.INTEGER,
+        flags: DeltaType.INTEGER
       },
       {
-        name: "bits",
+        name: 'bits',
         bits: 8,
         divisor: 1,
-        flags: DeltaType.INTEGER,
+        flags: DeltaType.INTEGER
       },
       {
-        name: "divisor",
+        name: 'divisor',
         bits: 32,
         divisor: 4000,
-        flags: DeltaType.FLOAT,
+        flags: DeltaType.FLOAT
       },
       {
-        name: "preMultiplier",
+        name: 'preMultiplier',
         bits: 32,
         divisor: 4000,
-        flags: DeltaType.FLOAT,
-      },
-    ],
-  ],
+        flags: DeltaType.FLOAT
+      }
+    ]
+  ]
 ]);
 
 type DeltaField<A> = P.Parser<number, [fieldName: string, value: A]>;
 
-type DeltaFieldParser<A> = (
-  deltaFieldDecoder: DeltaFieldDecoder
-) => DeltaField<A>;
+type DeltaFieldParser<A> = (deltaFieldDecoder: DeltaFieldDecoder) => DeltaField<A>;
 
-const fieldHasFlag: (fieldFlags: DeltaType) => (flags: DeltaType) => boolean =
-  (fieldFlags) => (flags) =>
-    (fieldFlags & flags) !== 0;
+const fieldHasFlag: (fieldFlags: DeltaType) => (flags: DeltaType) => boolean = (fieldFlags) => (flags) =>
+  (fieldFlags & flags) !== 0;
 
 const isNumericField = fieldHasFlag(
   DeltaType.BYTE |
@@ -121,31 +113,22 @@ const decodeSigned: DeltaFieldParser<number> = (deltaFieldDecoder) =>
         BB.ubits(1),
         P.map((a) => (a !== 0 ? -1 : 1))
       ),
-      value: BB.ubits(deltaFieldDecoder.bits - 1),
+      value: BB.ubits(deltaFieldDecoder.bits - 1)
     }),
 
-    P.map(({ sign, value }) => [
-      deltaFieldDecoder.name,
-      (sign * value) / deltaFieldDecoder.divisor,
-    ])
+    P.map(({ sign, value }) => [deltaFieldDecoder.name, (sign * value) / deltaFieldDecoder.divisor])
   );
 
 const decodeUnsigned: DeltaFieldParser<number> = (deltaFieldDecoder) =>
   pipe(
     BB.ubits(deltaFieldDecoder.bits),
-    P.map((value) => [
-      deltaFieldDecoder.name,
-      value / deltaFieldDecoder.divisor,
-    ])
+    P.map((value) => [deltaFieldDecoder.name, value / deltaFieldDecoder.divisor])
   );
 
 const decodeAngle: DeltaFieldParser<number> = (deltaFieldDecoder) =>
   pipe(
     BB.ubits(deltaFieldDecoder.bits),
-    P.map((value) => [
-      deltaFieldDecoder.name,
-      value * (360 / (1 << deltaFieldDecoder.bits)),
-    ])
+    P.map((value) => [deltaFieldDecoder.name, value * (360 / (1 << deltaFieldDecoder.bits))])
   );
 
 const decodeString: DeltaFieldParser<string> = (deltaFieldDecoder) =>
@@ -154,9 +137,7 @@ const decodeString: DeltaFieldParser<string> = (deltaFieldDecoder) =>
     P.map((value) => [deltaFieldDecoder.name, value])
   );
 
-const numericField: (
-  fieldFlags: DeltaType
-) => O.Option<DeltaFieldParser<number>> = flow(
+const numericField: (fieldFlags: DeltaType) => O.Option<DeltaFieldParser<number>> = flow(
   O.fromPredicate(isNumericField),
   O.chain(
     flow(
@@ -167,16 +148,12 @@ const numericField: (
   )
 );
 
-const angleField: (
-  fieldFlags: DeltaType
-) => O.Option<DeltaFieldParser<number>> = flow(
+const angleField: (fieldFlags: DeltaType) => O.Option<DeltaFieldParser<number>> = flow(
   O.fromPredicate(isAngleField),
   O.map(constant(decodeAngle))
 );
 
-const stringField: (
-  fieldFlags: DeltaType
-) => O.Option<DeltaFieldParser<string>> = flow(
+const stringField: (fieldFlags: DeltaType) => O.Option<DeltaFieldParser<string>> = flow(
   O.fromPredicate(isStringField),
   O.map(constant(decodeString))
 );
@@ -184,10 +161,7 @@ const stringField: (
 const readField: (
   fieldIndex: number,
   deltaDecoder: DeltaDecoder
-) => P.Parser<number, [fieldName: string, value: number | string]> = (
-  fieldIndex,
-  deltaDecoder
-) =>
+) => P.Parser<number, [fieldName: string, value: number | string]> = (fieldIndex, deltaDecoder) =>
   pipe(
     deltaDecoder,
     RA.lookup(fieldIndex),
@@ -205,12 +179,10 @@ const readField: (
 
 const lookupDecoder = pipe(string.Eq, RM.lookup);
 
-const maskBits: (maskBitLength: number) => P.Parser<number, readonly number[]> =
-  (maskBitLength) => P.manyN(BB.ubits(8), maskBitLength);
+const maskBits: (maskBitLength: number) => P.Parser<number, readonly number[]> = (maskBitLength) =>
+  P.manyN(BB.ubits(8), maskBitLength);
 
-const decodeDelta: (
-  maskBits: readonly number[]
-) => (deltaDecoder: DeltaDecoder) => P.Parser<number, Delta> =
+const decodeDelta: (maskBits: readonly number[]) => (deltaDecoder: DeltaDecoder) => P.Parser<number, Delta> =
   (maskBits) => (deltaDecoder) =>
     pipe(
       RA.makeBy(maskBits.length, (i) =>
@@ -224,9 +196,7 @@ const decodeDelta: (
                 pipe(
                   maskBits,
                   RA.lookup(i),
-                  O.chain(
-                    O.fromPredicate((maskBit) => (maskBit & (1 << j)) !== 0)
-                  ),
+                  O.chain(O.fromPredicate((maskBit) => (maskBit & (1 << j)) !== 0)),
                   O.map(() => readField(fieldIndex, deltaDecoder))
                 )
               )
@@ -239,9 +209,7 @@ const decodeDelta: (
       P.map((fields) => Object.fromEntries(fields))
     );
 
-export const readDelta = <A extends Delta = Delta>(
-  deltaDecoderName: string
-): DemoStateParser<A> =>
+export const readDelta = <A extends Delta = Delta>(deltaDecoderName: string): DemoStateParser<A> =>
   pipe(
     SP.get<number, DemoState>(),
     SP.chain(({ deltaDecoders }) =>

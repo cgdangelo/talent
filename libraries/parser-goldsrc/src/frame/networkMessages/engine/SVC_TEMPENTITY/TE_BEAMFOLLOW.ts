@@ -1,11 +1,11 @@
-import { parser as P } from "@talent/parser";
-import { buffer as B } from "@talent/parser-buffer";
-import { pipe } from "fp-ts/lib/function";
-import { TempEntityType } from "./TempEntityType";
+import { parser as P } from '@cgdangelo/talent-parser';
+import { buffer as B } from '@cgdangelo/talent-parser-buffer';
+import { pipe } from 'fp-ts/lib/function';
+import { TempEntityType } from './TempEntityType';
 
 export type BeamFollow = {
   readonly id: TempEntityType.TE_BEAMFOLLOW;
-  readonly name: "TE_BEAMFOLLOW";
+  readonly name: 'TE_BEAMFOLLOW';
   readonly fields: {
     readonly startEntity: number;
     readonly spriteIndex: number;
@@ -30,13 +30,13 @@ export const beamFollow: B.BufferParser<BeamFollow> = pipe(
       r: B.uint8_le,
       g: B.uint8_le,
       b: B.uint8_le,
-      a: B.uint8_le,
-    }),
+      a: B.uint8_le
+    })
   }),
 
   P.map((fields) => ({
     id: TempEntityType.TE_BEAMFOLLOW,
-    name: "TE_BEAMFOLLOW",
-    fields,
+    name: 'TE_BEAMFOLLOW',
+    fields
   }))
 );
