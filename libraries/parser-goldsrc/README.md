@@ -1,8 +1,8 @@
-‼️  If you're looking for the demo file documentation, it is located [here](docs/demo-structure.md). ‼️
-
 # @cgdangelo/talent-parser-goldsrc
 
 Parser combinators and utilities for GoldSrc demo files.
+
+‼️  If you're looking for the demo file documentation, it is located [here](docs/demo-structure.md). ‼️
 
 ## Installation
 
