@@ -29,7 +29,7 @@ Demos take quite a while to process, and the final parse result is not exactly t
 
 To alleviate this, the parser combinator allows for an event bus implementation to be provided so that data can be emitted as the file is evaluated, instead of waiting for the full parsing to complete.
 
-See [`@cgdangelo/talent-demo-analyzer` application](../../apps/demo-analyzer/src/index.ts) for more.
+See [`@cgdangelo/talent-demo-analyzer` application](../../apps/example-demo-analyzer/src/index.ts) for more.
 
 ```ts
 import { EventEmitter } from "events";
