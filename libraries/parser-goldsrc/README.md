@@ -17,12 +17,10 @@ npm install @cgdangelo/talent-parser-goldsrc
 
 ```ts
 import { readFile } from "fs/promises";
-import { createDemoParserIO } from "@cgdangelo/talent-parser-goldsrc";
+import { parseDemo } from "@cgdangelo/talent-parser-goldsrc";
 
 const fileContents = await readFile('./demo.dem');
-const runParser = createDemoParserIO(fileContents);
-
-const demo = runParser(); // Demo | undefined
+const demo = parseDemo(fileContents); // Demo | undefined
 ```
 
 ### Real-time event access
@@ -36,22 +34,21 @@ See [`@cgdangelo/talent-demo-analyzer` application](../../apps/demo-analyzer/src
 ```ts
 import { EventEmitter } from "events";
 import { readFile } from "fs/promises";
-import { createDemoParserIO } from "@cgdangelo/talent-parser-goldsrc";
+import { parseDemo } from "@cgdangelo/talent-parser-goldsrc";
 
 const demoEvents = new EventEmitter();
 
-const fileContents = await readFile('./demo.dem');
-const runParser = createDemoParserIO(fileContents, demoEvents);
-
 demoEvents.on('demo:frame', frame => console.log(frame));
 
-runParser();
+const fileContents = await readFile('./demo.dem');
+
+parseDemo(fileContents, demoEvents);
 ```
 
 ### Note for fp-ts users
 
-If you are working on a project within the [fp-ts](https://github.com/gcanti/fp-ts) ecosystem, `@cgdangelo/talent-parser-goldsrc` exports a `demo` combinator built with [parser-ts](https://github.com/gcanti/parser-ts). You should be able to use the combinator in your application the same way this library does.
+If you are working on a project within the [fp-ts](https://github.com/gcanti/fp-ts) ecosystem, `@cgdangelo/talent-parser-goldsrc` exports a `demo` combinator constructor built with [parser-ts](https://github.com/gcanti/parser-ts). You should be able to use the combinator in your application the same way this library does.
 
-See [`@cgdangelo/talent-demo-to-json` application](../../apps/demo-to-json/src/index.ts) for more.
+See [`@cgdangelo/talent-demo-to-json` application](../../apps/jsonify-demo/src/index.ts) for more.
 
-Similarly, the `createDemoParserIO` factory creates an IO monad that you can manipulate with `IO.map`, `IO.chain`, and so on.
+Similarly, the `goldsrcParserIO` and `goldsrcParserEither` constructors return instances that you can manipulate with `IO.map`, `Either.chain`, and so on.

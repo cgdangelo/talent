@@ -1,4 +1,4 @@
-import { createDemoParserIO, IDemoEventEmitter } from '@cgdangelo/talent-parser-goldsrc';
+import { IDemoEventEmitter, parseDemo } from '@cgdangelo/talent-parser-goldsrc';
 import { EventEmitter } from 'events';
 import { PathLike } from 'fs';
 import { readFile } from 'fs/promises';
@@ -28,7 +28,8 @@ async function main(demoPath?: PathLike): Promise<void> {
   //     console.log('DemoAnalyzer | Directory entry', directoryEntry)
   //   );
 
-  // Use case: tracking player movement through NetworkMessages.refParams.viewOrigin.
+  // Use case: tracking player movement through NetworkMessages.frameData.refParams.viewOrigin.
+  // Use case: reading metadata embedded in ConsoleCommand.frameData.
   //   demoEvents.on('demo:frame', (directoryEntry) => console.log('DemoAnalyzer | Frame', directoryEntry));
 
   // Use case: tracking player name changes through SVC_UPDATEUSERINFO.
@@ -40,11 +41,8 @@ async function main(demoPath?: PathLike): Promise<void> {
   // Demo has finished parsing.
   demoEvents.on('demo:end', () => console.log('DemoAnalyzer | End.'));
 
-  // Create the parser. This is a lazy function you can invoke later to start parsing.
-  const runParser = createDemoParserIO(fileContents, demoEvents);
-
   // Run the parser; the parser will emit events through the `demoEvents` bus as the file is evaluated.
-  runParser(); // Demo | undefined
+  parseDemo(fileContents, demoEvents); // Demo | undefined
 }
 
 main(process.argv[2]).catch(console.error);

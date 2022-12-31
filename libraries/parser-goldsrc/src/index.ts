@@ -6,10 +6,6 @@ import { IO } from 'fp-ts/lib/IO';
 import { demo, Demo } from './Demo';
 import { IDemoEventEmitter } from './DemoEventEmitter';
 
-export type { IDemoEventEmitter } from './DemoEventEmitter';
-export { demo };
-export type { Demo };
-
 /**
  * Run the demo parser and return a ParseResult.
  *
@@ -17,7 +13,7 @@ export type { Demo };
  * @param eventEmitter - Optional event bus for real-time event access.
  * @returns Parse result.
  */
-export function runDemoParser(
+export function goldsrcParserEither(
   demoBuffer: Buffer,
   eventEmitter?: IDemoEventEmitter
 ): ParseResult<number, Demo> {
@@ -33,10 +29,7 @@ export function runDemoParser(
  * @param eventEmitter - Optional event bus for real-time event access.
  * @returns Returns Demo object if parse succeeds; undefined otherwise.
  */
-export function createDemoParserIO(
-  demoBuffer: Buffer,
-  eventEmitter?: IDemoEventEmitter
-): IO<Demo | undefined> {
+export function goldsrcParserIO(demoBuffer: Buffer, eventEmitter?: IDemoEventEmitter): IO<Demo | undefined> {
   const demoStream: Stream<number> = stream(demoBuffer as unknown as number[]);
 
   return () => {
@@ -48,3 +41,25 @@ export function createDemoParserIO(
     return E.isRight(parseResult) ? parseResult.right : undefined;
   };
 }
+
+/**
+ * Run the parser on a buffer and return a Demo object, if successful.
+ *
+ * @param demoBuffer - Contents of a demo file.
+ * @param eventEmitter - Optional event bus for real-time event access.
+ * @returns Returns Demo object if parse succeeds; undefined otherwise.
+ */
+export function parseDemo(demoBuffer: Buffer, eventEmitter?: IDemoEventEmitter): Demo | undefined {
+  const runParser = goldsrcParserIO(demoBuffer, eventEmitter);
+
+  return runParser();
+}
+
+export type { IDemoEventEmitter } from './DemoEventEmitter';
+export type { DemoHeader } from './DemoHeader';
+export type { DirectoryEntry } from './DirectoryEntry';
+export type { Frame } from './frame/Frame';
+export type { EngineMessage } from './frame/networkMessages/EngineMessage';
+export type { UserMessage } from './frame/networkMessages/UserMessage';
+export { demo };
+export type { Demo };
