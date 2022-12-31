@@ -1,0 +1,17 @@
+{
+  "name": "@talent/demo-to-json",
+  "entries": [
+    {
+      "version": "1.0.0",
+      "tag": "@talent/demo-to-json_v1.0.0",
+      "date": "Sat, 31 Dec 2022 05:19:17 GMT",
+      "comments": {
+        "major": [
+          {
+            "comment": "Initial release"
+          }
+        ]
+      }
+    }
+  ]
+}

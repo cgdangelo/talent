@@ -1,6 +1,6 @@
 {
   "name": "@talent/demo-to-json",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "license": "MIT",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
