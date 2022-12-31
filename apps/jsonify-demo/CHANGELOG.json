@@ -1,0 +1,17 @@
+{
+  "name": "@cgdangelo/talent-jsonify-demo",
+  "entries": [
+    {
+      "version": "0.1.0",
+      "tag": "@cgdangelo/talent-jsonify-demo_v0.1.0",
+      "date": "Sat, 31 Dec 2022 16:31:37 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Initial release"
+          }
+        ]
+      }
+    }
+  ]
+}
