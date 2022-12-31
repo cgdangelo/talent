@@ -5,7 +5,7 @@
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
   "bin": {
-    "jsonify-demo": "./bin/talent-jsonify-demo"
+    "talent-jsonify-demo": "./bin/talent-jsonify-demo"
   },
   "scripts": {
     "_phase:build": "heft build --clean",
