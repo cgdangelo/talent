@@ -1,8 +1,8 @@
 // import * as PR from "../src/ParseResult";
 import { pipe } from 'fp-ts/lib/function';
-import { error, success } from '../src/ParseResult';
-import * as _ from '../src/StatefulParser';
-import { stream } from '../src/Stream';
+import { error, success } from '../ParseResult';
+import * as _ from '../StatefulParser';
+import { stream } from '../Stream';
 
 describe('StatefulParser', () => {
   describe('constructors', () => {

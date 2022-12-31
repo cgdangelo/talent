@@ -1,7 +1,7 @@
 import { pipe } from 'fp-ts/lib/function';
-import * as P from './Parser';
-import * as PR from './ParseResult';
-import { stream } from './Stream';
+import * as P from '../Parser';
+import * as PR from '../ParseResult';
+import { stream } from '../Stream';
 
 describe('Parser', () => {
   test('skip', () => {

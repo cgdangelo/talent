@@ -1,6 +1,6 @@
 import { pipe } from 'fp-ts/lib/function';
 import { RunHelpers, TestScheduler } from 'rxjs/testing';
-import * as _ from '../src/Observable';
+import * as _ from '../Observable';
 
 const testScheduler = new TestScheduler((actual, expected) => expect(actual).toStrictEqual(expected));
 
