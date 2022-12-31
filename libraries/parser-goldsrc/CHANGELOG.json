@@ -2,6 +2,18 @@
   "name": "@cgdangelo/talent-parser-goldsrc",
   "entries": [
     {
+      "version": "0.1.1",
+      "tag": "@cgdangelo/talent-parser-goldsrc_v0.1.1",
+      "date": "Sat, 31 Dec 2022 16:46:52 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Remove test assets from pack"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.1.0",
       "tag": "@cgdangelo/talent-parser-goldsrc_v0.1.0",
       "date": "Sat, 31 Dec 2022 16:31:37 GMT",
