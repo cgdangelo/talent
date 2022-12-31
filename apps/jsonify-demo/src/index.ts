@@ -1,9 +1,8 @@
 import { demo } from '@cgdangelo/talent-parser-goldsrc/lib/Demo';
 import type { Stream } from '@cgdangelo/talent-parser/lib/Stream';
 import { stream } from '@cgdangelo/talent-parser/lib/Stream';
-import * as Console from 'fp-ts/lib/Console';
 import * as E from 'fp-ts/lib/Either';
-import { constant, flow, pipe } from 'fp-ts/lib/function';
+import { apply, constant, flow, pipe } from 'fp-ts/lib/function';
 import * as json from 'fp-ts/lib/Json';
 import { not } from 'fp-ts/lib/Predicate';
 import * as S from 'fp-ts/lib/string';
@@ -25,15 +24,36 @@ const readFileContents: (path: string) => TE.TaskEither<Error, Stream<number>> =
     TE.map(bufferToStream)
   );
 
-const main: T.Task<void> = pipe(
-  TE.fromEither(validateDemoPath(process.argv[2])),
-  TE.chain(readFileContents),
-  TE.chainEitherKW(demo()),
-  TE.map(({ value }) => value),
-  TE.chainEitherK(json.stringify),
-  TE.mapLeft((e) => (e instanceof Error ? e : E.toError(e))),
-  TE.fold((e) => T.of(e.message), T.of),
-  T.chainIOK(Console.log)
-);
+/**
+ * Get a TaskEither that contains a JSON serialization of a demo file, or a parse error.
+ *
+ * @param filePath - Path to the demo file.
+ * @returns
+ */
+export function jsonifyDemoTaskEither(filePath: string): TE.TaskEither<Error, string> {
+  return pipe(
+    validateDemoPath(filePath),
+    TE.fromEither,
+    TE.chain(readFileContents),
+    TE.chainEitherKW(demo()),
+    TE.map(({ value }) => value),
+    TE.chainEitherK(json.stringify),
+    TE.mapLeft((e) => (e instanceof Error ? e : E.toError(e)))
+  );
+}
 
-main().catch(() => {});
+/**
+ * Get a JSON serialization of a demo file.
+ *
+ * @param filePath - Path to the demo file.
+ * @returns Promise containing JSON string serialization of the demo.
+ */
+export function jsonifyDemo(filePath: string): Promise<string> {
+  const runJsonifyDemo = flow(
+    jsonifyDemoTaskEither,
+    TE.fold((e) => T.of(e.message), T.of),
+    apply(undefined)
+  );
+
+  return runJsonifyDemo(filePath);
+}
