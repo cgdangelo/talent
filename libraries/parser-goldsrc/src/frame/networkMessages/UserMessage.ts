@@ -7,7 +7,7 @@ import * as DS from '../../DemoState';
 export type UserMessage = {
   readonly id: number;
   readonly name: string;
-  readonly data: readonly number[];
+  readonly data: Buffer;
 };
 
 const lookupUserMessage = RM.lookup(number.Eq);
@@ -33,7 +33,7 @@ export const userMessage: (messageId: number) => DS.DemoStateParser<UserMessage>
             // We have a message size, so grab those bytes
             SP.chain((size) => SP.take(size)),
 
-            SP.map((data) => ({ id, name, data }))
+            SP.map((data) => ({ id, name, data: data as unknown as Buffer } as UserMessage))
           )
         ),
 
