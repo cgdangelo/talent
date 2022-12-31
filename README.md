@@ -10,9 +10,9 @@ For now: yet another GoldSrc parser, built with [fp-ts](https://github.com/gcant
 
 | Name | Description | On npm? |
 | --- | --- | --- |
-| [@cgdangelo/talent-jsonify-demo](https://github.com/cgdangelo/talent/tree/main/apps/demo-to-json) | Runs the demo parser and logs to console. | ✅ |
+| [@cgdangelo/talent-jsonify-demo](https://github.com/cgdangelo/talent/tree/main/apps/jsonify-demo) | Runs the demo parser and logs to console. | ✅ |
 | [@cgdangelo/talent-demo-renamer](https://github.com/cgdangelo/talent/tree/main/apps/demo-renamer) | Renames a list of demo files to `YYYY-MM-DD_HHMM_{map}.dem`. | |
-| [@cgdangelo/talent-example-demo-analyzer](https://github.com/cgdangelo/talent/tree/main/apps/demo-analyzer) | Example of a real-time demo analysis application using the demo parser event bus. | |
+| [@cgdangelo/talent-example-demo-analyzer](https://github.com/cgdangelo/talent/tree/main/apps/example-demo-analyzer) | Example of a real-time demo analysis application using the demo parser event bus. | |
 
 ### Libraries
 
@@ -23,26 +23,6 @@ For now: yet another GoldSrc parser, built with [fp-ts](https://github.com/gcant
 | [@cgdangelo/talent-parser-buffer](https://github.com/cgdangelo/talent/tree/main/libraries/parser-buffer) | Parser combinators for a [Buffer](https://nodejs.org/api/buffer.html). | ✅ |
 | [@cgdangelo/talent-parser](https://github.com/cgdangelo/talent/tree/main/libraries/parser) | General use parser combinators. | ✅ |
 | [@cgdangelo/talent-observable](https://github.com/cgdangelo/talent/tree/main/libraries/observable) | fp-ts bindings for rxjs observables. | |
-
-
-## Contributing
-
-This is a monorepo managed by [Rush](https://rushjs.io/). You will need the Rush tool to continue:
-
-```
-npm install -g @microsoft/rush
-```
-
-### Running applications
-
-```
-git clone https://github.com/cgdangelo/talent.git
-cd talent
-rush update
-rush build
-
-node ./apps/<name-of-app>/lib/index.js [app params]
-```
 
 ## What's working?
 
@@ -62,6 +42,25 @@ The original goal of this project was to create a GoldSrc demo parser that could
 5.  Events that are otherwise important because of their circumstances:
     -   (Day of Defeat) Breaking a double cap in progress when the enemy team controls all other flags, thereby preventing a cap-out.
     -   A rapid change in crosshair angles followed by a kill. This could be a flick shot.
+
+## Contributing
+
+This is a monorepo managed by [Rush](https://rushjs.io/). You will need the Rush tool to continue:
+
+```
+npm install -g @microsoft/rush
+```
+
+### Running applications
+
+```
+git clone https://github.com/cgdangelo/talent.git
+cd talent
+rush update
+rush build
+
+node ./apps/<name-of-app>/lib/index.js [app params]
+```
 
 ## Prior art
 
