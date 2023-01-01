@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@cgdangelo/talent-jsonify-demo",
+      "comment": "Bump eslint",
+      "type": "none"
+    }
+  ],
+  "packageName": "@cgdangelo/talent-jsonify-demo"
+}

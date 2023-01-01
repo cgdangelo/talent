@@ -1,0 +1,15 @@
+{
+  "changes": [
+    {
+      "packageName": "@cgdangelo/talent-parser-goldsrc",
+      "comment": "(parser-buffer) Remove endianness from single byte parsers",
+      "type": "patch"
+    },
+    {
+      "packageName": "@cgdangelo/talent-parser-goldsrc",
+      "comment": "Bump eslint",
+      "type": "none"
+    }
+  ],
+  "packageName": "@cgdangelo/talent-parser-goldsrc"
+}
