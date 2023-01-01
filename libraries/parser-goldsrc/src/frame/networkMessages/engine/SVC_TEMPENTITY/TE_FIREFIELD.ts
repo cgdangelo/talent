@@ -23,9 +23,9 @@ export const fireField: B.BufferParser<FireField> = pipe(
     origin: coordPoint,
     scale: B.int16_le,
     modelIndex: B.int16_le,
-    count: B.uint8_le,
-    flags: B.uint8_le,
-    duration: B.uint8_le
+    count: B.uint8,
+    flags: B.uint8,
+    duration: B.uint8
   }),
 
   P.map((fields) => ({

@@ -17,7 +17,7 @@ export type ArmorRicochet = {
 export const armorRicochet: B.BufferParser<ArmorRicochet> = pipe(
   P.struct({
     position: coordPoint,
-    scale: B.uint8_le
+    scale: B.uint8
   }),
 
   P.map((fields) => ({

@@ -18,7 +18,7 @@ export type UpdateUserInfo = {
 
 export const updateUserInfo: B.BufferParser<UpdateUserInfo> = pipe(
   P.struct({
-    clientIndex: B.uint8_le,
+    clientIndex: B.uint8,
     clientUserId: B.uint32_le,
     clientUserInfo: pipe(B.ztstr, P.map(flow(S.split('\\'), RNEA.tail, RA.chunksOf(2), Object.fromEntries))),
     clientCdKeyHash: P.take(16)

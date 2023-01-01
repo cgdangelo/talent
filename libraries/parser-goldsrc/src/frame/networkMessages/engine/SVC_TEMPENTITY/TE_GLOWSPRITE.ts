@@ -21,9 +21,9 @@ export const glowSprite: B.BufferParser<GlowSprite> = pipe(
   P.struct({
     position: coordPoint,
     modelIndex: B.int16_le,
-    scale: B.uint8_le,
-    size: B.uint8_le,
-    brightness: B.uint8_le
+    scale: B.uint8,
+    size: B.uint8,
+    brightness: B.uint8
   }),
 
   P.map((fields) => ({

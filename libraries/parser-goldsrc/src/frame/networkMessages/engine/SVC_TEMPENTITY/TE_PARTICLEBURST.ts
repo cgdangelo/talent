@@ -20,8 +20,8 @@ export const particleBurst: B.BufferParser<ParticleBurst> = pipe(
   P.struct({
     origin: coordPoint,
     scale: B.int16_le,
-    color: B.uint8_le,
-    duration: B.uint8_le
+    color: B.uint8,
+    duration: B.uint8
   }),
 
   P.map((fields) => ({

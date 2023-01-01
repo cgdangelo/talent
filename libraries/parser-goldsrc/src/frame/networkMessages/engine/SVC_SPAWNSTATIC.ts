@@ -78,10 +78,10 @@ export const spawnStatic: B.BufferParser<SpawnStatic> = pipe(
         pipe(
           P.struct({
             renderColor: pipe(
-              P.tuple(B.uint8_le, B.uint8_le, B.uint8_le),
+              P.tuple(B.uint8, B.uint8, B.uint8),
               P.map(([r, g, b]) => ({ r, g, b }))
             ),
-            renderFx: B.uint8_le
+            renderFx: B.uint8
           }),
           P.map((b) => ({ ...a, ...b }))
         )

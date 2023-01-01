@@ -22,9 +22,9 @@ export const spriteSpray: B.BufferParser<SpriteSpray> = pipe(
     position: coordPoint,
     velocity: coordPoint,
     modelIndex: B.int16_le,
-    count: B.uint8_le,
-    speed: B.uint8_le,
-    random: B.uint8_le
+    count: B.uint8,
+    speed: B.uint8,
+    random: B.uint8
   }),
 
   P.map((fields) => ({

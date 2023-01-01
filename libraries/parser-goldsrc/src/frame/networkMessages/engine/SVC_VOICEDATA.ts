@@ -15,7 +15,7 @@ export type VoiceData = {
 };
 
 export const voiceData: B.BufferParser<VoiceData> = pipe(
-  P.struct({ playerIndex: B.uint8_le, size: B.uint16_le }),
+  P.struct({ playerIndex: B.uint8, size: B.uint16_le }),
 
   P.bind('data', ({ size }) => P.take<number>(size)),
 

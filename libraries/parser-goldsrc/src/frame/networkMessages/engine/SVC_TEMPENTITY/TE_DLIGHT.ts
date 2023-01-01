@@ -24,14 +24,14 @@ export type DLight = {
 export const dLight: B.BufferParser<DLight> = pipe(
   P.struct({
     position: coordPoint,
-    radius: B.uint8_le,
+    radius: B.uint8,
     color: P.struct({
-      r: B.uint8_le,
-      g: B.uint8_le,
-      b: B.uint8_le
+      r: B.uint8,
+      g: B.uint8,
+      b: B.uint8
     }),
-    life: B.uint8_le,
-    decayRate: B.uint8_le
+    life: B.uint8,
+    decayRate: B.uint8
   }),
 
   P.map((fields) => ({

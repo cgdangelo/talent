@@ -26,7 +26,7 @@ export const userMessage: (messageId: number) => DS.DemoStateParser<UserMessage>
               ? // If we have a sized message, return the size
                 P.of(size)
               : // If we have an unsized message, read the length first
-                B.uint8_le,
+                B.uint8,
 
             DS.lift,
 

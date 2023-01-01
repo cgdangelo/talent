@@ -18,8 +18,8 @@ export const playerSprites: B.BufferParser<PlayerSprites> = pipe(
   P.struct({
     entityIndex: B.int16_le,
     modelIndex: B.int16_le,
-    count: B.uint8_le,
-    variance: B.uint8_le
+    count: B.uint8,
+    variance: B.uint8
   }),
 
   P.map((fields) => ({

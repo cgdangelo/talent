@@ -31,7 +31,7 @@ export const messages: (messagesLength: number) => DS.DemoStateParser<readonly M
     );
 
 const message: DS.DemoStateParser<Message> = pipe(
-  DS.lift(B.uint8_le),
+  DS.lift(B.uint8),
   SP.chain(
     (messageId): DS.DemoStateParser<Message> =>
       messageId >= 64

@@ -24,13 +24,13 @@ export const beamFollow: B.BufferParser<BeamFollow> = pipe(
   P.struct({
     startEntity: B.int16_le,
     spriteIndex: B.int16_le,
-    life: B.uint8_le,
-    width: B.uint8_le,
+    life: B.uint8,
+    width: B.uint8,
     color: P.struct({
-      r: B.uint8_le,
-      g: B.uint8_le,
-      b: B.uint8_le,
-      a: B.uint8_le
+      r: B.uint8,
+      g: B.uint8,
+      b: B.uint8,
+      a: B.uint8
     })
   }),
 

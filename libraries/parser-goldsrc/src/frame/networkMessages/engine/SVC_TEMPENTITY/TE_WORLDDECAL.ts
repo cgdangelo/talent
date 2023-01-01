@@ -17,7 +17,7 @@ export type WorldDecal = {
 export const worldDecal: B.BufferParser<WorldDecal> = pipe(
   P.struct({
     position: coordPoint,
-    textureIndex: B.uint8_le
+    textureIndex: B.uint8
   }),
 
   P.map((fields) => ({

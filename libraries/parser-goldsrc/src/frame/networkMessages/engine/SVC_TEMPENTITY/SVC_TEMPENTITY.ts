@@ -71,7 +71,7 @@ export type TempEntity = {
 };
 
 export const tempEntity: B.BufferParser<TempEntity> = pipe(
-  B.uint8_le,
+  B.uint8,
   P.filter((id): id is TempEntityType => id in TempEntityType),
   P.chain((id): B.BufferParser<TempEntity['fields']> => {
     switch (id) {

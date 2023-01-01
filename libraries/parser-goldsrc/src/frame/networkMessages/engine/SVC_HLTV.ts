@@ -16,7 +16,7 @@ export type HLTV = {
 };
 
 export const hltv: B.BufferParser<HLTV> = pipe(
-  B.uint8_le,
+  B.uint8,
   P.filter((a): a is HLTV['fields']['mode']['id'] => a >= 0 && a <= 2),
   P.map((mode): HLTV['fields']['mode'] => {
     switch (mode) {

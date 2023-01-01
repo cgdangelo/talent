@@ -14,11 +14,11 @@ export type Director = {
 };
 
 export const director: B.BufferParser<Director> = pipe(
-  B.uint8_le,
+  B.uint8,
 
   P.chain((length) =>
     P.struct({
-      flag: B.uint8_le,
+      flag: B.uint8,
       message: B.ztstr_padded(length)
     })
   ),

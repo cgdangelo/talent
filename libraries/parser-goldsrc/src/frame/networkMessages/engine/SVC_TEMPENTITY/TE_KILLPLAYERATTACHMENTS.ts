@@ -12,7 +12,7 @@ export type KillPlayerAttachments = {
 };
 
 export const killPlayerAttachments: B.BufferParser<KillPlayerAttachments> = pipe(
-  P.struct({ entityIndex: B.uint8_le }),
+  P.struct({ entityIndex: B.uint8 }),
 
   P.map((fields) => ({
     id: TempEntityType.TE_KILLPLAYERATTACHMENTS,

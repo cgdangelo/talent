@@ -25,11 +25,11 @@ export const spriteTrail: B.BufferParser<SpriteTrail> = pipe(
     startPosition: coordPoint,
     endPosition: coordPoint,
     spriteIndex: B.int16_le,
-    count: B.uint8_le,
-    life: B.uint8_le,
-    scale: B.uint8_le,
-    velocity: B.uint8_le,
-    velocityRandomness: B.uint8_le
+    count: B.uint8,
+    life: B.uint8,
+    scale: B.uint8,
+    velocity: B.uint8,
+    velocityRandomness: B.uint8
   }),
 
   P.map((fields) => ({

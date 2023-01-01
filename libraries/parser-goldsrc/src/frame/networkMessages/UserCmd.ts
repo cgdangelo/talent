@@ -21,7 +21,7 @@ export type UserCmd = {
 
 export const userCmd: B.BufferParser<UserCmd> = P.struct({
   lerpMs: B.int16_le,
-  ms: B.uint8_le,
+  ms: B.uint8,
   viewAngles: pipe(P.skip<number>(1), P.apSecond(point)),
   forwardMove: B.float32_le,
   sideMove: B.float32_le,

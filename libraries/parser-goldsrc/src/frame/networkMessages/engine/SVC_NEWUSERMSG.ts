@@ -21,7 +21,7 @@ const addUserMessage = RM.upsertAt(number.Eq);
 export const newUserMsg: DS.DemoStateParser<NewUserMsg> = pipe(
   DS.lift(
     P.struct({
-      index: B.uint8_le,
+      index: B.uint8,
       size: B.int8,
 
       // TODO "Name can be represented as an array of 4 "longs"." ???

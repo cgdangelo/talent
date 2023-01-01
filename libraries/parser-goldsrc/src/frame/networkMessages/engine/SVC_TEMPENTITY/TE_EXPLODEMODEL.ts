@@ -23,7 +23,7 @@ export const explodeModel: B.BufferParser<ExplodeModel> = pipe(
     velocity: coord,
     modelIndex: B.int16_le,
     count: B.int16_le,
-    life: B.uint8_le
+    life: B.uint8
   }),
 
   P.map((fields) => ({

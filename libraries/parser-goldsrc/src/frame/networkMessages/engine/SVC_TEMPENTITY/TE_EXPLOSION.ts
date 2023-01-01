@@ -21,9 +21,9 @@ export const explosion: B.BufferParser<Explosion> = pipe(
   P.struct({
     position: coordPoint,
     spriteIndex: B.int16_le,
-    scale: B.uint8_le,
-    frameRate: B.uint8_le,
-    flags: B.uint8_le
+    scale: B.uint8,
+    frameRate: B.uint8,
+    flags: B.uint8
   }),
 
   P.map((fields) => ({

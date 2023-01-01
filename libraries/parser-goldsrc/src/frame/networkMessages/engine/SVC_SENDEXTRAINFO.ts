@@ -14,7 +14,7 @@ export type SendExtraInfo = {
 };
 
 export const sendExtraInfo: B.BufferParser<SendExtraInfo> = pipe(
-  P.struct({ fallbackDir: B.ztstr, canCheat: B.uint8_le }),
+  P.struct({ fallbackDir: B.ztstr, canCheat: B.uint8 }),
 
   P.map((fields) => ({
     id: MessageType.SVC_SENDEXTRAINFO,

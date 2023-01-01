@@ -17,7 +17,7 @@ export type PlayerAttachment = {
 
 export const playerAttachment: B.BufferParser<PlayerAttachment> = pipe(
   P.struct({
-    entityIndex: B.uint8_le,
+    entityIndex: B.uint8,
     scale: coord,
     modelIndex: B.int16_le,
     life: B.int16_le

@@ -22,7 +22,7 @@ export const streakSplash: B.BufferParser<StreakSplash> = pipe(
   P.struct({
     startPosition: coordPoint,
     vector: coordPoint,
-    color: B.uint8_le,
+    color: B.uint8,
     count: B.int16_le,
     velocity: B.int16_le,
     velocityRandomness: B.int16_le

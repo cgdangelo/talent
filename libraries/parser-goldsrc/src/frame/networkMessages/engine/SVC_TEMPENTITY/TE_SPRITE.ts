@@ -20,8 +20,8 @@ export const sprite: B.BufferParser<Sprite> = pipe(
   P.struct({
     position: coordPoint,
     spriteIndex: B.int16_le,
-    scale: B.uint8_le,
-    brightness: B.uint8_le
+    scale: B.uint8,
+    brightness: B.uint8
   }),
 
   P.map((fields) => ({

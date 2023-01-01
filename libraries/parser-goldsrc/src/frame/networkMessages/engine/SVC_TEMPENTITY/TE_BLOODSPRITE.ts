@@ -22,8 +22,8 @@ export const bloodSprite: B.BufferParser<BloodSprite> = pipe(
     position: coordPoint,
     modelIndex: B.int16_le,
     decalIndex: B.int16_le,
-    color: B.uint8_le,
-    scale: B.uint8_le
+    color: B.uint8,
+    scale: B.uint8
   }),
 
   P.map((fields) => ({

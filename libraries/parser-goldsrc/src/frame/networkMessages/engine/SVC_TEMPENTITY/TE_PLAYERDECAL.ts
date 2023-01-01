@@ -18,10 +18,10 @@ export type PlayerDecal = {
 
 export const playerDecal: B.BufferParser<PlayerDecal> = pipe(
   P.struct({
-    playerIndex: B.uint8_le,
+    playerIndex: B.uint8,
     position: coordPoint,
     entityIndex: B.int16_le,
-    decalIndex: B.uint8_le
+    decalIndex: B.uint8
     // [optional] short (model index???)
     // modelIndex: B.int16_le,
   }),

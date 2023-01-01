@@ -23,9 +23,9 @@ export const spray: B.BufferParser<Spray> = pipe(
     position: coordPoint,
     direction: coordPoint,
     modelIndex: B.int16_le,
-    count: B.uint8_le,
-    life: B.uint8_le,
-    owner: B.uint8_le
+    count: B.uint8,
+    life: B.uint8,
+    owner: B.uint8
   }),
 
   P.map((fields) => ({ id: TempEntityType.TE_SPRAY, name: 'TE_SPRAY', fields }))

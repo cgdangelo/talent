@@ -28,11 +28,11 @@ export const eLight: B.BufferParser<ELight> = pipe(
     position: coordPoint,
     radius: coord,
     color: P.struct({
-      r: B.uint8_le,
-      g: B.uint8_le,
-      b: B.uint8_le
+      r: B.uint8,
+      g: B.uint8,
+      b: B.uint8
     }),
-    life: B.uint8_le
+    life: B.uint8
   }),
 
   P.bind('decayRate', () =>

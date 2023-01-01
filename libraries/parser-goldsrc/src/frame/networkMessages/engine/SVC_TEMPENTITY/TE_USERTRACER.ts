@@ -21,9 +21,9 @@ export const userTracer: B.BufferParser<UserTracer> = pipe(
   P.struct({
     origin: coordPoint,
     velocity: coordPoint,
-    life: B.uint8_le,
-    color: B.uint8_le,
-    scale: B.uint8_le
+    life: B.uint8,
+    color: B.uint8,
+    scale: B.uint8
   }),
 
   P.map((fields) => ({

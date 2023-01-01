@@ -17,7 +17,7 @@ export const fizz: B.BufferParser<Fizz> = pipe(
   P.struct({
     entityIndex: B.int16_le,
     modelIndex: B.int16_le,
-    scale: B.uint8_le
+    scale: B.uint8
   }),
 
   P.map((fields) => ({ id: TempEntityType.TE_FIZZ, name: 'TE_FIZZ', fields }))

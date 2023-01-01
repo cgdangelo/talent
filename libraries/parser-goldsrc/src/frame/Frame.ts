@@ -35,7 +35,7 @@ export type Frame =
 const frameType = DS.lift(
   P.expected(
     pipe(
-      B.uint8_le,
+      B.uint8,
       P.filter((a) => a >= 0 && a <= 9)
     ),
     'frame type id [0, 9]'

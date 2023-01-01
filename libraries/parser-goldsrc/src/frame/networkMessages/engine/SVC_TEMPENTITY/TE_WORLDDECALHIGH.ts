@@ -17,7 +17,7 @@ export type WorldDecalHigh = {
 export const worldDecalHigh: B.BufferParser<WorldDecalHigh> = pipe(
   P.struct({
     position: coordPoint,
-    decalIndex: B.uint8_le
+    decalIndex: B.uint8
   }),
 
   P.map((fields) => ({

@@ -23,8 +23,8 @@ export const multiGunshot: B.BufferParser<MultiGunshot> = pipe(
       P.tuple(coord, coord),
       P.map(([x, y]) => ({ x, y, z: 0 }))
     ),
-    count: B.uint8_le,
-    decalIndex: B.uint8_le
+    count: B.uint8,
+    decalIndex: B.uint8
   }),
 
   P.map((fields) => ({

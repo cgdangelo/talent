@@ -25,11 +25,11 @@ export const breakModel: B.BufferParser<BreakModel> = pipe(
     position: coordPoint,
     size: coordPoint,
     velocity: coordPoint,
-    velocityRandomness: B.uint8_le,
+    velocityRandomness: B.uint8,
     objectIndex: B.int16_le,
-    count: B.uint8_le,
-    life: B.uint8_le,
-    flags: B.uint8_le
+    count: B.uint8,
+    life: B.uint8,
+    flags: B.uint8
   }),
 
   P.map((fields) => ({

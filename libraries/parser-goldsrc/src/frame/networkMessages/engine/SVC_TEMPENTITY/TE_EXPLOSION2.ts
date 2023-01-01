@@ -18,8 +18,8 @@ export type Explosion2 = {
 export const explosion2: B.BufferParser<Explosion2> = pipe(
   P.struct({
     position: coordPoint,
-    color: B.uint8_le,
-    count: B.uint8_le
+    color: B.uint8,
+    count: B.uint8
   }),
 
   P.map((fields) => ({

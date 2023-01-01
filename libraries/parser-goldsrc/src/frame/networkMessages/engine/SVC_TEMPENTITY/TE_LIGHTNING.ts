@@ -22,9 +22,9 @@ export const lightning: B.BufferParser<Lightning> = pipe(
   P.struct({
     startPosition: coordPoint,
     endPosition: coordPoint,
-    life: B.uint8_le,
-    width: B.uint8_le,
-    noise: B.uint8_le,
+    life: B.uint8,
+    width: B.uint8,
+    noise: B.uint8,
     modelIndex: B.int16_le
   }),
 

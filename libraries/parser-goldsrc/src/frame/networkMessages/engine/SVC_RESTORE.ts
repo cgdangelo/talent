@@ -15,7 +15,7 @@ export type Restore = {
 };
 
 export const restore: B.BufferParser<Restore> = pipe(
-  P.struct({ saveName: B.ztstr, mapCount: B.uint8_le }),
+  P.struct({ saveName: B.ztstr, mapCount: B.uint8 }),
   P.bind('mapNames', ({ mapCount }) => P.manyN(B.ztstr, mapCount)),
 
   P.map((fields) => ({

@@ -29,8 +29,8 @@ export const particle: B.BufferParser<Particle> = pipe(
     // TODO Value must be [-128, 127]
     direction: pointBy(B.int8),
 
-    count: B.uint8_le,
-    color: B.uint8_le
+    count: B.uint8,
+    color: B.uint8
   }),
 
   P.map((fields) => ({

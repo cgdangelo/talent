@@ -15,7 +15,7 @@ export type LightStyle = {
 
 // TODO Parse light info
 export const lightStyle: B.BufferParser<LightStyle> = pipe(
-  P.struct({ index: B.uint8_le, lightInfo: B.ztstr }),
+  P.struct({ index: B.uint8, lightInfo: B.ztstr }),
 
   P.map((fields) => ({
     id: MessageType.SVC_LIGHTSTYLE,

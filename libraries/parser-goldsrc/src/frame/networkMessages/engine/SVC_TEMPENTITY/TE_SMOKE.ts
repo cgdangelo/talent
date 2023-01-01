@@ -20,8 +20,8 @@ export const smoke: B.BufferParser<Smoke> = pipe(
   P.struct({
     position: coordPoint,
     spriteIndex: B.int16_le,
-    scale: B.uint8_le,
-    frameRate: B.uint8_le
+    scale: B.uint8,
+    frameRate: B.uint8
   }),
 
   P.map((fields) => ({ id: TempEntityType.TE_SMOKE, name: 'TE_SMOKE', fields }))

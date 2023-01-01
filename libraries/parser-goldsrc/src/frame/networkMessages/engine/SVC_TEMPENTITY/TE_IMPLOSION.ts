@@ -19,9 +19,9 @@ export type Implosion = {
 export const implosion: B.BufferParser<Implosion> = pipe(
   P.struct({
     position: coordPoint,
-    radius: B.uint8_le,
-    count: B.uint8_le,
-    life: B.uint8_le
+    radius: B.uint8,
+    count: B.uint8,
+    life: B.uint8
   }),
 
   P.map((fields) => ({

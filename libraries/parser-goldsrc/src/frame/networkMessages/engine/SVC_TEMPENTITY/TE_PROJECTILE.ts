@@ -22,8 +22,8 @@ export const projectile: B.BufferParser<Projectile> = pipe(
     position: coordPoint,
     velocity: coordPoint,
     modelIndex: B.int16_le,
-    life: B.uint8_le,
-    color: B.uint8_le
+    life: B.uint8,
+    color: B.uint8
   }),
 
   P.map((fields) => ({

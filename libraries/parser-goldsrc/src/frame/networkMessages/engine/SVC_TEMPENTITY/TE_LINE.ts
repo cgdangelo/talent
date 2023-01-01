@@ -26,9 +26,9 @@ export const line: B.BufferParser<Line> = pipe(
     endPosition: coordPoint,
     life: B.int16_le,
     color: P.struct({
-      r: B.uint8_le,
-      g: B.uint8_le,
-      b: B.uint8_le
+      r: B.uint8,
+      g: B.uint8,
+      b: B.uint8
     })
   }),
 

@@ -41,7 +41,7 @@ export type TextMessage = {
 
 export const textMessage: B.BufferParser<TextMessage> = pipe(
   P.struct({
-    channel: B.uint8_le,
+    channel: B.uint8,
     position: P.struct({
       x: pipe(
         B.int16_le
@@ -53,20 +53,20 @@ export const textMessage: B.BufferParser<TextMessage> = pipe(
       )
     }),
     effect: pipe(
-      B.uint8_le,
+      B.uint8,
       P.filter((a): a is TE_TEXTMESSAGE_FX => a === 0 || a === 1 || a === 2)
     ),
     textColor: P.struct({
-      r: B.uint8_le,
-      g: B.uint8_le,
-      b: B.uint8_le,
-      a: B.uint8_le
+      r: B.uint8,
+      g: B.uint8,
+      b: B.uint8,
+      a: B.uint8
     }),
     effectColor: P.struct({
-      r: B.uint8_le,
-      g: B.uint8_le,
-      b: B.uint8_le,
-      a: B.uint8_le
+      r: B.uint8,
+      g: B.uint8,
+      b: B.uint8,
+      a: B.uint8
     }),
     fadeIn: pipe(
       B.int16_le

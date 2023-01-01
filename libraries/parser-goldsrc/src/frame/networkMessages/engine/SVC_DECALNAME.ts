@@ -14,7 +14,7 @@ export type DecalName = {
 };
 
 export const decalName: B.BufferParser<DecalName> = pipe(
-  P.struct({ positionIndex: B.uint8_le, decalName: B.ztstr }),
+  P.struct({ positionIndex: B.uint8, decalName: B.ztstr }),
 
   P.map((fields) => ({
     id: MessageType.SVC_DECALNAME,

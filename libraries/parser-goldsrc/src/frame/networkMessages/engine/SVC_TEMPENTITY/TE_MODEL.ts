@@ -31,9 +31,9 @@ export const model: B.BufferParser<Model> = pipe(
       P.map((yaw) => ({ pitch: 0, yaw, roll: 0 }))
     ),
     modelIndex: B.int16_le,
-    flags: B.uint8_le,
+    flags: B.uint8,
     life: pipe(
-      B.uint8_le
+      B.uint8
       // P.map((a) => a * 10)
     )
   }),

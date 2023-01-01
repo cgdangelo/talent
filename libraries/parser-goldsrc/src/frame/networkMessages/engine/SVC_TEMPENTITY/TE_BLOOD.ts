@@ -20,8 +20,8 @@ export const blood: B.BufferParser<Blood> = pipe(
   P.struct({
     position: coordPoint,
     vector: coordPoint,
-    color: B.uint8_le,
-    count: B.uint8_le
+    color: B.uint8,
+    count: B.uint8
   }),
 
   P.map((fields) => ({ id: TempEntityType.TE_BLOOD, name: 'TE_BLOOD', fields }))

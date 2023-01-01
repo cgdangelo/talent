@@ -19,7 +19,7 @@ export const gunshotDecal: B.BufferParser<GunshotDecal> = pipe(
   P.struct({
     position: coordPoint,
     entityIndex: B.int16_le,
-    decal: B.uint8_le
+    decal: B.uint8
   }),
 
   P.map((fields) => ({

@@ -20,12 +20,12 @@ export type Customization = {
 
 export const customization: B.BufferParser<Customization> = pipe(
   P.struct({
-    playerIndex: B.uint8_le,
-    type: B.uint8_le,
+    playerIndex: B.uint8,
+    type: B.uint8,
     name: B.ztstr,
     index: B.uint16_le,
     downloadSize: B.uint32_le,
-    flags: B.uint8_le
+    flags: B.uint8
   }),
 
   P.bind('md5Hash', ({ flags }) => ((flags & 4) !== 0 ? P.take(16) : P.of(undefined))),

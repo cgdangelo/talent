@@ -17,10 +17,10 @@ export type SoundFade = {
 
 export const soundFade: B.BufferParser<SoundFade> = pipe(
   P.struct({
-    initialPercent: B.uint8_le,
-    holdTime: B.uint8_le,
-    fadeOutTime: B.uint8_le,
-    fadeInTime: B.uint8_le
+    initialPercent: B.uint8,
+    holdTime: B.uint8,
+    fadeOutTime: B.uint8,
+    fadeInTime: B.uint8
   }),
 
   P.map((fields) => ({

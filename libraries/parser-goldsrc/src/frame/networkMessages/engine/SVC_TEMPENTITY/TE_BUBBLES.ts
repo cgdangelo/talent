@@ -24,7 +24,7 @@ export const bubbles: B.BufferParser<Bubbles> = pipe(
     maxStartPosition: coordPoint,
     scale: coord,
     modelIndex: B.int16_le,
-    count: B.uint8_le,
+    count: B.uint8,
     speed: coord
   }),
 

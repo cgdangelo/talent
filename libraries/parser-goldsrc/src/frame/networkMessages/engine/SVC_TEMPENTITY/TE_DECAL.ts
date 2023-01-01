@@ -18,7 +18,7 @@ export type Decal = {
 export const decal: B.BufferParser<Decal> = pipe(
   P.struct({
     position: coordPoint,
-    decalIndex: B.uint8_le,
+    decalIndex: B.uint8,
     entityIndex: B.int16_le
   }),
 
