@@ -32,7 +32,7 @@ export const newMoveVars: B.BufferParser<NewMoveVars> = pipe(
     maxVelocity: B.float32_le,
     zMax: B.float32_le,
     waveHeight: B.float32_le,
-    footsteps: B.int8_le,
+    footsteps: B.int8,
     rollAngle: B.float32_le,
     rollSpeed: B.float32_le,
     skyColor: pipe(

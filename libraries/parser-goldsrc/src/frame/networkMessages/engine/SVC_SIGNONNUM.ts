@@ -13,7 +13,7 @@ export type SignOnNum = {
 };
 
 export const signOnNum: B.BufferParser<SignOnNum> = pipe(
-  P.struct({ sign: B.int8_le }),
+  P.struct({ sign: B.int8 }),
 
   P.map((fields) => ({
     id: MessageType.SVC_SIGNONNUM,

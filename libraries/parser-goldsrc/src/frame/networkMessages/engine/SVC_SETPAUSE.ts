@@ -13,7 +13,7 @@ export type SetPause = {
 };
 
 export const setPause: B.BufferParser<SetPause> = pipe(
-  P.struct({ isPaused: B.int8_le }),
+  P.struct({ isPaused: B.int8 }),
 
   P.map((fields) => ({
     id: MessageType.SVC_SETPAUSE,

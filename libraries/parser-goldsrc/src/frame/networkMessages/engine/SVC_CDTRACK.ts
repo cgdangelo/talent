@@ -14,7 +14,7 @@ export type CDTrack = {
 };
 
 export const cdTrack: B.BufferParser<CDTrack> = pipe(
-  P.struct({ track: B.int8_le, loopTrack: B.int8_le }),
+  P.struct({ track: B.int8, loopTrack: B.int8 }),
 
   P.map((fields) => ({
     id: MessageType.SVC_CDTRACK,

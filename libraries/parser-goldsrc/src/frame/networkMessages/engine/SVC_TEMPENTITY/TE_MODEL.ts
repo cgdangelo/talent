@@ -27,7 +27,7 @@ export const model: B.BufferParser<Model> = pipe(
     position: coordPoint,
     velocity: coordPoint,
     angle: pipe(
-      B.int8_le, // TODO ???
+      B.int8, // TODO ???
       P.map((yaw) => ({ pitch: 0, yaw, roll: 0 }))
     ),
     modelIndex: B.int16_le,

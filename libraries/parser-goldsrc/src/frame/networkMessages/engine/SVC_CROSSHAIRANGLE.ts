@@ -14,7 +14,7 @@ export type CrosshairAngle = {
 };
 
 export const crosshairAngle: B.BufferParser<CrosshairAngle> = pipe(
-  P.struct({ pitch: B.int8_le, yaw: B.int8_le }),
+  P.struct({ pitch: B.int8, yaw: B.int8 }),
 
   P.map((fields) => ({
     id: MessageType.SVC_CROSSHAIRANGLE,

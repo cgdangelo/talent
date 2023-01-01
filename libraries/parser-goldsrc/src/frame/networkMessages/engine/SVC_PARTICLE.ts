@@ -27,7 +27,7 @@ export const particle: B.BufferParser<Particle> = pipe(
 
     // TODO AlliedMods says 1/16, hlviewer does not scale
     // TODO Value must be [-128, 127]
-    direction: pointBy(B.int8_le),
+    direction: pointBy(B.int8),
 
     count: B.uint8_le,
     color: B.uint8_le

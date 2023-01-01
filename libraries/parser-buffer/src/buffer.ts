@@ -46,7 +46,7 @@ export const uint32_le: BufferParser<number> = uint_le(32);
 export const int16_le: BufferParser<number> = int_le(16);
 export const uint16_le: BufferParser<number> = uint_le(16);
 
-export const int8_le: BufferParser<number> = int_le(8);
+export const int8: BufferParser<number> = int_le(8);
 export const uint8_le: BufferParser<number> = uint_le(8);
 
 export const float32_le: BufferParser<number> = pipe(

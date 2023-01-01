@@ -14,7 +14,7 @@ export type VoiceInit = {
 };
 
 export const voiceInit: B.BufferParser<VoiceInit> = pipe(
-  P.struct({ codecName: B.ztstr, quality: B.int8_le }),
+  P.struct({ codecName: B.ztstr, quality: B.int8 }),
 
   P.map((fields) => ({
     id: MessageType.SVC_VOICEINIT,

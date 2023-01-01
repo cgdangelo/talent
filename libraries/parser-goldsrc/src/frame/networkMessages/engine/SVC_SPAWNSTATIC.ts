@@ -29,10 +29,10 @@ export type SpawnStatic = {
 export const spawnStatic: B.BufferParser<SpawnStatic> = pipe(
   P.struct({
     modelIndex: B.int16_le,
-    sequence: B.int8_le,
-    frame: B.int8_le,
+    sequence: B.int8,
+    frame: B.int8,
     colorMap: B.int16_le,
-    skin: B.int8_le
+    skin: B.int8
     // origin: point,
   }),
 
@@ -48,7 +48,7 @@ export const spawnStatic: B.BufferParser<SpawnStatic> = pipe(
         ),
 
         pipe(
-          B.int8_le,
+          B.int8,
           P.map((a) => a * (360 / 256))
         )
       ] as const,
@@ -65,7 +65,7 @@ export const spawnStatic: B.BufferParser<SpawnStatic> = pipe(
 
   P.chain((a) =>
     pipe(
-      P.struct({ renderMode: B.int8_le }),
+      P.struct({ renderMode: B.int8 }),
       P.map((b) => ({ ...a, ...b }))
     )
   ),

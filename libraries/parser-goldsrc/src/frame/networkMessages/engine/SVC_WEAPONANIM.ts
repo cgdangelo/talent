@@ -14,7 +14,7 @@ export type WeaponAnim = {
 };
 
 export const weaponAnim: B.BufferParser<WeaponAnim> = pipe(
-  P.struct({ sequenceNumber: B.int8_le, weaponModelBodyGroup: B.int8_le }),
+  P.struct({ sequenceNumber: B.int8, weaponModelBodyGroup: B.int8 }),
 
   P.map((fields) => ({
     id: MessageType.SVC_WEAPONANIM,
