@@ -2,6 +2,23 @@
   "name": "@cgdangelo/talent-parser-goldsrc",
   "entries": [
     {
+      "version": "0.1.2",
+      "tag": "@cgdangelo/talent-parser-goldsrc_v0.1.2",
+      "date": "Sun, 01 Jan 2023 21:56:55 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "(parser-buffer) Remove endianness from single byte parsers"
+          }
+        ],
+        "none": [
+          {
+            "comment": "Bump eslint"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.1.1",
       "tag": "@cgdangelo/talent-parser-goldsrc_v0.1.1",
       "date": "Sat, 31 Dec 2022 16:46:52 GMT",
