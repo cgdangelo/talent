@@ -2,9 +2,10 @@
 require('@rushstack/eslint-config/patch/modern-module-resolution');
 
 module.exports = {
-  extends: ['@rushstack/eslint-config/profile/node'],
-  parserOptions: { tsconfigRootDir: __dirname },
-  rules: {
-    '@typescript-eslint/no-use-before-define': 'warn'
-  }
+  extends: [
+    '@rushstack/eslint-config/profile/node',
+    '@rushstack/eslint-config/mixins/packlets',
+    '@rushstack/eslint-config/mixins/tsdoc'
+  ],
+  parserOptions: { tsconfigRootDir: __dirname }
 };
