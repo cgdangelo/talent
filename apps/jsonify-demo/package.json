@@ -22,7 +22,7 @@
     "@rushstack/heft-node-rig": "~1.11.11",
     "@rushstack/heft": "~0.49.0",
     "@rushstack/eslint-config": "~3.1.1",
-    "eslint": "~8.30.0",
+    "eslint": "~8.31.0",
     "typescript": "~4.9.4",
     "@types/heft-jest": "1.0.3",
     "@types/node": "18.11.18"
