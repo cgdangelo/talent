@@ -49,9 +49,6 @@ export const uint16_le: BufferParser<number> = uint_le(16);
 export const int8_le: BufferParser<number> = int_le(8);
 export const uint8_le: BufferParser<number> = uint_le(8);
 
-export const uint8_be: BufferParser<number> = uint_be(8);
-export const int8_be: BufferParser<number> = int_be(8);
-
 export const float32_le: BufferParser<number> = pipe(
   P.take<number>(4),
   P.map((as) => Buffer.from(as)),
