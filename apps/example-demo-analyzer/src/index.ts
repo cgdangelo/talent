@@ -30,7 +30,7 @@ async function main(demoPath?: PathLike): Promise<void> {
 
   // Use case: tracking player movement through NetworkMessages.frameData.refParams.viewOrigin.
   // Use case: reading metadata embedded in ConsoleCommand.frameData.
-  //   demoEvents.on('demo:frame', (directoryEntry) => console.log('DemoAnalyzer | Frame', directoryEntry));
+  //   demoEvents.on('demo:frame', (frame) => console.log('DemoAnalyzer | Frame', frame));
 
   // Use case: tracking player name changes through SVC_UPDATEUSERINFO.
   demoEvents.on('demo:netmessage:engine', (message) => console.log('DemoAnalyzer | Engine message', message));
