@@ -2,6 +2,12 @@
   "name": "@cgdangelo/talent-parser-goldsrc",
   "entries": [
     {
+      "version": "0.1.3",
+      "tag": "@cgdangelo/talent-parser-goldsrc_v0.1.3",
+      "date": "Wed, 04 Jan 2023 09:29:36 GMT",
+      "comments": {}
+    },
+    {
       "version": "0.1.2",
       "tag": "@cgdangelo/talent-parser-goldsrc_v0.1.2",
       "date": "Sun, 01 Jan 2023 21:56:55 GMT",
