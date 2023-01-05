@@ -6,8 +6,10 @@ import { pipe } from 'fp-ts/lib/function';
 
 export type BufferParser<A> = P.Parser<number, A>;
 
-const makeIntParser: (
-  fa: Buffer[`read${'U' | ''}Int${'L' | 'B'}E`]
+type BitLength = 8 | 16 | 24 | 32 | 40 | 48;
+
+const makeBufferParser: (
+  fa: Buffer[`read${`${'U' | ''}Int` | 'Float'}${'L' | 'B'}E`]
 ) => (bitLength: BitLength) => BufferParser<number> = (fa) => (bitLength) =>
   pipe(
     P.take<number>(bitLength / 8),
@@ -22,21 +24,19 @@ const makeIntParser: (
     )
   );
 
-type BitLength = 8 | 16 | 24 | 32 | 40 | 48;
-
-export const int_le: (bitLength: BitLength) => BufferParser<number> = makeIntParser(
+export const int_le: (bitLength: BitLength) => BufferParser<number> = makeBufferParser(
   Buffer.prototype.readIntLE
 );
 
-export const uint_le: (bitLength: BitLength) => BufferParser<number> = makeIntParser(
+export const uint_le: (bitLength: BitLength) => BufferParser<number> = makeBufferParser(
   Buffer.prototype.readUIntLE
 );
 
-export const int_be: (bitLength: BitLength) => BufferParser<number> = makeIntParser(
+export const int_be: (bitLength: BitLength) => BufferParser<number> = makeBufferParser(
   Buffer.prototype.readIntBE
 );
 
-export const uint_be: (bitLength: BitLength) => BufferParser<number> = makeIntParser(
+export const uint_be: (bitLength: BitLength) => BufferParser<number> = makeBufferParser(
   Buffer.prototype.readUIntBE
 );
 
@@ -49,11 +49,7 @@ export const uint16_le: BufferParser<number> = uint_le(16);
 export const int8: BufferParser<number> = int_le(8);
 export const uint8: BufferParser<number> = uint_le(8);
 
-export const float32_le: BufferParser<number> = pipe(
-  P.take<number>(4),
-  P.map((as) => Buffer.from(as)),
-  P.map((buffer) => buffer.readFloatLE())
-);
+export const float32_le: BufferParser<number> = makeBufferParser(Buffer.prototype.readFloatLE)(32);
 
 export const char: BufferParser<string> = pipe(int_le(8), P.map(String.fromCharCode));
 

@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@cgdangelo/talent-parser-goldsrc",
+      "comment": "(parser-buffer) Reduce buffer creation",
+      "type": "none"
+    }
+  ],
+  "packageName": "@cgdangelo/talent-parser-goldsrc"
+}
