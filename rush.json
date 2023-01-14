@@ -527,6 +527,12 @@
     },
 
     {
+      "packageName": "@cgdangelo/talent-demo-rxjs-analyzer",
+      "projectFolder": "apps/demo-rxjs-analyzer",
+      "shouldPublish": false
+    },
+
+    {
       "packageName": "@cgdangelo/talent-example-demo-analyzer",
       "projectFolder": "apps/example-demo-analyzer",
       "shouldPublish": false
