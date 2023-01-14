@@ -11,7 +11,8 @@
     "test": "heft test --clean"
   },
   "dependencies": {
-    "@cgdangelo/talent-parser-goldsrc": "workspace:*"
+    "@cgdangelo/talent-parser-goldsrc": "workspace:*",
+    "rxjs": "~7.8.0"
   },
   "devDependencies": {
     "@rushstack/heft-node-rig": "~1.11.11",
