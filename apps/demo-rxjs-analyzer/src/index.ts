@@ -1,9 +1,16 @@
-import { Frame, IDemoEventEmitter, parseDemo, UserMessage } from '@cgdangelo/talent-parser-goldsrc';
+import {
+  EngineMessage,
+  Frame,
+  IDemoEventEmitter,
+  parseDemo,
+  UserMessage
+} from '@cgdangelo/talent-parser-goldsrc';
 import { NetworkMessages } from '@cgdangelo/talent-parser-goldsrc/lib/frame/networkMessages/NetworkMessages';
 import { EventEmitter } from 'events';
 import { PathLike } from 'fs';
 import { readFile } from 'fs/promises';
 import {
+  EMPTY,
   filter,
   from,
   fromEvent,
@@ -11,7 +18,9 @@ import {
   merge,
   mergeMap,
   Observable,
+  of,
   reduce,
+  scan,
   takeUntil,
   withLatestFrom
 } from 'rxjs';
@@ -41,6 +50,16 @@ async function main(demoPath?: PathLike): Promise<void> {
     filter((frame): frame is NetworkMessages => frame.type === 'NetworkMessages')
   );
 
+  const engineMessage$: Observable<EngineMessage & { parentFrame: NetworkMessages }> = networkMessages$.pipe(
+    mergeMap((networkMessages) =>
+      from(networkMessages.frameData.messages).pipe(
+        filter((message) => message.type === 'engine'),
+        map((message) => message.message as EngineMessage),
+        map((engineMessage) => ({ ...engineMessage, parentFrame: networkMessages }))
+      )
+    )
+  );
+
   const userMessage$: Observable<UserMessage & { parentFrame: NetworkMessages }> = networkMessages$.pipe(
     mergeMap((networkMessages) =>
       from(networkMessages.frameData.messages).pipe(
@@ -51,15 +70,13 @@ async function main(demoPath?: PathLike): Promise<void> {
     )
   );
 
-  const roundState$ = userMessage$.pipe(
+  const roundStateChange$: Observable<IRoundStateChangeEvent> = userMessage$.pipe(
     filter((userMessage) => userMessage.name === 'RoundState'),
-    map((roundState) => ({ ...roundState, data: roundState.data.readInt8(0) }))
-  );
+    map((roundState) => {
+      const roundStateIndex = roundState.data.readInt8(0);
 
-  const roundStateChange$: Observable<IRoundStateChangeEvent> = roundState$.pipe(
-    map((roundState) => ({
-      type: (() => {
-        switch (roundState.data) {
+      const type = (() => {
+        switch (roundStateIndex) {
           case 0:
             return 'reset' as const;
           case 1:
@@ -72,10 +89,10 @@ async function main(demoPath?: PathLike): Promise<void> {
           default:
             return 'unknown' as const;
         }
-      })(),
+      })();
 
-      timeS: roundState.parentFrame.header.time
-    }))
+      return { timeS: roundState.parentFrame.header.time, type };
+    })
   );
 
   const roundStart$ = roundStateChange$.pipe(
@@ -92,12 +109,12 @@ async function main(demoPath?: PathLike): Promise<void> {
     }))
   );
 
-  const roundWinLogger$ = roundWin$.pipe(
+  const roundWinFeed$ = roundWin$.pipe(
     map((roundWin) => {
+      const frameTime = `t=${roundWin.timeS.toFixed(3)}s`.padEnd(12);
       const winningTeam = roundWin.team;
-      const frameTime = `t=${roundWin.timeS.toFixed(3)}`;
 
-      return `Round win: ${winningTeam} | ${frameTime}`;
+      return `🟢 | ${frameTime} | Round win: ${winningTeam}.`;
     })
   );
 
@@ -106,7 +123,75 @@ async function main(demoPath?: PathLike): Promise<void> {
     map((meanRoundDurationS) => `Mean round duration: ${meanRoundDurationS}`)
   );
 
-  merge(roundWinLogger$, roundDurationMetrics$).subscribe(console.debug);
+  const players$: Observable<Partial<Record<number, { name: string; team?: string }>>> = engineMessage$.pipe(
+    mergeMap((engineMessage) => (engineMessage.name === 'SVC_UPDATEUSERINFO' ? of(engineMessage) : EMPTY)),
+    filter((updateUserInfo) => updateUserInfo.fields.clientUserInfo['*hltv'] !== '1'),
+    scan((acc, cur) => {
+      const clientIndex = cur.fields.clientIndex;
+      const name = cur.fields.clientUserInfo.name;
+      const team = cur.fields.clientUserInfo.team;
+
+      return { ...acc, [clientIndex]: { name, team } };
+    })
+  );
+
+  const frag$: Observable<IFragEvent> = userMessage$.pipe(
+    filter((userMessage) => userMessage.name === 'DeathMsg'),
+    map((userMessage) => {
+      const killerClientIndex = userMessage.data.readInt8(0) - 1;
+      const victimClientIndex = userMessage.data.readInt8(1) - 1;
+      const weaponIndex = userMessage.data.readInt8(2) - 1;
+
+      return {
+        timeS: userMessage.parentFrame.header.time,
+        killerClientIndex: killerClientIndex === -1 ? victimClientIndex : killerClientIndex,
+        victimClientIndex,
+        weaponIndex
+      };
+    }),
+    withLatestFrom(players$),
+    map(([frag, players]) => {
+      const killerName = players[frag.killerClientIndex]?.name;
+      const victimName = players[frag.victimClientIndex]?.name;
+
+      if (!killerName) {
+        throw new Error(`Can't find killer {${frag.killerClientIndex}} to construct IFragEvent.`);
+      }
+
+      if (!victimName) {
+        throw new Error(`Can't find victim {${frag.victimClientIndex}} to construct IFragEvent.`);
+      }
+
+      const isTeamkill = players[frag.killerClientIndex]?.team === players[frag.victimClientIndex]?.team;
+
+      const weaponName = weaponIndexToName(frag.weaponIndex);
+
+      return {
+        timeS: frag.timeS,
+        killerName,
+        victimName,
+        isTeamkill,
+        weaponName
+      };
+    })
+  );
+
+  const killFeed$ = frag$.pipe(
+    map((frag) => {
+      const frameTime = `t=${frag.timeS.toFixed(3)}s`.padEnd(12);
+      const killer = `{${frag.killerName}}`;
+      const fragAction = `${frag.isTeamkill ? 'team' : ''}killed`;
+      const victim = `{${frag.victimName}}`;
+      const weaponName = `{${frag.weaponName}}`;
+
+      return `💀 | ${frameTime} | ${killer} ${fragAction} ${victim} with ${weaponName}.`;
+    })
+  );
+
+  merge(roundWinFeed$, roundDurationMetrics$, killFeed$).subscribe({
+    next: console.log,
+    error: console.error
+  });
 
   // Run the parser; the parser will emit events through the `demoEvents` bus as the file is evaluated.
   parseDemo(fileContents, demoEvents);
@@ -114,27 +199,95 @@ async function main(demoPath?: PathLike): Promise<void> {
 
 /** Emitted when RoundState message is parsed. */
 interface IRoundStateChangeEvent {
+  /** Time, in seconds, since beginning of demo. */
+  timeS: number;
+
   /** Type of the round state. */
   type:
     | 'reset' // Round reset (freeze time).
     | 'normal' // Round start.
     | 'unknown' // 2 | ???
     | `win-${'allies' | 'axis'}`; // Allies or axis team won the round.
-
-  /** Time, in seconds, since beginning of demo. */
-  timeS: number;
 }
 
 /** Emitted when one team completes all objectives and wins the round. */
 interface IRoundWinEvent {
+  /** Time, in seconds, since beginning of demo. */
+  timeS: number;
+
   /** Name of the team that won the round. */
   team: 'allies' | 'axis';
 
   /** Time, in seconds, between the round start event and the round win event. */
   roundDurationS: number;
+}
 
+interface IFragEvent {
   /** Time, in seconds, since beginning of demo. */
   timeS: number;
+
+  /** Name of the killer at the time of the frag. */
+  killerName: string;
+
+  /** Name of the victim at the time of the frag. */
+  victimName: string;
+
+  /** True if killer and victim are on the same team. */
+  isTeamkill: boolean;
+
+  /** Name of the weapon used to kill the victim. */
+  weaponName?: DoDWeapon;
+}
+
+// eslint-disable-next-line @rushstack/typedef-var
+const dodWeapons = [
+  'DODW_AMERKNIFE',
+  'DODW_GERKNIFE',
+  'DODW_COLT',
+  'DODW_LUGER',
+  'DODW_GARAND',
+  'DODW_SCOPED_KAR',
+  'DODW_THOMPSON',
+  'DODW_STG44',
+  'DODW_SPRINGFIELD',
+  'DODW_KAR',
+  'DODW_BAR',
+  'DODW_MP40',
+  'DODW_HANDGRENADE',
+  'DODW_STICKGRENADE',
+  'DODW_STICKGRENADE_EX',
+  'DODW_HANDGRENADE_EX',
+  'DODW_MG42',
+  'DODW_30_CAL',
+  'DODW_SPADE',
+  'DODW_M1_CARBINE',
+  'DODW_MG34',
+  'DODW_GREASEGUN',
+  'DODW_FG42',
+  'DODW_K43',
+  'DODW_ENFIELD',
+  'DODW_STEN',
+  'DODW_BREN',
+  'DODW_WEBLEY',
+  'DODW_BAZOOKA',
+  'DODW_PANZERSCHRECK',
+  'DODW_PIAT',
+  'DODW_SCOPED_FG42',
+  'DODW_FOLDING_CARBINE',
+  'DODW_KAR_BAYONET',
+  'DODW_SCOPED_ENFIELD',
+  'DODW_MILLS_BOMB',
+  'DODW_BRITKNIFE',
+  'DODW_GARAND_BUTT',
+  'DODW_ENFIELD_BAYONET',
+  'DODW_MORTAR',
+  'DODW_K43_BUTT'
+] as const;
+
+type DoDWeapon = typeof dodWeapons[number];
+
+function weaponIndexToName(weaponIndex: number): DoDWeapon {
+  return dodWeapons[weaponIndex];
 }
 
 main(process.argv[2]).catch(console.error);
