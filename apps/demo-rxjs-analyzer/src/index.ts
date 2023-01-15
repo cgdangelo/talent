@@ -109,13 +109,38 @@ async function main(demoPath?: PathLike): Promise<void> {
     }))
   );
 
-  const roundWinFeed$ = roundWin$.pipe(
-    map((roundWin) => {
-      const frameTime = `t=${roundWin.timeS.toFixed(3)}s`.padEnd(12);
-      const winningTeam = roundWin.team;
+  const roundFeed$ = merge(
+    userMessage$.pipe(
+      filter((userMessage) => userMessage.name === 'ClanTimer'),
+      map((userMessage) => {
+        const frameTime = `t=${userMessage.parentFrame.header.time.toFixed(3)}s`.padEnd(12);
+        const timerLength = userMessage.data.readInt8(0);
+        return `⚔️  | ${frameTime} | Clan timer: ${timerLength}.`;
+      })
+    ),
 
-      return `🟢 | ${frameTime} | Round win: ${winningTeam}.`;
-    })
+    roundStateChange$.pipe(
+      filter((roundStateChange) => roundStateChange.type === 'reset'),
+      map((roundStateChange) => {
+        const frameTime = `t=${roundStateChange.timeS.toFixed(3)}s`.padEnd(12);
+        return `🟡 | ${frameTime} | Round RESET.`;
+      })
+    ),
+
+    roundStart$.pipe(
+      map((roundStateChange) => {
+        const frameTime = `t=${roundStateChange.timeS.toFixed(3)}s`.padEnd(12);
+        return `🟢 | ${frameTime} | Round START.`;
+      })
+    ),
+
+    roundWin$.pipe(
+      map((roundWin) => {
+        const frameTime = `t=${roundWin.timeS.toFixed(3)}s`.padEnd(12);
+        const winningTeam = `{${roundWin.team}}`;
+        return `🔴 | ${frameTime} | Round WIN ${winningTeam}.`;
+      })
+    )
   );
 
   const roundDurationMetrics$ = roundWin$.pipe(
@@ -130,7 +155,6 @@ async function main(demoPath?: PathLike): Promise<void> {
       const clientIndex = cur.fields.clientIndex;
       const name = cur.fields.clientUserInfo.name;
       const team = cur.fields.clientUserInfo.team;
-
       return { ...acc, [clientIndex]: { name, team } };
     })
   );
@@ -188,7 +212,7 @@ async function main(demoPath?: PathLike): Promise<void> {
     })
   );
 
-  merge(roundWinFeed$, roundDurationMetrics$, killFeed$).subscribe({
+  merge(roundFeed$, roundDurationMetrics$, killFeed$).subscribe({
     next: console.log,
     error: console.error
   });
