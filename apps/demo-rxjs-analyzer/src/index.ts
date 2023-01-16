@@ -161,24 +161,25 @@ async function main(demoPath?: PathLike): Promise<void> {
     map((meanRoundDurationS) => `Mean round duration: ${meanRoundDurationS.toFixed(3)}.`)
   );
 
-  const players$: Observable<Partial<Record<number, { name: string; team?: string }>>> = engineMessage$.pipe(
-    mergeMap((engineMessage) => (engineMessage.name === 'SVC_UPDATEUSERINFO' ? of(engineMessage) : EMPTY)),
-    filter((updateUserInfo) => updateUserInfo.fields.clientUserInfo['*hltv'] !== '1'),
-    scan((acc, cur) => {
-      const clientIndex = cur.fields.clientIndex;
-      const name = cur.fields.clientUserInfo.name;
-      const team = cur.fields.clientUserInfo.team;
+  const players$: Observable<Partial<Record<number, { playerName: string; teamName?: DoDTeam }>>> =
+    engineMessage$.pipe(
+      mergeMap((engineMessage) => (engineMessage.name === 'SVC_UPDATEUSERINFO' ? of(engineMessage) : EMPTY)),
+      filter((updateUserInfo) => updateUserInfo.fields.clientUserInfo['*hltv'] !== '1'),
+      scan((acc, cur) => {
+        const clientIndex = cur.fields.clientIndex;
+        const playerName = cur.fields.clientUserInfo.name;
+        const teamName = cur.fields.clientUserInfo.team as DoDTeam;
 
-      return { ...acc, [clientIndex]: { name, team } };
-    })
-  );
+        return { ...acc, [clientIndex]: { playerName, teamName } };
+      })
+    );
 
   const frag$: Observable<IFragEvent> = userMessage$.pipe(
     filter((userMessage) => userMessage.name === 'DeathMsg'),
     map((userMessage) => {
       const killerClientIndex = userMessage.data.readInt8(0) - 1;
       const victimClientIndex = userMessage.data.readInt8(1) - 1;
-      const weaponIndex = userMessage.data.readInt8(2) - 1;
+      const weaponIndex = userMessage.data.readInt8(2);
 
       return {
         timeS: userMessage.parentFrame.header.time,
@@ -189,8 +190,8 @@ async function main(demoPath?: PathLike): Promise<void> {
     }),
     withLatestFrom(players$),
     map(([frag, players]) => {
-      const killerName = players[frag.killerClientIndex]?.name;
-      const victimName = players[frag.victimClientIndex]?.name;
+      const killerName = players[frag.killerClientIndex]?.playerName;
+      const victimName = players[frag.victimClientIndex]?.playerName;
 
       if (!killerName) {
         throw new Error(`Can't find killer {${frag.killerClientIndex}} to construct IFragEvent.`);
@@ -200,7 +201,8 @@ async function main(demoPath?: PathLike): Promise<void> {
         throw new Error(`Can't find victim {${frag.victimClientIndex}} to construct IFragEvent.`);
       }
 
-      const isTeamkill = players[frag.killerClientIndex]?.team === players[frag.victimClientIndex]?.team;
+      const isTeamkill =
+        players[frag.killerClientIndex]?.teamName === players[frag.victimClientIndex]?.teamName;
       const weaponName = weaponIndexToName(frag.weaponIndex);
 
       return { timeS: frag.timeS, killerName, victimName, isTeamkill, weaponName };
@@ -271,7 +273,7 @@ async function main(demoPath?: PathLike): Promise<void> {
     withLatestFrom(players$),
     map(([objectiveCapture, players]) => {
       const frameTime = `t=${objectiveCapture.timeS.toFixed(3)}s`.padEnd(12);
-      const playerName = `{${players[objectiveCapture.clientIndex]?.name}}`;
+      const playerName = `{${players[objectiveCapture.clientIndex]?.playerName}}`;
       const objectiveName = `{${objectiveCapture.objectiveName}}`;
       const teamName = `{${objectiveCapture.teamName}}`;
 
@@ -335,7 +337,7 @@ interface ITeamScoreEvent {
   timeS: number;
 
   /** Team's name. */
-  teamName: string;
+  teamName: DoDTeam;
 
   /** Team's score. */
   score: number;
@@ -386,12 +388,12 @@ const dodWeapons = [
   'DODW_K43_BUTT'
 ] as const;
 
-type DoDWeapon = typeof dodWeapons[number];
+type DoDWeapon = Exclude<typeof dodWeapons[number], undefined>;
 
 function weaponIndexToName(weaponIndex: number): DoDWeapon | undefined {
-  if (weaponIndex === -1) return undefined;
+  if (weaponIndex === 0) return undefined;
 
-  const weaponName = dodWeapons[weaponIndex];
+  const weaponName = dodWeapons[weaponIndex - 1];
 
   if (!weaponName) {
     throw new Error(`Can't resolve weapon ${weaponIndex}.`);
@@ -400,15 +402,19 @@ function weaponIndexToName(weaponIndex: number): DoDWeapon | undefined {
   return weaponName;
 }
 
-function teamIndexToName(teamIndex: number): string {
-  switch (teamIndex) {
-    case 1:
-      return 'allies' as const;
-    case 2:
-      return 'axis' as const;
-    default:
-      throw new Error(`Can't resolve team {${teamIndex}}.`);
+// eslint-disable-next-line @rushstack/typedef-var
+const dodTeams = ['allies', 'axis'] as const;
+
+type DoDTeam = Exclude<typeof dodTeams[number], undefined>;
+
+function teamIndexToName(teamIndex: number): DoDTeam {
+  const teamName = dodTeams[teamIndex - 1];
+
+  if (!teamName) {
+    throw new Error(`Can't resolve team {${teamIndex}}.`);
   }
+
+  return teamName;
 }
 
 main(process.argv[2]).catch(console.error);
