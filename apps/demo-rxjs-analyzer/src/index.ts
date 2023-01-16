@@ -20,6 +20,7 @@ import {
   Observable,
   of,
   reduce,
+  sample,
   scan,
   takeUntil,
   withLatestFrom
@@ -241,15 +242,17 @@ async function main(demoPath?: PathLike): Promise<void> {
   );
 
   const teamScores$ = teamScore$.pipe(
-    map((teamScore) => ({ [teamScore.teamName]: teamScore.score })),
-    scan((acc, cur) => ({ ...acc, ...cur }))
+    scan(
+      (acc, cur) => ({ ...acc, timeS: cur.timeS, [cur.teamName]: cur.score }),
+      {} as { timeS: number; [teamName: string]: number }
+    )
   );
 
-  const teamScoreFeed$ = roundReset$.pipe(
-    withLatestFrom(teamScores$),
-    map(([roundStateChange, teamScore]) => {
-      const frameTime = `t=${roundStateChange.timeS.toFixed(3)}s`.padEnd(12);
-      const scoreState = `${JSON.stringify(teamScore)}`;
+  const teamScoreFeed$ = teamScores$.pipe(
+    sample(roundReset$),
+    map(({ timeS, ...teamScores }) => {
+      const frameTime = `t=${timeS.toFixed(3)}s`.padEnd(12);
+      const scoreState = `${JSON.stringify(teamScores)}`;
 
       return `📈 | ${frameTime} | Team scores: ${scoreState}`;
     })
@@ -364,7 +367,9 @@ const dodWeapons = [
 
 type DoDWeapon = typeof dodWeapons[number];
 
-function weaponIndexToName(weaponIndex: number): DoDWeapon {
+function weaponIndexToName(weaponIndex: number): DoDWeapon | undefined {
+  if (weaponIndex === -1) return undefined;
+
   const weaponName = dodWeapons[weaponIndex];
 
   if (!weaponName) {
