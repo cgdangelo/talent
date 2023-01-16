@@ -203,13 +203,7 @@ async function main(demoPath?: PathLike): Promise<void> {
       const isTeamkill = players[frag.killerClientIndex]?.team === players[frag.victimClientIndex]?.team;
       const weaponName = weaponIndexToName(frag.weaponIndex);
 
-      return {
-        timeS: frag.timeS,
-        killerName,
-        victimName,
-        isTeamkill,
-        weaponName
-      };
+      return { timeS: frag.timeS, killerName, victimName, isTeamkill, weaponName };
     })
   );
 
@@ -230,17 +224,7 @@ async function main(demoPath?: PathLike): Promise<void> {
     map((userMessage) => {
       const teamIndex = userMessage.data.readInt8(0);
       const score = userMessage.data.readInt16LE(1);
-
-      const teamName = (() => {
-        switch (teamIndex) {
-          case 1:
-            return 'allies' as const;
-          case 2:
-            return 'axis' as const;
-          default:
-            throw new Error(`Can't resolve team {${teamIndex}} to construct ITeamScoreEvent.`);
-        }
-      })();
+      const teamName = teamIndexToName(teamIndex);
 
       return { timeS: userMessage.parentFrame.header.time, teamName, score };
     })
@@ -270,7 +254,32 @@ async function main(demoPath?: PathLike): Promise<void> {
     })
   );
 
-  merge(roundFeed$, roundDurationMetrics$, killFeed$, teamScoreFeed$).subscribe({
+  const objectiveCapture$ = userMessage$.pipe(
+    filter((userMessage) => userMessage.name === 'CapMsg'),
+    map((userMessage) => {
+      const clientIndex = userMessage.data.readInt8(0) - 1;
+      const objectiveName = new TextDecoder().decode(
+        userMessage.data.subarray(1, userMessage.data.length - 2)
+      );
+      const teamName = teamIndexToName(userMessage.data.readInt8(userMessage.data.length - 1));
+
+      return { timeS: userMessage.parentFrame.header.time, clientIndex, objectiveName, teamName };
+    })
+  );
+
+  const objectiveFeed$ = objectiveCapture$.pipe(
+    withLatestFrom(players$),
+    map(([objectiveCapture, players]) => {
+      const frameTime = `t=${objectiveCapture.timeS.toFixed(3)}s`.padEnd(12);
+      const playerName = `{${players[objectiveCapture.clientIndex]?.name}}`;
+      const objectiveName = `{${objectiveCapture.objectiveName}}`;
+      const teamName = `{${objectiveCapture.teamName}}`;
+
+      return `🚩 | ${frameTime} | ${playerName} captured objective ${objectiveName} for ${teamName}.`;
+    })
+  );
+
+  merge(roundFeed$, killFeed$, objectiveFeed$, teamScoreFeed$, roundDurationMetrics$).subscribe({
     next: console.log,
     error: console.error
   });
@@ -389,6 +398,17 @@ function weaponIndexToName(weaponIndex: number): DoDWeapon | undefined {
   }
 
   return weaponName;
+}
+
+function teamIndexToName(teamIndex: number): string {
+  switch (teamIndex) {
+    case 1:
+      return 'allies' as const;
+    case 2:
+      return 'axis' as const;
+    default:
+      throw new Error(`Can't resolve team {${teamIndex}}.`);
+  }
 }
 
 main(process.argv[2]).catch(console.error);
