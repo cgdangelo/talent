@@ -81,13 +81,20 @@ async function main(demoPath?: PathLike): Promise<void> {
             return 'reset' as const;
           case 1:
             return 'normal' as const;
+
+          // TODO case 2
+
           case 3:
             return 'win-allies' as const;
           case 4:
             return 'win-axis' as const;
+          case 5:
+            return 'draw' as const;
 
           default:
-            return 'unknown' as const;
+            throw new Error(
+              `Can't resolve round state {${roundStateIndex}} to construct IRoundStateChangeEvent.`
+            );
         }
       })();
 
@@ -116,7 +123,7 @@ async function main(demoPath?: PathLike): Promise<void> {
       filter((userMessage) => userMessage.name === 'ClanTimer'),
       map((userMessage) => {
         const frameTime = `t=${userMessage.parentFrame.header.time.toFixed(3)}s`.padEnd(12);
-        const timerLength = userMessage.data.readInt8(0);
+        const timerLength = `{${userMessage.data.readInt8(0)}}`;
         return `⚔️  | ${frameTime} | Clan timer START: ${timerLength}.`;
       })
     ),
@@ -139,7 +146,7 @@ async function main(demoPath?: PathLike): Promise<void> {
       map((roundWin) => {
         const frameTime = `t=${roundWin.timeS.toFixed(3)}s`.padEnd(12);
         const winningTeam = `{${roundWin.team}}`;
-        return `🔴 | ${frameTime} | Round WIN ${winningTeam}.`;
+        return `🔴 | ${frameTime} | Round WIN: ${winningTeam}.`;
       })
     )
   );
@@ -218,23 +225,23 @@ async function main(demoPath?: PathLike): Promise<void> {
       const teamIndex = userMessage.data.readInt8(0);
       const score = userMessage.data.readInt16LE(1);
 
-      const team = (() => {
+      const teamName = (() => {
         switch (teamIndex) {
           case 1:
             return 'allies' as const;
           case 2:
             return 'axis' as const;
           default:
-            return 'unknown' as const;
+            throw new Error(`Can't resolve team {${teamIndex}} to construct ITeamScoreEvent.`);
         }
       })();
 
-      return { timeS: userMessage.parentFrame.header.time, team, score };
+      return { timeS: userMessage.parentFrame.header.time, teamName, score };
     })
   );
 
   const teamScores$ = teamScore$.pipe(
-    map((teamScore) => ({ [teamScore.team]: teamScore.score })),
+    map((teamScore) => ({ [teamScore.teamName]: teamScore.score })),
     scan((acc, cur) => ({ ...acc, ...cur }))
   );
 
@@ -266,7 +273,7 @@ interface IRoundStateChangeEvent {
   type:
     | 'reset' // Round reset (freeze time).
     | 'normal' // Round start.
-    | 'unknown' // 2 | ???
+    | 'draw' // Round draw.
     | `win-${'allies' | 'axis'}`; // Allies or axis team won the round.
 }
 
@@ -302,7 +309,11 @@ interface IFragEvent {
 interface ITeamScoreEvent {
   /** Time, in seconds, since beginning of demo. */
   timeS: number;
-  team: string;
+
+  /** Team's name. */
+  teamName: string;
+
+  /** Team's score. */
   score: number;
 }
 
@@ -354,7 +365,13 @@ const dodWeapons = [
 type DoDWeapon = typeof dodWeapons[number];
 
 function weaponIndexToName(weaponIndex: number): DoDWeapon {
-  return dodWeapons[weaponIndex];
+  const weaponName = dodWeapons[weaponIndex];
+
+  if (!weaponName) {
+    throw new Error(`Can't resolve weapon ${weaponIndex}.`);
+  }
+
+  return weaponName;
 }
 
 main(process.argv[2]).catch(console.error);
