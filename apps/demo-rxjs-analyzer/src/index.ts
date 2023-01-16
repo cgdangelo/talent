@@ -17,10 +17,10 @@ import {
   map,
   merge,
   mergeMap,
+  mergeScan,
   Observable,
   of,
   reduce,
-  sample,
   scan,
   takeUntil,
   withLatestFrom
@@ -125,6 +125,7 @@ async function main(demoPath?: PathLike): Promise<void> {
       map((userMessage) => {
         const frameTime = `t=${userMessage.parentFrame.header.time.toFixed(3)}s`.padEnd(12);
         const timerLength = `{${userMessage.data.readInt8(0)}}`;
+
         return `⚔️  | ${frameTime} | Clan timer START: ${timerLength}.`;
       })
     ),
@@ -132,6 +133,7 @@ async function main(demoPath?: PathLike): Promise<void> {
     roundReset$.pipe(
       map((roundStateChange) => {
         const frameTime = `t=${roundStateChange.timeS.toFixed(3)}s`.padEnd(12);
+
         return `🟡 | ${frameTime} | Round RESET.`;
       })
     ),
@@ -139,6 +141,7 @@ async function main(demoPath?: PathLike): Promise<void> {
     roundStart$.pipe(
       map((roundStateChange) => {
         const frameTime = `t=${roundStateChange.timeS.toFixed(3)}s`.padEnd(12);
+
         return `🟢 | ${frameTime} | Round START.`;
       })
     ),
@@ -147,6 +150,7 @@ async function main(demoPath?: PathLike): Promise<void> {
       map((roundWin) => {
         const frameTime = `t=${roundWin.timeS.toFixed(3)}s`.padEnd(12);
         const winningTeam = `{${roundWin.team}}`;
+
         return `🔴 | ${frameTime} | Round WIN: ${winningTeam}.`;
       })
     )
@@ -164,6 +168,7 @@ async function main(demoPath?: PathLike): Promise<void> {
       const clientIndex = cur.fields.clientIndex;
       const name = cur.fields.clientUserInfo.name;
       const team = cur.fields.clientUserInfo.team;
+
       return { ...acc, [clientIndex]: { name, team } };
     })
   );
@@ -242,19 +247,26 @@ async function main(demoPath?: PathLike): Promise<void> {
   );
 
   const teamScores$ = teamScore$.pipe(
-    scan(
-      (acc, cur) => ({ ...acc, timeS: cur.timeS, [cur.teamName]: cur.score }),
+    mergeScan(
+      (acc, cur) =>
+        acc[cur.teamName] === cur.score ? EMPTY : of({ ...acc, timeS: cur.timeS, [cur.teamName]: cur.score }),
       {} as { timeS: number; [teamName: string]: number }
     )
   );
 
-  const teamScoreFeed$ = teamScores$.pipe(
-    sample(roundReset$),
+  const teamScoreFeed$ = merge(
+    teamScores$,
+
+    demoEnd$.pipe(
+      withLatestFrom(teamScores$),
+      map(([, teamScores]) => teamScores)
+    )
+  ).pipe(
     map(({ timeS, ...teamScores }) => {
       const frameTime = `t=${timeS.toFixed(3)}s`.padEnd(12);
       const scoreState = `${JSON.stringify(teamScores)}`;
 
-      return `📈 | ${frameTime} | Team scores: ${scoreState}`;
+      return `📈 | ${frameTime} | Team scores: ${scoreState}.`;
     })
   );
 
