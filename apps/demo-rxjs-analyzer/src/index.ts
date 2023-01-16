@@ -232,11 +232,13 @@ async function main(demoPath?: PathLike): Promise<void> {
     })
   );
 
-  const teamScores$ = teamScore$.pipe(
+  const teamScores$: Observable<ITeamScoresChangeEvent> = teamScore$.pipe(
     mergeScan(
       (acc, cur) =>
-        acc[cur.teamName] === cur.score ? EMPTY : of({ ...acc, timeS: cur.timeS, [cur.teamName]: cur.score }),
-      {} as { timeS: number; [teamName: string]: number }
+        acc.scoreState[cur.teamName] === cur.score
+          ? EMPTY
+          : of({ timeS: cur.timeS, scoreState: { ...acc.scoreState, [cur.teamName]: cur.score } }),
+      { scoreState: {} } as { timeS: number; scoreState: Record<DoDTeam, number> }
     )
   );
 
@@ -248,32 +250,44 @@ async function main(demoPath?: PathLike): Promise<void> {
       map(([, teamScores]) => teamScores)
     )
   ).pipe(
-    map(({ timeS, ...teamScores }) => {
-      const frameTime = `t=${timeS.toFixed(3)}s`.padEnd(12);
-      const scoreState = `${JSON.stringify(teamScores)}`;
+    map((teamScores) => {
+      const frameTime = `t=${teamScores.timeS.toFixed(3)}s`.padEnd(12);
+      const scoreState = `${JSON.stringify(teamScores.scoreState)}`;
 
       return `📈 | ${frameTime} | Team scores: ${scoreState}.`;
     })
   );
 
-  const objectiveCapture$ = userMessage$.pipe(
+  const objectiveCapture$: Observable<IObjectiveCaptureEvent> = userMessage$.pipe(
     filter((userMessage) => userMessage.name === 'CapMsg'),
-    map((userMessage) => {
+    withLatestFrom(players$),
+    map(([userMessage, players]) => {
       const clientIndex = userMessage.data.readInt8(0) - 1;
       const objectiveName = new TextDecoder().decode(
         userMessage.data.subarray(1, userMessage.data.length - 2)
       );
       const teamName = teamIndexToName(userMessage.data.readInt8(userMessage.data.length - 1));
 
-      return { timeS: userMessage.parentFrame.header.time, clientIndex, objectiveName, teamName };
+      const playerName = players[clientIndex]?.playerName;
+
+      if (!playerName) {
+        throw new Error(`Can't find player {${clientIndex}} to construct IObjectiveCaptureEvent.`);
+      }
+
+      if (teamName !== players[clientIndex]?.teamName) {
+        throw new Error(
+          `CapMsg team name {${teamName}} does not match SVC_UPDATEUSERINFO team name {${players[clientIndex]?.teamName}}.`
+        );
+      }
+
+      return { timeS: userMessage.parentFrame.header.time, playerName, objectiveName, teamName };
     })
   );
 
   const objectiveFeed$ = objectiveCapture$.pipe(
-    withLatestFrom(players$),
-    map(([objectiveCapture, players]) => {
+    map((objectiveCapture) => {
       const frameTime = `t=${objectiveCapture.timeS.toFixed(3)}s`.padEnd(12);
-      const playerName = `{${players[objectiveCapture.clientIndex]?.playerName}}`;
+      const playerName = `{${objectiveCapture.playerName}}`;
       const objectiveName = `{${objectiveCapture.objectiveName}}`;
       const teamName = `{${objectiveCapture.teamName}}`;
 
@@ -303,18 +317,19 @@ interface IRoundStateChangeEvent {
     | `win-${'allies' | 'axis'}`; // Allies or axis team won the round.
 }
 
-/** Emitted when one team completes all objectives and wins the round. */
+/** Emitted when RoundState message is parsed with a win state for either team. */
 interface IRoundWinEvent {
   /** Time, in seconds, since beginning of demo. */
   timeS: number;
 
   /** Name of the team that won the round. */
-  team: 'allies' | 'axis';
+  team: DoDTeam;
 
   /** Time, in seconds, between the round start event and the round win event. */
   roundDurationS: number;
 }
 
+/** Emitted when DeathMsg message is parsed. */
 interface IFragEvent {
   /** Time, in seconds, since beginning of demo. */
   timeS: number;
@@ -332,6 +347,7 @@ interface IFragEvent {
   weaponName?: DoDWeapon;
 }
 
+/** Emitted when TeamScore message is parsed.  */
 interface ITeamScoreEvent {
   /** Time, in seconds, since beginning of demo. */
   timeS: number;
@@ -341,6 +357,30 @@ interface ITeamScoreEvent {
 
   /** Team's score. */
   score: number;
+}
+
+/** Emitted when TeamScore message is parsed and changes a team's score. */
+interface ITeamScoresChangeEvent {
+  /** Time, in seconds, since beginning of demo. */
+  timeS: number;
+
+  /** Map of team name to team score. */
+  scoreState: Record<DoDTeam, number>;
+}
+
+/** Emitted when CapMsg message is parsed. */
+interface IObjectiveCaptureEvent {
+  /** Time, in seconds, since beginning of demo. */
+  timeS: number;
+
+  /** Name of the player that captured the objective. */
+  playerName: string;
+
+  /** Name of the objective. */
+  objectiveName: string;
+
+  /** Name of the team that captured the objective. */
+  teamName: DoDTeam;
 }
 
 // eslint-disable-next-line @rushstack/typedef-var
