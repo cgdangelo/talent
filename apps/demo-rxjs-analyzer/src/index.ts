@@ -37,7 +37,7 @@ async function main(demoPath?: PathLike): Promise<void> {
   const fileContents = await readFile(demoPath);
 
   // Create an event bus for the demo parser.
-  const demoEvents: IDemoEventEmitter = new EventEmitter();
+  const demoEvents: IDemoEventEmitter = new EventEmitter().setMaxListeners(Infinity);
 
   const demoEnd$: Observable<void> = fromEvent(demoEvents, 'demo:end');
 
@@ -95,6 +95,8 @@ async function main(demoPath?: PathLike): Promise<void> {
     })
   );
 
+  const roundReset$ = roundStateChange$.pipe(filter((roundStateChange) => roundStateChange.type === 'reset'));
+
   const roundStart$ = roundStateChange$.pipe(
     filter((roundStateChange) => roundStateChange.type === 'normal')
   );
@@ -115,12 +117,11 @@ async function main(demoPath?: PathLike): Promise<void> {
       map((userMessage) => {
         const frameTime = `t=${userMessage.parentFrame.header.time.toFixed(3)}s`.padEnd(12);
         const timerLength = userMessage.data.readInt8(0);
-        return `⚔️  | ${frameTime} | Clan timer: ${timerLength}.`;
+        return `⚔️  | ${frameTime} | Clan timer START: ${timerLength}.`;
       })
     ),
 
-    roundStateChange$.pipe(
-      filter((roundStateChange) => roundStateChange.type === 'reset'),
+    roundReset$.pipe(
       map((roundStateChange) => {
         const frameTime = `t=${roundStateChange.timeS.toFixed(3)}s`.padEnd(12);
         return `🟡 | ${frameTime} | Round RESET.`;
@@ -145,7 +146,7 @@ async function main(demoPath?: PathLike): Promise<void> {
 
   const roundDurationMetrics$ = roundWin$.pipe(
     reduce((acc, cur, index) => (acc * index + cur.roundDurationS) / (index + 1), 0),
-    map((meanRoundDurationS) => `Mean round duration: ${meanRoundDurationS}`)
+    map((meanRoundDurationS) => `Mean round duration: ${meanRoundDurationS.toFixed(3)}.`)
   );
 
   const players$: Observable<Partial<Record<number, { name: string; team?: string }>>> = engineMessage$.pipe(
@@ -187,7 +188,6 @@ async function main(demoPath?: PathLike): Promise<void> {
       }
 
       const isTeamkill = players[frag.killerClientIndex]?.team === players[frag.victimClientIndex]?.team;
-
       const weaponName = weaponIndexToName(frag.weaponIndex);
 
       return {
@@ -212,7 +212,43 @@ async function main(demoPath?: PathLike): Promise<void> {
     })
   );
 
-  merge(roundFeed$, roundDurationMetrics$, killFeed$).subscribe({
+  const teamScore$: Observable<ITeamScoreEvent> = userMessage$.pipe(
+    filter((userMessage) => userMessage.name === 'TeamScore'),
+    map((userMessage) => {
+      const teamIndex = userMessage.data.readInt8(0);
+      const score = userMessage.data.readInt16LE(1);
+
+      const team = (() => {
+        switch (teamIndex) {
+          case 1:
+            return 'allies' as const;
+          case 2:
+            return 'axis' as const;
+          default:
+            return 'unknown' as const;
+        }
+      })();
+
+      return { timeS: userMessage.parentFrame.header.time, team, score };
+    })
+  );
+
+  const teamScores$ = teamScore$.pipe(
+    map((teamScore) => ({ [teamScore.team]: teamScore.score })),
+    scan((acc, cur) => ({ ...acc, ...cur }))
+  );
+
+  const teamScoreFeed$ = roundReset$.pipe(
+    withLatestFrom(teamScores$),
+    map(([roundStateChange, teamScore]) => {
+      const frameTime = `t=${roundStateChange.timeS.toFixed(3)}s`.padEnd(12);
+      const scoreState = `${JSON.stringify(teamScore)}`;
+
+      return `📈 | ${frameTime} | Team scores: ${scoreState}`;
+    })
+  );
+
+  merge(roundFeed$, roundDurationMetrics$, killFeed$, teamScoreFeed$).subscribe({
     next: console.log,
     error: console.error
   });
@@ -261,6 +297,13 @@ interface IFragEvent {
 
   /** Name of the weapon used to kill the victim. */
   weaponName?: DoDWeapon;
+}
+
+interface ITeamScoreEvent {
+  /** Time, in seconds, since beginning of demo. */
+  timeS: number;
+  team: string;
+  score: number;
 }
 
 // eslint-disable-next-line @rushstack/typedef-var
