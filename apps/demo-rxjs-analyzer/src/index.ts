@@ -23,7 +23,8 @@ import {
   reduce,
   scan,
   takeUntil,
-  withLatestFrom
+  withLatestFrom,
+  zip
 } from 'rxjs';
 
 /**
@@ -39,6 +40,8 @@ async function main(demoPath?: PathLike): Promise<void> {
 
   // Create an event bus for the demo parser.
   const demoEvents: IDemoEventEmitter = new EventEmitter().setMaxListeners(Infinity);
+
+  const demoStart$: Observable<void> = fromEvent(demoEvents, 'demo:start');
 
   const demoEnd$: Observable<void> = fromEvent(demoEvents, 'demo:end');
 
@@ -299,6 +302,46 @@ async function main(demoPath?: PathLike): Promise<void> {
     next: console.log,
     error: console.error
   });
+
+  // Parser metrics
+
+  const parsingFrameRate$ = demoStart$.pipe(
+    map(() => Date.now()),
+    mergeMap((demoParseStart) =>
+      frame$.pipe(
+        map((frame) => {
+          const frameTime = frame.header.time;
+          const clockTime = (Date.now() - demoParseStart) / 1e3;
+
+          return frameTime / clockTime;
+        })
+      )
+    ),
+    takeUntil(demoEnd$)
+  );
+
+  const parsingExecutionTimeS$ = zip([
+    demoStart$.pipe(map(() => Date.now())),
+    demoEnd$.pipe(map(() => Date.now()))
+  ]).pipe(map(([demoParseStart, demoParseEnd]) => (demoParseEnd - demoParseStart) / 1e3));
+
+  merge(
+    parsingFrameRate$.pipe(
+      reduce((acc, cur, index) => (acc * index + cur) / (index + 1)),
+      map((fpsRatio) => {
+        const parseRate = `{${fpsRatio.toFixed(3)}x}`;
+
+        return `🏥 | Mean parser speed: ${parseRate}.`;
+      })
+    ),
+
+    parsingExecutionTimeS$.pipe(
+      map((executionTime) => {
+        const time = `{${executionTime.toFixed(3)}s}`;
+        return `🏥 | Parser execution time: ${time}.`;
+      })
+    )
+  ).subscribe({ next: console.log, error: console.error });
 
   // Run the parser; the parser will emit events through the `demoEvents` bus as the file is evaluated.
   parseDemo(fileContents, demoEvents);
