@@ -298,7 +298,31 @@ async function main(demoPath?: PathLike): Promise<void> {
     })
   );
 
-  merge(roundFeed$, killFeed$, objectiveFeed$, teamScoreFeed$, roundDurationMetrics$).subscribe({
+  const sayText$ = userMessage$.pipe(
+    filter((userMessage) => userMessage.name === 'SayText'),
+    map((userMessage) => {
+      // const senderClientIndex = userMessage.data.readInt8(0) - 1; // 0 = rcon
+      const destinationChannel = userMessage.data.readInt8(1); // 1 = rcon say, 2 = player text
+      const messageText = new TextDecoder().decode(userMessage.data.subarray(2, userMessage.data.length - 2)); // remove newline and null bytes
+
+      return {
+        timeS: userMessage.parentFrame.header.time,
+        destinationChannel,
+        messageText,
+        isTeamChat: messageText.startsWith('(TEAM) ')
+      };
+    })
+  );
+
+  const chatFeed$ = sayText$.pipe(
+    map((sayText) => {
+      const frameTime = `t=${sayText.timeS.toFixed(3)}s`.padEnd(12);
+
+      return `🗣️  | ${frameTime} | ${sayText.messageText}`;
+    })
+  );
+
+  merge(chatFeed$, roundFeed$, killFeed$, objectiveFeed$, teamScoreFeed$, roundDurationMetrics$).subscribe({
     next: console.log,
     error: console.error
   });
