@@ -15,8 +15,8 @@
     "parser-ts": "~0.6.16"
   },
   "devDependencies": {
-    "@rushstack/heft-node-rig": "~1.11.11",
-    "@rushstack/heft": "~0.49.0",
+    "@rushstack/heft-node-rig": "~2.3.11",
+    "@rushstack/heft": "~0.63.2",
     "@rushstack/eslint-config": "~3.1.1",
     "eslint": "~8.31.0",
     "typescript": "~4.9.4",
