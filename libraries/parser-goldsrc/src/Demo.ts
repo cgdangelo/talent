@@ -30,7 +30,7 @@ export const demo_: DS.DemoStateParser<Demo> = pipe(
   ),
 
   SP.chainFirst(({ header: { networkProtocol } }) => SP.modify((s) => ({ ...s, networkProtocol }))),
-  SP.bind('directory', ({ header: { directoryOffset } }) => directory(directoryOffset)),
+  SP.bind('directory', () => directory),
 
   // Emit parse end event.
   SP.chainFirst(() =>
