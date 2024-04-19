@@ -13,6 +13,7 @@ export const lift: <A>(p: P.Parser<number, A>) => DemoStateParser<A> = SP.lift;
 export type DemoState = {
   readonly deltaDecoders: ReadonlyMap<string, DeltaDecoder>;
   readonly eventEmitter?: IDemoEventEmitter;
+  readonly isHLTV: boolean;
   readonly maxClients: number;
   readonly networkProtocol: number;
   readonly userMessages: ReadonlyMap<number, NewUserMsg['fields']>;
@@ -20,6 +21,7 @@ export type DemoState = {
 
 export const initialState: DemoState = {
   deltaDecoders: initialDeltaDecoders,
+  isHLTV: false,
   maxClients: 0,
   networkProtocol: 0,
   userMessages: RM.empty

@@ -1,7 +1,8 @@
 import { statefulParser as SP } from '@cgdangelo/talent-parser';
-import type { DemoStateParser } from '../../DemoState';
+import * as DS from '../../DemoState';
 import * as M from './engine';
 import { MessageType } from './MessageType';
+import { pipe } from 'fp-ts/lib/function';
 
 export type EngineMessage =
   | M.Bad
@@ -64,7 +65,7 @@ export type EngineMessage =
   | M.SendCvarValue
   | M.SendCvarValue2;
 
-export const engineMessage: (messageId: MessageType) => DemoStateParser<EngineMessage> = (messageId) => {
+export const engineMessage: (messageId: MessageType) => DS.DemoStateParser<EngineMessage> = (messageId) => {
   // TODO Replace with Option?
   switch (messageId) {
     case MessageType.SVC_BAD:
@@ -218,7 +219,16 @@ export const engineMessage: (messageId: MessageType) => DemoStateParser<EngineMe
       return SP.lift(M.fileTxferFailed);
 
     case MessageType.SVC_HLTV: // 50
-      return SP.lift(M.hltv);
+      return pipe(
+        DS.lift(M.hltv),
+
+        SP.chainFirst((message) =>
+          SP.modify((state) => ({
+            ...state,
+            isHLTV: message.fields.mode.name === 'HLTV_ACTIVE'
+          }))
+        )
+      );
 
     case MessageType.SVC_DIRECTOR: // 51
       return SP.lift(M.director);
