@@ -8,7 +8,6 @@ export type Director = {
   readonly name: 'SVC_DIRECTOR';
 
   readonly fields: {
-    readonly flag: number;
     readonly message: string;
   };
 };
@@ -18,7 +17,6 @@ export const director: B.BufferParser<Director> = pipe(
 
   P.chain((length) =>
     P.struct({
-      flag: B.uint8,
       message: B.ztstr_padded(length)
     })
   ),
