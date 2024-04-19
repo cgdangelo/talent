@@ -12,7 +12,7 @@ export type ClientData = {
   readonly id: MessageType.SVC_CLIENTDATA;
   readonly name: 'SVC_CLIENTDATA';
 
-  readonly fields: {
+  readonly fields?: {
     readonly deltaUpdateMask?: number;
     readonly clientData: Delta;
     readonly weaponData: readonly {
@@ -22,7 +22,17 @@ export type ClientData = {
   };
 };
 
-export const clientData: DS.DemoStateParser<ClientData> = (s) => (i) =>
+export const clientData: DS.DemoStateParser<ClientData> = pipe(
+  SP.get<number, DS.DemoState>(),
+  SP.chain((state) => (state.isHLTV ? SP.of(undefined) : clientData_)),
+  SP.map((fields) => ({
+    id: MessageType.SVC_CLIENTDATA,
+    name: 'SVC_CLIENTDATA',
+    fields
+  }))
+);
+
+const clientData_: DS.DemoStateParser<ClientData['fields']> = (s) => (i) =>
   pipe(
     stream(i.buffer, i.cursor * 8),
 
@@ -56,15 +66,6 @@ export const clientData: DS.DemoStateParser<ClientData> = (s) => (i) =>
         SP.lift((o) =>
           success(a, i, stream(o.buffer, o.cursor % 8 === 0 ? o.cursor / 8 : Math.floor(o.cursor / 8) + 1))
         )
-      ),
-
-      SP.map(
-        (fields) =>
-          ({
-            id: MessageType.SVC_CLIENTDATA,
-            name: 'SVC_CLIENTDATA',
-            fields
-          } as const)
       )
     )(s)
   );
