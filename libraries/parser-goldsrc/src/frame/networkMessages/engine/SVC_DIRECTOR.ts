@@ -8,7 +8,8 @@ export type Director = {
   readonly name: 'SVC_DIRECTOR';
 
   readonly fields: {
-    readonly message: string;
+    // TODO Unknown how to decode these fields; does it vary per mod?
+    readonly data: readonly number[];
   };
 };
 
@@ -17,7 +18,7 @@ export const director: B.BufferParser<Director> = pipe(
 
   P.chain((length) =>
     P.struct({
-      message: B.ztstr_padded(length)
+      data: P.take(length)
     })
   ),
 
