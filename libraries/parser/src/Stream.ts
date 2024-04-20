@@ -1,1 +1,1 @@
-export * from "parser-ts/lib/Stream";
+export * from 'parser-ts/lib/Stream';

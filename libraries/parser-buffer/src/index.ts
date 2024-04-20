@@ -1,1 +1,1 @@
-export * as buffer from "./buffer";
+export * as buffer from './buffer';

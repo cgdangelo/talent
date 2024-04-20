@@ -1,1 +1,1 @@
-export * from "./SVC_TEMPENTITY";
+export * from './SVC_TEMPENTITY';
