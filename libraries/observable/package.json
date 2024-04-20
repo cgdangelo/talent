@@ -5,8 +5,8 @@
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
   "scripts": {
-    "_phase:build": "heft build --clean",
-    "_phase:test": "heft test --no-build",
+    "_phase:build": "heft run --only build -- --clean",
+    "_phase:test": "heft run --only test -- --clean",
     "build": "heft build --clean",
     "test": "heft test --clean"
   },
@@ -16,8 +16,8 @@
     "rxjs": "^7.5.4"
   },
   "devDependencies": {
-    "@rushstack/heft-node-rig": "~1.11.11",
-    "@rushstack/heft": "~0.49.0",
+    "@rushstack/heft-node-rig": "~2.3.11",
+    "@rushstack/heft": "~0.63.2",
     "@rushstack/eslint-config": "~3.1.1",
     "eslint": "~8.30.0",
     "typescript": "~4.9.4",
