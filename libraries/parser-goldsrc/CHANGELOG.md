@@ -1,6 +1,13 @@
 # Change Log - @cgdangelo/talent-parser-goldsrc
 
-This log was last generated on Wed, 04 Jan 2023 09:29:36 GMT and should not be manually modified.
+This log was last generated on Sat, 20 Apr 2024 23:34:49 GMT and should not be manually modified.
+
+## 0.1.4
+Sat, 20 Apr 2024 23:34:49 GMT
+
+### Updates
+
+- (parser-buffer) Reduce buffer creation
 
 ## 0.1.3
 Wed, 04 Jan 2023 09:29:36 GMT
