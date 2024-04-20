@@ -1,6 +1,5 @@
 import { demo } from '@cgdangelo/talent-parser-goldsrc/lib/Demo';
-import { Stream } from '@cgdangelo/talent-parser/lib/Stream';
-import { stream } from '@cgdangelo/talent-parser/lib/Stream';
+import { type Stream, stream } from '@cgdangelo/talent-parser/lib/Stream';
 import * as E from 'fp-ts/lib/Either';
 import { apply, constant, flow, pipe } from 'fp-ts/lib/function';
 import * as json from 'fp-ts/lib/Json';
