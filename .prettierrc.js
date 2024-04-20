@@ -12,5 +12,7 @@ module.exports = {
 
   // For ES5, trailing commas cannot be used in function parameters; it is counterintuitive
   // to use them for arrays only
-  trailingComma: 'none'
+  trailingComma: 'none',
+
+  plugins: ['./common/autoinstallers/rush-prettier/node_modules/prettier-plugin-packagejson']
 };
