@@ -5,6 +5,13 @@ module.exports = {
   extends: ['@rushstack/eslint-config/profile/node'],
   parserOptions: { tsconfigRootDir: __dirname },
   rules: {
+    '@typescript-eslint/consistent-type-imports': [
+      'warn',
+      {
+        fixStyle: 'inline-type-imports',
+        prefer: 'type-imports'
+      }
+    ],
     '@typescript-eslint/no-use-before-define': 'warn'
   }
 };

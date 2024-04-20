@@ -3,5 +3,14 @@ require('@rushstack/eslint-config/patch/modern-module-resolution');
 
 module.exports = {
   extends: ['@rushstack/eslint-config/profile/node'],
-  parserOptions: { tsconfigRootDir: __dirname }
+  parserOptions: { tsconfigRootDir: __dirname },
+  rules: {
+    '@typescript-eslint/consistent-type-imports': [
+      'warn',
+      {
+        fixStyle: 'inline-type-imports',
+        prefer: 'type-imports'
+      }
+    ]
+  }
 };

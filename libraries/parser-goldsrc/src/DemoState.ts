@@ -1,10 +1,8 @@
-import type { parser as P } from '@cgdangelo/talent-parser';
-import { statefulParser as SP } from '@cgdangelo/talent-parser';
+import { type parser as P, statefulParser as SP } from '@cgdangelo/talent-parser';
 import { readonlyMap as RM } from 'fp-ts';
-import type { DeltaDecoder } from './delta';
-import { initialDeltaDecoders } from './delta';
-import { IDemoEventEmitter } from './DemoEventEmitter';
-import type { NewUserMsg } from './frame/networkMessages/engine';
+import { type DeltaDecoder, initialDeltaDecoders } from './delta';
+import { type IDemoEventEmitter } from './DemoEventEmitter';
+import { type NewUserMsg } from './frame/networkMessages/engine';
 
 export type DemoStateParser<A> = SP.StatefulParser<DemoState, number, A>;
 

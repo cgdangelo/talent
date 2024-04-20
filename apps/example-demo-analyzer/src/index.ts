@@ -1,6 +1,6 @@
-import { IDemoEventEmitter, parseDemo } from '@cgdangelo/talent-parser-goldsrc';
+import { type IDemoEventEmitter, parseDemo } from '@cgdangelo/talent-parser-goldsrc';
 import { EventEmitter } from 'events';
-import { PathLike } from 'fs';
+import { type PathLike } from 'fs';
 import { readFile } from 'fs/promises';
 
 /**

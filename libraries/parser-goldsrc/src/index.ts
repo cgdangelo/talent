@@ -1,10 +1,10 @@
-import { ParseResult } from '@cgdangelo/talent-parser/lib/ParseResult';
-import { Stream, stream } from '@cgdangelo/talent-parser/lib/Stream';
+import { type ParseResult } from '@cgdangelo/talent-parser/lib/ParseResult';
+import { type Stream, stream } from '@cgdangelo/talent-parser/lib/Stream';
 import * as E from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/function';
-import { IO } from 'fp-ts/lib/IO';
-import { demo, Demo } from './Demo';
-import { IDemoEventEmitter } from './DemoEventEmitter';
+import { type IO } from 'fp-ts/lib/IO';
+import { demo, type Demo } from './Demo';
+import { type IDemoEventEmitter } from './DemoEventEmitter';
 
 /**
  * Run the demo parser and return a ParseResult.

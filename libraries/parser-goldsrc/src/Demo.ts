@@ -1,7 +1,7 @@
 import type { buffer as B } from '@cgdangelo/talent-parser-buffer';
 import * as SP from '@cgdangelo/talent-parser/lib/StatefulParser';
 import { pipe } from 'fp-ts/lib/function';
-import { IDemoEventEmitter } from './DemoEventEmitter';
+import { type IDemoEventEmitter } from './DemoEventEmitter';
 import type { DemoHeader } from './DemoHeader';
 import { header } from './DemoHeader';
 import * as DS from './DemoState';
