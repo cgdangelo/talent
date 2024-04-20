@@ -8,25 +8,25 @@ import {
   readonlyNonEmptyArray as RNEA,
   stateT as ST
 } from 'fp-ts';
-import type { Alt3 } from 'fp-ts/lib/Alt';
-import type { Alternative3 } from 'fp-ts/lib/Alternative';
-import type { Applicative3 } from 'fp-ts/lib/Applicative';
+import { type Alt3 } from 'fp-ts/lib/Alt';
+import { type Alternative3 } from 'fp-ts/lib/Alternative';
+import { type Applicative3 } from 'fp-ts/lib/Applicative';
 import { sequenceS, sequenceT } from 'fp-ts/lib/Apply';
-import type { Chain3 } from 'fp-ts/lib/Chain';
+import { type Chain3 } from 'fp-ts/lib/Chain';
 import { bind as bind_ } from 'fp-ts/lib/Chain';
-import type { ChainRec3 } from 'fp-ts/lib/ChainRec';
+import { type ChainRec3 } from 'fp-ts/lib/ChainRec';
 import { tailRec } from 'fp-ts/lib/ChainRec';
-import type { Lazy } from 'fp-ts/lib/function';
+import { type Lazy } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/function';
-import type { Functor3 } from 'fp-ts/lib/Functor';
+import { type Functor3 } from 'fp-ts/lib/Functor';
 import { bindTo as bindTo_ } from 'fp-ts/lib/Functor';
-import type { Monad3 } from 'fp-ts/lib/Monad';
-import type { Predicate } from 'fp-ts/lib/Predicate';
-import type { Refinement } from 'fp-ts/lib/Refinement';
+import { type Monad3 } from 'fp-ts/lib/Monad';
+import { type Predicate } from 'fp-ts/lib/Predicate';
+import { type Refinement } from 'fp-ts/lib/Refinement';
 import * as P from './Parser';
-import type { ParseResult, ParseSuccess } from './ParseResult';
+import { type ParseResult, type ParseSuccess } from './ParseResult';
 import { error, success } from './ParseResult';
-import type { Stream } from './Stream';
+import { type Stream } from './Stream';
 
 // -----------------------------------------------------------------------------
 // model

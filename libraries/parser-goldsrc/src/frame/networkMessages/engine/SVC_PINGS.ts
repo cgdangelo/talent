@@ -1,5 +1,5 @@
 import * as BB from '@cgdangelo/talent-parser-bitbuffer';
-import type { buffer as B } from '@cgdangelo/talent-parser-buffer';
+import { type buffer as B } from '@cgdangelo/talent-parser-buffer';
 import * as P from '@cgdangelo/talent-parser/lib/Parser';
 import { stream } from '@cgdangelo/talent-parser/lib/Stream';
 import { pipe } from 'fp-ts/lib/function';

@@ -4,7 +4,7 @@ import { success } from '@cgdangelo/talent-parser/lib/ParseResult';
 import { stream } from '@cgdangelo/talent-parser/lib/Stream';
 import { number, ord, readonlyArray as RA } from 'fp-ts';
 import { pipe } from 'fp-ts/lib/function';
-import type { Delta } from '../../../delta';
+import { type Delta } from '../../../delta';
 import { readDelta } from '../../../delta';
 import * as DS from '../../../DemoState';
 import { MessageType } from '../MessageType';

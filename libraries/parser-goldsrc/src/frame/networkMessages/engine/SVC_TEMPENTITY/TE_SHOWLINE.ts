@@ -1,7 +1,7 @@
 import { parser as P } from '@cgdangelo/talent-parser';
-import type { buffer as B } from '@cgdangelo/talent-parser-buffer';
+import { type buffer as B } from '@cgdangelo/talent-parser-buffer';
 import { pipe } from 'fp-ts/lib/function';
-import type { Point } from '../../../../Point';
+import { type Point } from '../../../../Point';
 import { coordPoint } from './coord';
 import { TempEntityType } from './TempEntityType';
 

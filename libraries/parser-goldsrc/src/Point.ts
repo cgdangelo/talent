@@ -1,4 +1,4 @@
-import type { BufferParser } from '@cgdangelo/talent-parser-buffer/lib/buffer';
+import { type BufferParser } from '@cgdangelo/talent-parser-buffer/lib/buffer';
 import { float32_le } from '@cgdangelo/talent-parser-buffer/lib/buffer';
 import * as P from '@cgdangelo/talent-parser/lib/Parser';
 

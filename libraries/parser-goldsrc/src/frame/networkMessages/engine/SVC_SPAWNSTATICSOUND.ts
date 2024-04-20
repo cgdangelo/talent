@@ -1,7 +1,7 @@
 import { buffer as B } from '@cgdangelo/talent-parser-buffer';
 import * as P from '@cgdangelo/talent-parser/lib/Parser';
 import { pipe } from 'fp-ts/lib/function';
-import type { Point } from '../../../Point';
+import { type Point } from '../../../Point';
 import { pointBy } from '../../../Point';
 import { MessageType } from '../MessageType';
 

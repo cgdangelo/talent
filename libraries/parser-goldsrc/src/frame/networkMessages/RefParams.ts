@@ -1,6 +1,6 @@
 import { buffer as B } from '@cgdangelo/talent-parser-buffer';
 import * as P from '@cgdangelo/talent-parser/lib/Parser';
-import type { Point } from '../../Point';
+import { type Point } from '../../Point';
 import { point } from '../../Point';
 
 export type RefParams = {

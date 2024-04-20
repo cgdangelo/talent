@@ -1,21 +1,21 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 
-import type { Alt1 } from 'fp-ts/lib/Alt';
-import type { Alternative1 } from 'fp-ts/lib/Alternative';
-import type { Applicative1 } from 'fp-ts/lib/Applicative';
-import type { Apply1 } from 'fp-ts/lib/Apply';
-import type { Chain1 } from 'fp-ts/lib/Chain';
+import { Alt1 } from 'fp-ts/lib/Alt';
+import { Alternative1 } from 'fp-ts/lib/Alternative';
+import { Applicative1 } from 'fp-ts/lib/Applicative';
+import { Apply1 } from 'fp-ts/lib/Apply';
+import { Chain1 } from 'fp-ts/lib/Chain';
 import { bind as bind_ } from 'fp-ts/lib/Chain';
-import type { Lazy } from 'fp-ts/lib/function';
+import { Lazy } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/function';
-import type { Functor1 } from 'fp-ts/lib/Functor';
+import { Functor1 } from 'fp-ts/lib/Functor';
 import { bindTo as bindTo_ } from 'fp-ts/lib/Functor';
-import type { Monad1 } from 'fp-ts/lib/Monad';
-import type { Pointed1 } from 'fp-ts/lib/Pointed';
-import type { Predicate } from 'fp-ts/lib/Predicate';
-import type { Refinement } from 'fp-ts/lib/Refinement';
-import type { Zero1 } from 'fp-ts/lib/Zero';
-import type { Observable } from 'rxjs';
+import { Monad1 } from 'fp-ts/lib/Monad';
+import { Pointed1 } from 'fp-ts/lib/Pointed';
+import { Predicate } from 'fp-ts/lib/Predicate';
+import { Refinement } from 'fp-ts/lib/Refinement';
+import { Zero1 } from 'fp-ts/lib/Zero';
+import { Observable } from 'rxjs';
 import { combineLatest, EMPTY, from as rxFrom, merge, of as rxOf } from 'rxjs';
 import * as RX from 'rxjs/operators';
 

@@ -3,17 +3,17 @@ import { buffer as B } from '@cgdangelo/talent-parser-buffer';
 import * as P from '@cgdangelo/talent-parser/lib/Parser';
 import { pipe } from 'fp-ts/lib/function';
 import * as DS from '../../DemoState';
-import type { Point } from '../../Point';
+import { type Point } from '../../Point';
 import { point } from '../../Point';
-import type { FrameHeader } from '../FrameHeader';
+import { type FrameHeader } from '../FrameHeader';
 import { frameHeader } from '../FrameHeader';
-import type { Message } from './Message';
+import { type Message } from './Message';
 import { messages } from './Message';
-import type { MoveVars } from './MoveVars';
+import { type MoveVars } from './MoveVars';
 import { moveVars } from './MoveVars';
-import type { RefParams } from './RefParams';
+import { type RefParams } from './RefParams';
 import { refParams } from './RefParams';
-import type { UserCmd } from './UserCmd';
+import { type UserCmd } from './UserCmd';
 import { userCmd } from './UserCmd';
 
 export type NetworkMessages = {

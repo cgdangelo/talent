@@ -1,9 +1,9 @@
 import { buffer as B } from '@cgdangelo/talent-parser-buffer';
 import * as P from '@cgdangelo/talent-parser/lib/Parser';
 import { pipe } from 'fp-ts/lib/function';
-import type { Point } from '../Point';
+import { type Point } from '../Point';
 import { point } from '../Point';
-import type { FrameHeader } from './FrameHeader';
+import { type FrameHeader } from './FrameHeader';
 import { frameHeader } from './FrameHeader';
 
 export type ClientData = {

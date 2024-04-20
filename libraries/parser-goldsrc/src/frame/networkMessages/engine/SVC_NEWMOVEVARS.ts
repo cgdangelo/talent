@@ -2,7 +2,7 @@ import { buffer as B } from '@cgdangelo/talent-parser-buffer';
 import * as P from '@cgdangelo/talent-parser/lib/Parser';
 import { pipe } from 'fp-ts/lib/function';
 import { point } from '../../../Point';
-import type { MoveVars } from '../MoveVars';
+import { type MoveVars } from '../MoveVars';
 import { MessageType } from '../MessageType';
 
 // TODO sky stuff is at the bottom unlike moveVars parser unfortunately, but

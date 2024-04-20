@@ -3,7 +3,7 @@ import { buffer as B } from '@cgdangelo/talent-parser-buffer';
 import { readonlyArray as RA, readonlyNonEmptyArray as RNEA } from 'fp-ts';
 import { flow, pipe } from 'fp-ts/lib/function';
 import * as DS from './DemoState';
-import type { DirectoryEntry } from './DirectoryEntry';
+import { type DirectoryEntry } from './DirectoryEntry';
 import { directoryEntry } from './DirectoryEntry';
 import { frames } from './frame/Frame';
 import { fst } from 'fp-ts/ReadonlyTuple';

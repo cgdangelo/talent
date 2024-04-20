@@ -1,7 +1,7 @@
 import { parser as P } from '@cgdangelo/talent-parser';
 import { buffer as B } from '@cgdangelo/talent-parser-buffer';
 import { pipe } from 'fp-ts/lib/function';
-import type { FrameHeader } from './FrameHeader';
+import { type FrameHeader } from './FrameHeader';
 import { frameHeader } from './FrameHeader';
 
 export type ConsoleCommand = {

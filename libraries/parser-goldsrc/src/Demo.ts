@@ -1,11 +1,11 @@
-import type { buffer as B } from '@cgdangelo/talent-parser-buffer';
+import { type buffer as B } from '@cgdangelo/talent-parser-buffer';
 import * as SP from '@cgdangelo/talent-parser/lib/StatefulParser';
 import { pipe } from 'fp-ts/lib/function';
 import { type IDemoEventEmitter } from './DemoEventEmitter';
-import type { DemoHeader } from './DemoHeader';
+import { type DemoHeader } from './DemoHeader';
 import { header } from './DemoHeader';
 import * as DS from './DemoState';
-import type { Directory } from './Directory';
+import { type Directory } from './Directory';
 import { directory } from './Directory';
 
 export type Demo = {

@@ -2,9 +2,9 @@ import { parser as P, statefulParser as SP } from '@cgdangelo/talent-parser';
 import { buffer as B } from '@cgdangelo/talent-parser-buffer';
 import { pipe } from 'fp-ts/lib/function';
 import * as DS from '../../DemoState';
-import type { EngineMessage } from './EngineMessage';
+import { type EngineMessage } from './EngineMessage';
 import { engineMessage } from './EngineMessage';
-import type { UserMessage } from './UserMessage';
+import { type UserMessage } from './UserMessage';
 import { userMessage } from './UserMessage';
 
 export type Message =
