@@ -103,7 +103,7 @@
   {
     "policyName": "goldsrcParserPolicy",
     "definitionName": "lockStepVersion",
-    "version": "0.1.3",
+    "version": "0.1.4",
     "nextBump": "prerelease",
     "mainProject": "@cgdangelo/talent-parser-goldsrc"
   },
