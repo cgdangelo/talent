@@ -15,12 +15,12 @@ importers:
       '@types/heft-jest': 1.0.6
       '@types/node': 20.12.7
       eslint: ~8.54.0
-      fp-ts: ~2.13.1
+      fp-ts: ~2.16.5
       typescript: ~5.4.5
     dependencies:
       '@cgdangelo/talent-parser': link:../../libraries/parser
       '@cgdangelo/talent-parser-goldsrc': link:../../libraries/parser-goldsrc
-      fp-ts: 2.13.1
+      fp-ts: 2.16.5
     devDependencies:
       '@rushstack/eslint-config': 3.6.9_vtxim2at5sbitwenshbfzi5z6u
       '@rushstack/heft': 0.66.3_@types+node@20.12.7
@@ -61,12 +61,12 @@ importers:
       '@types/heft-jest': 1.0.6
       '@types/node': 20.12.7
       eslint: ~8.54.0
-      fp-ts: ~2.13.1
+      fp-ts: ~2.16.5
       typescript: ~5.4.5
     dependencies:
       '@cgdangelo/talent-parser': link:../../libraries/parser
       '@cgdangelo/talent-parser-goldsrc': link:../../libraries/parser-goldsrc
-      fp-ts: 2.13.1
+      fp-ts: 2.16.5
     devDependencies:
       '@rushstack/eslint-config': 3.6.9_vtxim2at5sbitwenshbfzi5z6u
       '@rushstack/heft': 0.66.3_@types+node@20.12.7
@@ -84,12 +84,12 @@ importers:
       '@types/heft-jest': 1.0.6
       '@types/node': 20.12.7
       eslint: ~8.54.0
-      fp-ts: ~2.13.1
-      parser-ts: ~0.6.16
+      fp-ts: ~2.16.5
+      parser-ts: ~0.7.0
       typescript: ~5.4.5
     dependencies:
-      fp-ts: 2.13.1
-      parser-ts: 0.6.16_fp-ts@2.13.1
+      fp-ts: 2.16.5
+      parser-ts: 0.7.0_fp-ts@2.16.5
     devDependencies:
       '@rushstack/eslint-config': 3.6.9_vtxim2at5sbitwenshbfzi5z6u
       '@rushstack/heft': 0.66.3_@types+node@20.12.7
@@ -108,11 +108,11 @@ importers:
       '@types/heft-jest': 1.0.6
       '@types/node': 20.12.7
       eslint: ~8.54.0
-      fp-ts: ~2.13.1
+      fp-ts: ~2.16.5
       typescript: ~5.4.5
     dependencies:
       '@cgdangelo/talent-parser': link:../parser
-      fp-ts: 2.13.1
+      fp-ts: 2.16.5
     devDependencies:
       '@rushstack/eslint-config': 3.6.9_vtxim2at5sbitwenshbfzi5z6u
       '@rushstack/heft': 0.66.3_@types+node@20.12.7
@@ -131,11 +131,11 @@ importers:
       '@types/heft-jest': 1.0.6
       '@types/node': 20.12.7
       eslint: ~8.54.0
-      fp-ts: ~2.13.1
+      fp-ts: ~2.16.5
       typescript: ~5.4.5
     dependencies:
       '@cgdangelo/talent-parser': link:../parser
-      fp-ts: 2.13.1
+      fp-ts: 2.16.5
     devDependencies:
       '@rushstack/eslint-config': 3.6.9_vtxim2at5sbitwenshbfzi5z6u
       '@rushstack/heft': 0.66.3_@types+node@20.12.7
@@ -156,13 +156,13 @@ importers:
       '@types/heft-jest': 1.0.6
       '@types/node': 20.12.7
       eslint: ~8.54.0
-      fp-ts: ~2.13.1
+      fp-ts: ~2.16.5
       typescript: ~5.4.5
     dependencies:
       '@cgdangelo/talent-parser': link:../parser
       '@cgdangelo/talent-parser-bitbuffer': link:../parser-bitbuffer
       '@cgdangelo/talent-parser-buffer': link:../parser-buffer
-      fp-ts: 2.13.1
+      fp-ts: 2.16.5
     devDependencies:
       '@rushstack/eslint-config': 3.6.9_vtxim2at5sbitwenshbfzi5z6u
       '@rushstack/heft': 0.66.3_@types+node@20.12.7
@@ -639,7 +639,7 @@ packages:
     engines: {node: ^14.15.0 || ^16.10.0 || >=18.0.0}
     dependencies:
       '@jest/types': 29.6.3
-      '@types/node': 18.11.18
+      '@types/node': 20.12.7
       chalk: 4.1.2
       jest-message-util: 29.7.0
       jest-util: 29.7.0
@@ -660,14 +660,14 @@ packages:
       '@jest/test-result': 29.7.0
       '@jest/transform': 29.7.0
       '@jest/types': 29.6.3
-      '@types/node': 18.11.18
+      '@types/node': 20.12.7
       ansi-escapes: 4.3.2
       chalk: 4.1.2
       ci-info: 3.7.0
       exit: 0.1.2
       graceful-fs: 4.2.10
       jest-changed-files: 29.7.0
-      jest-config: 29.5.0_@types+node@18.11.18
+      jest-config: 29.5.0_@types+node@20.12.7
       jest-haste-map: 29.7.0
       jest-message-util: 29.7.0
       jest-regex-util: 29.6.3
@@ -695,7 +695,7 @@ packages:
     dependencies:
       '@jest/fake-timers': 29.7.0
       '@jest/types': 29.6.3
-      '@types/node': 18.11.18
+      '@types/node': 20.12.7
       jest-mock: 29.7.0
     dev: true
 
@@ -722,7 +722,7 @@ packages:
     dependencies:
       '@jest/types': 29.6.3
       '@sinonjs/fake-timers': 10.3.0
-      '@types/node': 18.11.18
+      '@types/node': 20.12.7
       jest-message-util: 29.7.0
       jest-mock: 29.7.0
       jest-util: 29.7.0
@@ -755,7 +755,7 @@ packages:
       '@jest/transform': 29.7.0
       '@jest/types': 29.6.3
       '@jridgewell/trace-mapping': 0.3.20
-      '@types/node': 18.11.18
+      '@types/node': 20.12.7
       chalk: 4.1.2
       collect-v8-coverage: 1.0.1
       exit: 0.1.2
@@ -866,7 +866,7 @@ packages:
       '@jest/schemas': 29.6.3
       '@types/istanbul-lib-coverage': 2.0.4
       '@types/istanbul-reports': 3.0.1
-      '@types/node': 18.11.18
+      '@types/node': 20.12.7
       '@types/yargs': 17.0.17
       chalk: 4.1.2
     dev: true
@@ -1350,7 +1350,7 @@ packages:
   /@types/graceful-fs/4.1.5:
     resolution: {integrity: sha512-anKkLmZZ+xm4p8JWBf4hElkM4XR+EZeA2M9BAkkTldmcyDY4mbdIJnRghDJH3Ov5ooY7/UAoENtmdMSkaAd7Cw==}
     dependencies:
-      '@types/node': 18.11.18
+      '@types/node': 20.12.7
     dev: true
 
   /@types/heft-jest/1.0.1:
@@ -1390,10 +1390,6 @@ packages:
 
   /@types/json-schema/7.0.15:
     resolution: {integrity: sha512-5+fP8P8MFNC+AyZCDxrB2pkZFPGzqQWUzpSeuuVLvm8VMcorNYavBqoFcxK8bQz4Qsbn4oUEEem4wDLfcysGHA==}
-    dev: true
-
-  /@types/node/18.11.18:
-    resolution: {integrity: sha512-DHQpWGjyQKSHj3ebjFI/wRKcqQcdR+MoFBygntYOZytCqNfkd2ZC4ARDJ2DQqhjH5p85Nnd3jhUJIXrszFX/JA==}
     dev: true
 
   /@types/node/20.12.7:
@@ -2664,8 +2660,8 @@ packages:
       is-callable: 1.2.7
     dev: true
 
-  /fp-ts/2.13.1:
-    resolution: {integrity: sha512-0eu5ULPS2c/jsa1lGFneEFFEdTbembJv8e4QKXeVJ3lm/5hyve06dlKZrpxmMwJt6rYen7sxmHHK2CLaXvWuWQ==}
+  /fp-ts/2.16.5:
+    resolution: {integrity: sha512-N8T8PwMSeTKKtkm9lkj/zSTAnPC/aJIIrQhnHxxkL0KLsRCNUPANksJOlMXxcKKCo7H1ORP3No9EMD+fP0tsdA==}
     dev: false
 
   /fs-extra/7.0.1:
@@ -3252,7 +3248,7 @@ packages:
       '@jest/expect': 29.7.0
       '@jest/test-result': 29.7.0
       '@jest/types': 29.6.3
-      '@types/node': 18.11.18
+      '@types/node': 20.12.7
       chalk: 4.1.2
       co: 4.6.0
       dedent: 1.5.1
@@ -3268,46 +3264,6 @@ packages:
       pure-rand: 6.0.4
       slash: 3.0.0
       stack-utils: 2.0.6
-    transitivePeerDependencies:
-      - babel-plugin-macros
-      - supports-color
-    dev: true
-
-  /jest-config/29.5.0_@types+node@18.11.18:
-    resolution: {integrity: sha512-kvDUKBnNJPNBmFFOhDbm59iu1Fii1Q6SxyhXfvylq3UTHbg6o7j/g8k2dZyXWLvfdKB1vAPxNZnMgtKJcmu3kA==}
-    engines: {node: ^14.15.0 || ^16.10.0 || >=18.0.0}
-    peerDependencies:
-      '@types/node': '*'
-      ts-node: '>=9.0.0'
-    peerDependenciesMeta:
-      '@types/node':
-        optional: true
-      ts-node:
-        optional: true
-    dependencies:
-      '@babel/core': 7.20.7
-      '@jest/test-sequencer': 29.7.0
-      '@jest/types': 29.6.3
-      '@types/node': 18.11.18
-      babel-jest: 29.7.0_@babel+core@7.20.7
-      chalk: 4.1.2
-      ci-info: 3.7.0
-      deepmerge: 4.2.2
-      glob: 7.2.3
-      graceful-fs: 4.2.10
-      jest-circus: 29.7.0
-      jest-environment-node: 29.7.0
-      jest-get-type: 29.6.3
-      jest-regex-util: 29.6.3
-      jest-resolve: 29.7.0
-      jest-runner: 29.7.0
-      jest-util: 29.7.0
-      jest-validate: 29.7.0
-      micromatch: 4.0.5
-      parse-json: 5.2.0
-      pretty-format: 29.7.0
-      slash: 3.0.0
-      strip-json-comments: 3.1.1
     transitivePeerDependencies:
       - babel-plugin-macros
       - supports-color
@@ -3388,7 +3344,7 @@ packages:
       '@jest/environment': 29.7.0
       '@jest/fake-timers': 29.7.0
       '@jest/types': 29.6.3
-      '@types/node': 18.11.18
+      '@types/node': 20.12.7
       jest-mock: 29.7.0
       jest-util: 29.7.0
     dev: true
@@ -3400,7 +3356,7 @@ packages:
       '@jest/environment': 29.7.0
       '@jest/fake-timers': 29.7.0
       '@jest/types': 29.6.3
-      '@types/node': 18.11.18
+      '@types/node': 20.12.7
       jest-mock: 29.7.0
       jest-util: 29.7.0
     dev: true
@@ -3416,7 +3372,7 @@ packages:
     dependencies:
       '@jest/types': 29.6.3
       '@types/graceful-fs': 4.1.5
-      '@types/node': 18.11.18
+      '@types/node': 20.12.7
       anymatch: 3.1.3
       fb-watchman: 2.0.2
       graceful-fs: 4.2.10
@@ -3467,7 +3423,7 @@ packages:
     engines: {node: ^14.15.0 || ^16.10.0 || >=18.0.0}
     dependencies:
       '@jest/types': 29.6.3
-      '@types/node': 18.11.18
+      '@types/node': 20.12.7
       jest-util: 29.7.0
     dev: true
 
@@ -3549,7 +3505,7 @@ packages:
       '@jest/test-result': 29.7.0
       '@jest/transform': 29.7.0
       '@jest/types': 29.6.3
-      '@types/node': 18.11.18
+      '@types/node': 20.12.7
       chalk: 4.1.2
       emittery: 0.13.1
       graceful-fs: 4.2.10
@@ -3580,7 +3536,7 @@ packages:
       '@jest/test-result': 29.7.0
       '@jest/transform': 29.7.0
       '@jest/types': 29.6.3
-      '@types/node': 18.11.18
+      '@types/node': 20.12.7
       chalk: 4.1.2
       cjs-module-lexer: 1.2.2
       collect-v8-coverage: 1.0.1
@@ -3663,7 +3619,7 @@ packages:
     engines: {node: ^14.15.0 || ^16.10.0 || >=18.0.0}
     dependencies:
       '@jest/types': 29.6.3
-      '@types/node': 18.11.18
+      '@types/node': 20.12.7
       chalk: 4.1.2
       ci-info: 3.7.0
       graceful-fs: 4.2.10
@@ -3688,7 +3644,7 @@ packages:
     dependencies:
       '@jest/test-result': 29.7.0
       '@jest/types': 29.6.3
-      '@types/node': 18.11.18
+      '@types/node': 20.12.7
       ansi-escapes: 4.3.2
       chalk: 4.1.2
       emittery: 0.13.1
@@ -3700,7 +3656,7 @@ packages:
     resolution: {integrity: sha512-eIz2msL/EzL9UFTFFx7jBTkeZfku0yUAyZZZmJ93H2TYEiroIx2PQjEXcwYtYl8zXCxb+PAmA2hLIt/6ZEkPHw==}
     engines: {node: ^14.15.0 || ^16.10.0 || >=18.0.0}
     dependencies:
-      '@types/node': 18.11.18
+      '@types/node': 20.12.7
       jest-util: 29.7.0
       merge-stream: 2.0.0
       supports-color: 8.1.1
@@ -4067,13 +4023,13 @@ packages:
       lines-and-columns: 1.2.4
     dev: true
 
-  /parser-ts/0.6.16_fp-ts@2.13.1:
-    resolution: {integrity: sha512-BC5HBg1UfaGKi/PKwUZKmFwQq56qVsMel1Gx0Lu2JeHf/J+XCqV9fahCil0GOMC+sH2ON3N6jdyIoI6RzCyQqw==}
+  /parser-ts/0.7.0_fp-ts@2.16.5:
+    resolution: {integrity: sha512-YBJYgQ6j2DiKryKkYUrw0a7WiUb2DGnanffFZNz5cRTaoTncSxjKCio6ocEBSAa26jFXr0XSNjaYXUrL61BISA==}
     peerDependencies:
-      fp-ts: ^2.0.0
+      fp-ts: ^2.14.0
     dependencies:
       '@babel/code-frame': 7.18.6
-      fp-ts: 2.13.1
+      fp-ts: 2.16.5
     dev: false
 
   /path-exists/4.0.0:

@@ -11,8 +11,8 @@
     "test": "heft test --clean"
   },
   "dependencies": {
-    "fp-ts": "~2.13.1",
-    "parser-ts": "~0.6.16"
+    "fp-ts": "~2.16.5",
+    "parser-ts": "~0.7.0"
   },
   "devDependencies": {
     "@rushstack/eslint-config": "~3.6.9",

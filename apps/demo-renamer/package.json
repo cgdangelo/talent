@@ -13,7 +13,7 @@
   "dependencies": {
     "@cgdangelo/talent-parser": "workspace:*",
     "@cgdangelo/talent-parser-goldsrc": "workspace:*",
-    "fp-ts": "~2.13.1"
+    "fp-ts": "~2.16.5"
   },
   "devDependencies": {
     "@rushstack/eslint-config": "~3.6.9",
