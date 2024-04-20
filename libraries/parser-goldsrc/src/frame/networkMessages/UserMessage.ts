@@ -14,7 +14,7 @@ const lookupUserMessage = RM.lookup(number.Eq);
 
 export const userMessage: (messageId: number) => DS.DemoStateParser<UserMessage> = (messageId) =>
   pipe(
-    SP.get<number, DS.DemoState>(),
+    DS.get(),
     SP.chain(({ userMessages }) =>
       pipe(
         lookupUserMessage(messageId)(userMessages),

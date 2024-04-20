@@ -38,7 +38,7 @@ export const spawnBaseline: DS.DemoStateParser<SpawnBaseline> = (s) => (i) =>
 
           SP.bind('delta', ({ index, type }) =>
             pipe(
-              SP.get<number, DS.DemoState>(),
+              DS.get(),
               SP.chain(({ maxClients }) =>
                 readDelta(
                   (type & 1) !== 0

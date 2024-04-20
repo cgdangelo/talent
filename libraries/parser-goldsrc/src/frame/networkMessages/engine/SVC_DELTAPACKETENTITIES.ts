@@ -31,7 +31,7 @@ const entityState: (entityIndex: number) => DS.DemoStateParser<DeltaPacketEntity
 
     SP.chain((hasCustomDelta) =>
       pipe(
-        SP.get<number, DS.DemoState>(),
+        DS.get(),
         SP.chain(({ maxClients }) =>
           pipe(
             readDelta(

@@ -34,7 +34,7 @@ export const directoryEntry: DS.DemoStateParser<DirectoryEntry> = pipe(
 
   SP.chainFirst((directoryEntry) =>
     pipe(
-      SP.get<number, DS.DemoState>(),
+      DS.get(),
       SP.map(({ eventEmitter }) => eventEmitter?.emit('demo:directory-entry', directoryEntry))
     )
   )

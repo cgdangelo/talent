@@ -92,7 +92,7 @@ const frame = pipe(
   SP.chain(frame_),
   SP.chainFirst((frame) =>
     pipe(
-      SP.get<number, DS.DemoState>(),
+      DS.get(),
       SP.map(({ eventEmitter }) => eventEmitter?.emit('demo:frame', frame))
     )
   )

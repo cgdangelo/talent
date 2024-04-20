@@ -40,7 +40,7 @@ const message: DS.DemoStateParser<Message> = pipe(
             SP.map((message) => ({ type: 'user', message } as const)),
             SP.chainFirst(({ message: userMessage }) =>
               pipe(
-                SP.get<number, DS.DemoState>(),
+                DS.get(),
                 SP.map(({ eventEmitter }) => eventEmitter?.emit('demo:netmessage:user', userMessage))
               )
             )
@@ -50,7 +50,7 @@ const message: DS.DemoStateParser<Message> = pipe(
             SP.map((message) => ({ type: 'engine', message } as const)),
             SP.chainFirst(({ message: engineMessage }) =>
               pipe(
-                SP.get<number, DS.DemoState>(),
+                DS.get(),
                 SP.map(({ eventEmitter }) => eventEmitter?.emit('demo:netmessage:engine', engineMessage))
               )
             )

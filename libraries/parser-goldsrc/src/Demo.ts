@@ -15,7 +15,7 @@ export type Demo = {
 
 export const demo_: DS.DemoStateParser<Demo> = pipe(
   // Emit parse start event.
-  SP.get<number, DS.DemoState>(),
+  DS.get(),
   SP.map(({ eventEmitter }) => eventEmitter?.emit('demo:start')),
 
   SP.chain(() => DS.lift(header)),
@@ -24,7 +24,7 @@ export const demo_: DS.DemoStateParser<Demo> = pipe(
   // Emit demo header event.
   SP.chainFirst(({ header }) =>
     pipe(
-      SP.get<number, DS.DemoState>(),
+      DS.get(),
       SP.map(({ eventEmitter }) => eventEmitter?.emit('demo:header', header))
     )
   ),
@@ -35,7 +35,7 @@ export const demo_: DS.DemoStateParser<Demo> = pipe(
   // Emit parse end event.
   SP.chainFirst(() =>
     pipe(
-      SP.get<number, DS.DemoState>(),
+      DS.get(),
       SP.map(({ eventEmitter }) => eventEmitter?.emit('demo:end'))
     )
   )

@@ -8,6 +8,8 @@ import type { NewUserMsg } from './frame/networkMessages/engine';
 
 export type DemoStateParser<A> = SP.StatefulParser<DemoState, number, A>;
 
+export const get: () => SP.StatefulParser<DemoState, number, DemoState> = () => SP.get();
+
 export const lift: <A>(p: P.Parser<number, A>) => DemoStateParser<A> = SP.lift;
 
 export type DemoState = {

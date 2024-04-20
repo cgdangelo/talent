@@ -68,7 +68,7 @@ const fallbackDirectory: (headerEndOffset: number) => DS.DemoStateParser<Directo
     SP.of,
     SP.chainFirst((directoryEntry) =>
       pipe(
-        SP.get<number, DS.DemoState>(),
+        DS.get(),
         SP.map(({ eventEmitter }) => eventEmitter?.emit('demo:directory-entry', directoryEntry[0]))
       )
     ),

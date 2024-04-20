@@ -3,10 +3,10 @@
 
 import {
   either as E,
+  option as O,
   readonlyArray as RA,
   readonlyNonEmptyArray as RNEA,
-  stateT as ST,
-  option as O
+  stateT as ST
 } from 'fp-ts';
 import type { Alt3 } from 'fp-ts/lib/Alt';
 import type { Alternative3 } from 'fp-ts/lib/Alternative';
@@ -40,8 +40,7 @@ export type StatefulParser<R, E, A> = ST.StateT2<P.URI, R, E, A>;
 
 export const fail: <S, I, A = never>() => StatefulParser<S, I, A> = () => lift(P.fail());
 
-// TODO reverse typeparams
-export const get: <I, S>() => StatefulParser<S, I, S> = () => (s) => P.of([s, s]);
+export const get: <S, I = never>() => StatefulParser<S, I, S> = () => (s) => P.of([s, s]);
 
 export const modify: <S, I>(f: (s: S) => S) => StatefulParser<S, I, void> = (f) => (s) =>
   P.of([undefined, f(s)]);

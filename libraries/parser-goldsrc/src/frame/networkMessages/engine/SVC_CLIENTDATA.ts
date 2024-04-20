@@ -23,7 +23,7 @@ export type ClientData = {
 };
 
 export const clientData: DS.DemoStateParser<ClientData> = pipe(
-  SP.get<number, DS.DemoState>(),
+  DS.get(),
   SP.chain((state) => (state.isHLTV ? SP.of(undefined) : clientData_)),
   SP.map((fields) => ({
     id: MessageType.SVC_CLIENTDATA,

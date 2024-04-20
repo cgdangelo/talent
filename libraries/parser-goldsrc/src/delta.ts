@@ -2,7 +2,7 @@ import { parser as P, statefulParser as SP } from '@cgdangelo/talent-parser';
 import * as BB from '@cgdangelo/talent-parser-bitbuffer';
 import { option as O, readonlyArray as RA, readonlyMap as RM, string } from 'fp-ts';
 import { constant, flow, pipe } from 'fp-ts/lib/function';
-import type { DemoState, DemoStateParser } from './DemoState';
+import * as DS from './DemoState';
 
 // A delta is some collection of fields, specified by a decoder.
 export type Delta = Record<string, number | string>;
@@ -182,8 +182,10 @@ const lookupDecoder = pipe(string.Eq, RM.lookup);
 const maskBits: (maskBitLength: number) => P.Parser<number, readonly number[]> = (maskBitLength) =>
   P.manyN(BB.ubits(8), maskBitLength);
 
-const decodeDelta: (maskBits: readonly number[]) => (deltaDecoder: DeltaDecoder) => P.Parser<number, Delta> =
-  (maskBits) => (deltaDecoder) =>
+function decodeDelta<TDelta extends Delta = never>(
+  maskBits: readonly number[]
+): (deltaDecoder: DeltaDecoder) => P.Parser<number, TDelta> {
+  return (deltaDecoder) =>
     pipe(
       RA.makeBy(maskBits.length, (i) =>
         pipe(
@@ -206,12 +208,13 @@ const decodeDelta: (maskBits: readonly number[]) => (deltaDecoder: DeltaDecoder)
       ),
       RA.flatten,
       RA.sequence(P.Applicative),
-      P.map((fields) => Object.fromEntries(fields))
+      P.map((fields) => Object.fromEntries(fields) as TDelta)
     );
+}
 
-export const readDelta = <A extends Delta = Delta>(deltaDecoderName: string): DemoStateParser<A> =>
+export const readDelta = <A extends Delta = Delta>(deltaDecoderName: string): DS.DemoStateParser<A> =>
   pipe(
-    SP.get<number, DemoState>(),
+    DS.get(),
     SP.chain(({ deltaDecoders }) =>
       SP.lift(
         pipe(
@@ -221,12 +224,9 @@ export const readDelta = <A extends Delta = Delta>(deltaDecoderName: string): De
             pipe(
               lookupDecoder(deltaDecoderName)(deltaDecoders),
               O.map(decodeDelta(maskBits)),
-              O.getOrElseW(() => P.fail<number>())
+              O.getOrElse(() => P.fail())
             )
-          ),
-
-          // TODO safe?
-          P.map((a) => a as A)
+          )
         )
       )
     )

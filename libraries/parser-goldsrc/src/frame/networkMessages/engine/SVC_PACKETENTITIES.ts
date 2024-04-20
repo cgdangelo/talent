@@ -32,7 +32,7 @@ const entityState: (entityIndex: number) => DS.DemoStateParser<PacketEntity> = (
     SP.bind('baselineIndex', () => SP.lift(BB.bitFlagged(() => BB.ubits(6)))),
     SP.chain(({ hasCustomDelta, baselineIndex }) =>
       pipe(
-        SP.get<number, DS.DemoState>(),
+        DS.get(),
         SP.chain(({ maxClients }) =>
           pipe(
             readDelta(
